@@ -17,7 +17,7 @@ export const translations: Record<LanguageCode, any> = {
     lang_ru: "Русский",
     lang_uk: "Українська",
     fidelity: "Fidelity",
-    back: "INDIETRO",
+    back: "BACK",
     simulate: "AVVIA MOTORE",
     loading: "Simulazione Quantistica",
     results: "Risultati Strategia",

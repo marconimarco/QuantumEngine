@@ -56,7 +56,7 @@ export default function QuantumLocker() {
           };
           reader.readAsText(file);
         } else {
-          alert('Selezionare un file con estensione .vault per la decifratura.');
+          alert('Please select a file with .vault extension for decryption.');
         }
       }
     }
@@ -102,12 +102,12 @@ export default function QuantumLocker() {
         setResult(response.data);
       } else {
         console.error('Invalid response format', response.data);
-        alert('Errore: Risposta del server non valida.');
+        alert('Error: Invalid server response.');
       }
     } catch (error: any) {
       console.error('Encryption failed', error);
-      const errorMsg = error.response?.data?.error || 'Errore durante la cifratura.';
-      alert(`Errore: ${errorMsg}`);
+      const errorMsg = error.response?.data?.error || 'Error during encryption.';
+      alert(`Error: ${errorMsg}`);
     } finally {
       setIsProcessing(false);
     }
@@ -115,7 +115,7 @@ export default function QuantumLocker() {
 
   const handleDecrypt = async () => {
     if (!decryptPayload || !decryptEncKey || !decryptSecretKey) {
-      alert("Inserire payload, chiave incapsulata e chiave di sblocco.");
+      alert("Please enter payload, encapsulated key, and unlock key.");
       return;
     }
 
@@ -134,8 +134,8 @@ export default function QuantumLocker() {
       }
     } catch (error: any) {
       console.error('Decryption failed', error);
-      const errorMsg = error.response?.data?.error || 'Errore durante la decifratura. Verifica le chiavi.';
-      alert(`Errore: ${errorMsg}`);
+      const errorMsg = error.response?.data?.error || 'Error during decryption. Check keys.';
+      alert(`Error: ${errorMsg}`);
     } finally {
       setIsDecrypting(false);
     }
@@ -223,17 +223,17 @@ export default function QuantumLocker() {
 
               <div className="space-y-6 sm:space-y-8 flex-1 flex flex-col">
                 <div className="space-y-3">
-                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-black ml-1">Testo Originale</label>
+                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-black ml-1">Original Text</label>
                   <textarea 
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Inserisci qui il messaggio segreto da cifrare..."
+                    placeholder="Enter secret message to encrypt here..."
                     className="w-full h-32 sm:h-48 bg-black/40 border border-white/5 rounded-[1.2rem] sm:rounded-[1.5rem] p-4 sm:p-6 text-sm sm:text-base text-gray-200 placeholder:text-gray-700 focus:ring-2 focus:ring-quantum-primary/30 focus:border-quantum-primary/30 transition-all resize-none shadow-inner font-medium leading-relaxed outline-none"
                   />
                 </div>
 
                 <div className="relative">
-                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-black ml-1 block mb-4">Oppure Carica File</label>
+                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-black ml-1 block mb-4">Or Upload File</label>
                   <div 
                     onClick={() => fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-[1.5rem] sm:rounded-[2rem] p-8 sm:p-12 flex flex-col items-center justify-center transition-all cursor-pointer group ${
@@ -252,7 +252,7 @@ export default function QuantumLocker() {
                       selectedFile ? 'text-quantum-primary shadow-[0_0_15px_rgba(0,242,255,0.4)]' : 'text-gray-700'
                     }`} />
                     <p className="text-xs sm:text-sm font-mono text-gray-400 font-black uppercase tracking-[0.2em] text-center">
-                      {selectedFile ? selectedFile.name : 'Sfoglia file locali'}
+                      {selectedFile ? selectedFile.name : 'Browse local files'}
                     </p>
                     <p className="text-[8px] sm:text-[9px] text-gray-600 mt-2 font-mono uppercase tracking-[0.2em]">Max 100MB • ML-KEM Encapsulation</p>
                   </div>
@@ -287,14 +287,14 @@ export default function QuantumLocker() {
                   <textarea 
                     value={decryptPayload}
                     onChange={(e) => setDecryptPayload(e.target.value)}
-                    placeholder="Incolla il contenuto del file .vault..."
+                    placeholder="Paste the content of the .vault file..."
                     className="w-full h-24 sm:h-32 bg-black/40 border border-white/5 rounded-xl sm:rounded-[1.5rem] p-4 sm:p-6 text-[10px] sm:text-[11px] font-mono text-gray-400 placeholder:text-gray-700 focus:ring-2 focus:ring-quantum-primary/30 focus:border-quantum-primary/30 transition-all resize-none shadow-inner outline-none"
                   />
                   <button 
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full py-3 sm:py-4 bg-white/5 border border-white/5 rounded-xl sm:rounded-[1.5rem] text-[10px] sm:text-[11px] text-gray-400 uppercase font-black tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-3"
                   >
-                    <FileText className="w-4 h-4 sm:w-5 h-5" /> Carica File .vault
+                    <FileText className="w-4 h-4 sm:w-5 h-5" /> Load .vault File
                   </button>
                   <input 
                     type="file" 
@@ -398,7 +398,7 @@ export default function QuantumLocker() {
 
                   <div className="space-y-6">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-black ml-1">Chiave di Sblocco (SecretKey)</label>
+                      <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-black ml-1">Unlock Key (SecretKey)</label>
                       <div className="relative group">
                         <div className="w-full bg-black/60 border border-white/5 rounded-[1.5rem] p-6 text-[11px] font-mono text-quantum-secondary break-all pr-16 leading-relaxed">
                           {result.unlockKey}
@@ -456,7 +456,7 @@ export default function QuantumLocker() {
                   className="quantum-card bg-gradient-to-br from-green-500/10 to-black/80 border-green-500/20 p-8 sm:p-10 space-y-8"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="text-white font-display font-black uppercase tracking-[0.2em] text-[13px]">Dati Decifrati</h3>
+                    <h3 className="text-white font-display font-black uppercase tracking-[0.2em] text-[13px]">Decrypted Data</h3>
                     <div className="flex items-center gap-3 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-lg">
                       <ShieldCheck className="w-4 h-4 text-green-500 shadow-[0_0_10px_#22c55e]" />
                       <span className="text-green-500 text-[10px] font-black uppercase tracking-widest">Clean Data</span>

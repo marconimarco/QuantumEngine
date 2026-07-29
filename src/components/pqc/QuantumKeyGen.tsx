@@ -30,12 +30,12 @@ export default function QuantumKeyGen() {
       if (response.data && response.data.publicKey) {
         setKeys(response.data);
       } else {
-        alert('Errore: Risposta del server non valida.');
+        alert('Error: Invalid server response.');
       }
     } catch (error: any) {
       console.error('Key generation failed', error);
-      const errorMsg = error.response?.data?.error || 'Errore durante la generazione.';
-      alert(`Errore: ${errorMsg}`);
+      const errorMsg = error.response?.data?.error || 'Error during generation.';
+      alert(`Error: ${errorMsg}`);
     } finally {
       setIsGenerating(false);
     }
@@ -57,7 +57,7 @@ export default function QuantumKeyGen() {
           NIST <span className="text-quantum-primary">Key Generator</span>
         </h2>
         <p className="text-[9px] sm:text-xs text-gray-500 font-mono uppercase tracking-[0.15em] sm:tracking-[0.2em] max-w-lg mx-auto leading-relaxed">
-          Generazione istantanea di coppie di chiavi asimmetriche quantum-resistant basate su standard ML-KEM-768.
+          Instantaneous generation of quantum-resistant asymmetric key pairs based on ML-KEM-768 standard.
         </p>
       </div>
 
@@ -70,7 +70,7 @@ export default function QuantumKeyGen() {
           <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl sm:rounded-2xl" />
           <div className="flex items-center justify-center gap-2 sm:gap-3">
             {isGenerating ? <RefreshCcw className="w-4 h-4 sm:w-5 h-5 animate-spin" /> : <Cpu className="w-4 h-4 sm:w-5 h-5" />}
-            {isGenerating ? 'Computing Entropy...' : 'Genera Coppie NIST'}
+            {isGenerating ? 'Computing Entropy...' : 'Generate NIST Pairs'}
           </div>
         </button>
       </div>
@@ -154,21 +154,21 @@ export default function QuantumKeyGen() {
           <Fingerprint className="w-5 h-5 text-quantum-primary shrink-0" />
           <div>
             <h4 className="text-[10px] font-bold text-white uppercase mb-1">Entropy Injection</h4>
-            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">I Qubit fisici vengono utilizzati per generare semi di randomicità pura non prevedibile.</p>
+            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">Physical qubits are used to generate unpredictable seeds of pure randomness.</p>
           </div>
         </div>
         <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-start gap-4">
           <Layers className="w-5 h-5 text-quantum-primary shrink-0" />
           <div>
             <h4 className="text-[10px] font-bold text-white uppercase mb-1">Lattice Algorithm</h4>
-            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">Basato su calcoli matriciali che neanche i computer quantistici futuri possono invertire.</p>
+            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">Based on matrix calculations that even future quantum computers cannot invert.</p>
           </div>
         </div>
         <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-start gap-4">
           <RefreshCcw className="w-5 h-5 text-quantum-primary shrink-0" />
           <div>
             <h4 className="text-[10px] font-bold text-white uppercase mb-1">Automatic Flush</h4>
-            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">Ogni chiave generata viene immediatamente cancellata dalla memoria volatile del backend.</p>
+            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">Every generated key is immediately wiped from the backend volatile memory.</p>
           </div>
         </div>
       </div>

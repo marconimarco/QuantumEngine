@@ -344,12 +344,12 @@ print("Optimal state sequence found:", counts)`;
                       {copied ? (
                         <>
                           <Check className="w-3 h-3 text-emerald-400" />
-                          <span className="text-emerald-400">Copiato!</span>
+                          <span className="text-emerald-400">Copied!</span>
                         </>
                       ) : (
                         <>
                           <Copy className="w-3 h-3" />
-                          <span>Copia</span>
+                          <span>Copy</span>
                         </>
                       )}
                     </button>

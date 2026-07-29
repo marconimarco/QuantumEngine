@@ -285,7 +285,7 @@ ${asset3},0.78,LIBERO${l3}`;
           
           {/* Formula value display input */}
           <div className="flex-1 bg-[#090d16] border border-slate-800 rounded px-3 py-1.5 text-slate-200 font-mono text-[11.5px] overflow-hidden truncate">
-            {activeCellValue || <span className="text-slate-600 italic">cella vuota</span>}
+            {activeCellValue || <span className="text-slate-600 italic">empty cell</span>}
           </div>
         </div>
         
@@ -452,7 +452,7 @@ ${asset3},0.78,LIBERO${l3}`;
                 
                 {/* Formula value display input */}
                 <div className="flex-1 bg-[#090d16] border border-slate-800 rounded px-3 py-1.5 text-slate-200 font-mono text-[11.5px] overflow-hidden truncate">
-                  {activeCellValue || <span className="text-slate-600 italic">cella vuota</span>}
+                  {activeCellValue || <span className="text-slate-600 italic">empty cell</span>}
                 </div>
               </div>
               
@@ -677,7 +677,7 @@ ${asset3},0.78,LIBERO${l3}`;
                 <div key={pIdx} className="my-4 p-5 bg-[#0a0f1d] border border-quantum-primary/25 rounded-2xl flex flex-col items-center gap-3 text-center shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
                   <span className="text-[10px] uppercase font-mono tracking-widest text-[#00f2ff] font-black">IBM QUANTUM HOST BRIDGE MODULE</span>
                   <p className="text-[11px] text-slate-400 font-mono tracking-tight max-w-sm mb-1">
-                    Connessione sicura end-to-end con i computer quantistici superconduttori fisici della scuderia IBM Q.
+                    Secure end-to-end connection with physical superconducting quantum computers from the IBM Q fleet.
                   </p>
                   <button
                     onClick={() => {
@@ -687,7 +687,7 @@ ${asset3},0.78,LIBERO${l3}`;
                     }}
                     className="flex items-center gap-2 px-6 py-3 bg-[#00f2ff] hover:bg-[#00e1f0] text-[#090d18] font-mono font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-[0_0_15px_rgba(0,242,255,0.3)] hover:shadow-[0_0_22px_rgba(0,242,255,0.5)] cursor-pointer hover:scale-[1.01]"
                   >
-                    <Cpu className="w-4 h-4 text-[#090d18] fill-[#090d18] animate-pulse" /> Trasmetti circuito a QPU IBM Q Real 🚀
+                    <Cpu className="w-4 h-4 text-[#090d18] fill-[#090d18] animate-pulse" /> Transmit circuit to IBM Q Real QPU 🚀
                   </button>
                 </div>
               );
@@ -732,110 +732,110 @@ ${asset3},0.78,LIBERO${l3}`;
   const getClarificatoryExplanation = (question: string): string => {
     const q = question.toLowerCase();
     
-    if (q.includes('tolleranza') || q.includes('rischio')) {
-      return "La tolleranza al rischio indica quanto sei disposto ad accettare fluttuazioni per proteggere il capitale o i carichi. \n\n❗ **Frequenza e Scala:** Riferita ad un orizzonte temporale strategico **annuale**. Puoi specificare se preferisci un approccio prudente ('conservativo/conservativo'), equilibrato ('moderato') o volto alla massimizzazione dell'efficienza della risorsa ('aggressivo').";
+    if (q.includes('tolleranza') || q.includes('rischio') || q.includes('tolerance') || q.includes('risk')) {
+      return "Risk tolerance indicates how willing you are to accept fluctuations to protect capital or cargo. \n\n❗ **Frequency & Scale:** Refers to an **annual** strategic time horizon. You can specify whether you prefer a prudent ('conservative'), balanced ('moderate'), or efficiency-focused ('aggressive') approach.";
     }
-    if (q.includes('volatilità')) {
-      return "La volatilità misura l'intensità delle variazioni di prezzo dei tuoi asset finanziari. \n\n❗ **Frequenza e Scala:** Si intende l'oscillazione dei prezzi calcolata su base **giornaliera o mensile** proiettata su base **annuale**. Puoi rispondere fornendo una percentuale stimata (es. '20% all'anno') o semplicemente specificando se si prevede un periodo di 'alta' o 'bassa' oscillazione dei prezzi di mercato dei capitali d'investimento.";
+    if (q.includes('volatilità') || q.includes('volatility')) {
+      return "Volatility measures the intensity of price fluctuations for your financial assets. \n\n❗ **Frequency & Scale:** Price oscillations calculated on a **daily or monthly** basis projected to an **annual** timeline. You can respond with an estimated percentage (e.g. '20% per year') or specify if you expect 'high' or 'low' market price fluctuations.";
     }
-    if (q.includes('precisione') || q.includes('scadenza')) {
-      return "Riguarda il livello di affinamento geometrico del tempo ottimale per esercitare l'opzione. \n\n❗ **Frequenza e Scala:** Si riferisce alla precisione desiderata per scadenze finanziarie tipiche a **breve termine (mensili)** o **medio-lungo termine (es. trimestrali o annuali)**. Puoi rispondere richiedendo una precisione 'alta' o 'standard'.";
+    if (q.includes('precisione') || q.includes('scadenza') || q.includes('precision') || q.includes('expiry') || q.includes('maturity')) {
+      return "Concerns the level of geometric refinement for the optimal timing to exercise options. \n\n❗ **Frequency & Scale:** Refers to desired accuracy for typical financial horizons in the **short term (monthly)** or **medium-long term (e.g. quarterly or annual)**. You can request 'high' or 'standard' precision.";
     }
-    if (q.includes('risk-free') || q.includes('tasso')) {
-      return "Il tasso 'risk-free' indica il rendimento teorico di un investimento a rischio zero (es. titoli di stato a breve/medio orizzonte). \n\n❗ **Frequenza e Scala:** Espresso come tasso di rendimento percentuale **annuo**. Un tasso tipico attuale di riferimento è intorno al **'4% all'anno'** o **'4.5% all'anno'**. Se scrivi 'default' o 'standard' useremo il valore ottimizzato del 4.5% annuo.";
+    if (q.includes('risk-free') || q.includes('tasso') || q.includes('rate')) {
+      return "The risk-free rate indicates the theoretical yield of a zero-risk investment (e.g., government bonds). \n\n❗ **Frequency & Scale:** Expressed as an **annual** percentage rate of return. A typical current reference rate is around **'4% per year'** or **'4.5% per year'**. If you type 'default' or 'standard', we will use the optimized value of 4.5% per year.";
     }
-    if (q.includes('orizzonte') || q.includes('mensile') || q.includes('settimana')) {
-      return "Definisce il periodo futuro su cui analizzare i flussi. \n\n❗ **Frequenza e Scala:** L'orizzonte futuro di analisi del portafoglio può essere a breve termine (es. **'15 o 30 giorni'**), a medio termine (es. **'su base mensile'** o **'trimestrale'**), oppure a lungo termine (**'annuale'**). Scegli pure l'intervallo temporale che fa al caso tuo.";
+    if (q.includes('orizzonte') || q.includes('mensile') || q.includes('settimana') || q.includes('horizon') || q.includes('monthly') || q.includes('week')) {
+      return "Defines the future period over which to analyze cash flows. \n\n❗ **Frequency & Scale:** The future portfolio analysis horizon can be short-term (e.g., **'15 or 30 days'**), medium-term (e.g., **'monthly'** or **'quarterly'**), or long-term (**'annual'**). Choose the interval that suits your needs.";
     }
-    if (q.includes('insoluto') || q.includes('fatture')) {
-      return "Misura la quota percentuale media di fatture non pagate a scadenza naturale dai vostri clienti. \n\n❗ **Frequenza e Scala:** Percentuale calcolata sul totale fatturato **all'anno** (es. '2% del fatturato annuo'). Puoi specificare un valore numerico semplice come '2%' o '5%', oppure scrivere 'nessun insoluto' se riscuotete sempre con la massima puntualità.";
+    if (q.includes('insoluto') || q.includes('fatture') || q.includes('invoice') || q.includes('unpaid')) {
+      return "Measures the average percentage share of unpaid invoices at maturity from customers. \n\n❗ **Frequency & Scale:** Percentage calculated on total **annual** turnover (e.g. '2% of annual turnover'). You can specify a simple numeric value like '2%' or '5%', or write 'no unpaid' if collections are punctual.";
     }
-    if (q.includes('veicoli') || q.includes('flotta')) {
-      return "Si riferisce al numero di vetture/mezzi aziendali attivi simultaneamente per la distribuzione fisica delle merci. \n\n❗ **Frequenza e Scala:** Calcolato come numero massimo di veicoli operativi **al giorno** (es. '10 veicoli operativi al giorno'). Serve per dimensionare la densità di nodi qubit necessari per ottimizzare le rotte.";
+    if (q.includes('veicoli') || q.includes('flotta') || q.includes('vehicle') || q.includes('fleet')) {
+      return "Refers to the number of active company vehicles simultaneously distributing physical goods. \n\n❗ **Frequency & Scale:** Calculated as maximum operating vehicles **per day** (e.g. '10 active vehicles per day'). Used to scale the qubit density needed to optimize routes.";
     }
-    if (q.includes('finestre temporali') || q.includes('scarico')) {
-      return "Le finestre temporali indicano la rigidità di orario per le consegne o i prelievi logistici. \n\n❗ **Frequenza e Scala:** Gestite su turni orari **giornalieri** (es. fasce dalle 08:00 alle 12:00 del mattino). Puoi rispondere specificando se gli orari sono 'rigidi/vincolanti' (es. penali in caso di ritardi giornalieri) o 'flessibili' (piena tolleranza).";
+    if (q.includes('finestre temporali') || q.includes('scarico') || q.includes('window') || q.includes('time window')) {
+      return "Time windows indicate schedule rigidity for deliveries or logistics pick-ups. \n\n❗ **Frequency & Scale:** Managed on **daily** hourly shifts (e.g. 08:00 to 12:00 morning slots). You can specify if schedules are 'strict/binding' (e.g. penalties for daily delays) or 'flexible' (full tolerance).";
     }
-    if (q.includes('pescaggio') || q.includes('portata')) {
-      return "La portata utile o limiti fisici volumetrici delle stive per lo stivaggio 3D. \n\n❗ **Frequenza e Scala:** Calcolata in tonnellate complessive d'imbarco **per singola spedizione/viaggio** marittimo, non su base annua. Inserisci una tonnellata limite massima (es. '20 tonnellate') o scrivi 'standard' per caricare il profilo medio della nave.";
+    if (q.includes('pescaggio') || q.includes('portata') || q.includes('payload') || q.includes('capacity')) {
+      return "Cargo capacity or physical volumetric limits of holds for 3D bin packing. \n\n❗ **Frequency & Scale:** Calculated in total shipment tonnage **per single voyage/shipment**, not annually. Enter a maximum limit tonnage (e.g. '20 tons') or type 'standard' to load average ship profiles.";
     }
-    if (q.includes('baricentro') || q.includes('sfasamenti')) {
-      return "La stabilità della nave richiede un bilanciamento geometrico del peso totale dei container a bordo. \n\n❗ **Frequenza e Scala:** Tolleranza di bilanciamento valutata **per singolo viaggio** marino. Puoi richiedere 'tolleranza bassa' per massima severità d'assetto e stabilità geometrica e prevenzione degli sbandamenti durante la tratta, oppure 'normale'.";
+    if (q.includes('baricentro') || q.includes('sfasamenti') || q.includes('center of gravity') || q.includes('balance')) {
+      return "Vessel stability requires geometric balancing of total container weight on board. \n\n❗ **Frequency & Scale:** Balance tolerance evaluated **per single voyage**. You can request 'low tolerance' for maximum trim severity, geometric stability, and preventing tilt during transit, or 'normal'.";
     }
-    if (q.includes('contratti') || q.includes('fissa')) {
-      return "La percentuale di spedizioni prepagate o protette con contratti fissi di lungo periodo con gli armatori navali. \n\n❗ **Frequenza e Scala:** Calcolata sul totale dei volumi logistici contrattualizzati su base **annuale** (es. '50% all'anno'). Più questa percentuale è alta, meno il circuito risulterà sensibile alle speculazioni spot sul qubit d'ampiezza.";
+    if (q.includes('contratti') || q.includes('fissa') || q.includes('contract') || q.includes('fixed')) {
+      return "Percentage of shipments prepaid or protected with long-term fixed contracts with shipowners. \n\n❗ **Frequency & Scale:** Calculated on total contracted logistics volume on an **annual** basis (e.g. '50% per year'). The higher this percentage, the less sensitive the circuit will be to spot rate speculation on the amplitude qubit.";
     }
-    if (q.includes('costi di trasporto') || q.includes('target') || q.includes('riduzione')) {
-      return "L'obiettivo di risparmio desiderato sui noli marittimi spot. \n\n❗ **Frequenza e Scala:** Obiettivo applicato sulla spesa logistica **mensile o annuale** (es. '15% di risparmio annuo sui noli'). L'algoritmo quantistico mapperà la rotazione probabilistica per forzare il superamento di questo target di costo.";
+    if (q.includes('costi di trasporto') || q.includes('target') || q.includes('riduzione') || q.includes('freight') || q.includes('savings')) {
+      return "Desired cost savings target on spot container ocean freight. \n\n❗ **Frequency & Scale:** Target applied to **monthly or annual** logistics expenditure (e.g., '15% annual savings on freight'). The quantum algorithm will map probabilistic rotation to force surpassing this cost target.";
     }
     if (q.includes('storage') || q.includes('bess') || q.includes('mwh')) {
-      return "La capienza massima nominale del sistema di batterie aziendale utilizzato per conservare l'energia solare o eolica accumulata prima di immetterla in rete. \n\n❗ **Frequenza e Scala:** Capacità totale di energia accumulabile ed erogabile **giornalmente** (es. '10 megawattora (MWh)'). Coerente con il dimensionamento del qubit d'ampiezza.";
+      return "Nominal maximum capacity of the corporate battery system used to store solar or wind energy before feeding it into the grid. \n\n❗ **Frequency & Scale:** Total energy capacity storable and deliverable **daily** (e.g. '10 megawatt-hours (MWh)'). Consistent with the sizing of the amplitude qubit.";
     }
-    if (q.includes('immissione') || q.includes('curtailing') || q.includes('rete')) {
-      return "Il limite di potenza massima consentito di immissione istantanea in rete per evitare sovraccarichi o tariffe punitive dal distributore. \n\n❗ **Frequenza e Scala:** Limite termico o regolatorio misurato istante per istante o con cap giornaliero in Megawatt (MW) (es. '1.5 MW massimi **al giorno**'). Rispondi inserendo la potenza o 'nessun limite'.";
+    if (q.includes('immissione') || q.includes('curtailing') || q.includes('rete') || q.includes('grid') || q.includes('injection')) {
+      return "Maximum allowed instantaneous grid injection power limit to prevent overloads or distributor penalties. \n\n❗ **Frequency & Scale:** Thermal or regulatory limit measured continuously or with a daily cap in Megawatts (MW) (e.g. '1.5 MW maximum **per day**'). Respond with power or 'no limit'.";
     }
-    if (q.includes('orbitali') || q.includes('vqe')) {
-      return "I canali energetici molecolari da simulare sul computer quantistico per verificare la coesione e l'unione chimica. \n\n❗ **Frequenza e Scala:** Riferita ad una simulazione statica **per carica/run** di calcolo molecolare. Di norma, ciascun orbitale attivo richiede l'assegnazione di un qubit dedicato (es. '4 orbitali molecolari per run').";
+    if (q.includes('orbitali') || q.includes('vqe') || q.includes('orbital')) {
+      return "Molecular energy channels to simulate on the quantum computer to verify cohesion and chemical bonding. \n\n❗ **Frequency & Scale:** Refers to a static simulation **per run** of molecular calculation. Typically, each active orbital requires assigning a dedicated qubit (e.g. '4 molecular orbitals per run').";
     }
     if (q.includes('ansatz')) {
-      return "Riguarda l'algoritmo geometrico variazionale per esplorare le combinazioni molecolari. \n\n❗ **Frequenza e Scala:** Parametro d'impostazione logica ad alta frequenza **all'interno del ciclo di convergenza VQE**. Se non hai familiarità scientifica, rispondi semplicemente 'UCCSD' (standard del settore) o 'ottimale'.";
+      return "Concerns the variational geometric algorithm for exploring molecular combinations. \n\n❗ **Frequency & Scale:** High-frequency logical setup parameter **within the VQE convergence loop**. If you are not familiar with the science, simply answer 'UCCSD' (industry standard) or 'optimal'.";
     }
-    if (q.includes('conducibilità') || q.includes('ec') || q.includes('idroponica')) {
-      return "I livelli nutritivi minerali disciolti in acqua per nutrire le radici nelle serre idroponiche. \n\n❗ **Frequenza e Scala:** Valore misurato costantemente **per ciclo di crescita/coltivazione** (es. '1.8 mS/cm per erbe o insalata', '2.8 mS/cm per pomodori'). Fornisci la conducibilità desiderata per la tua coltivazione.";
+    if (q.includes('conducibilità') || q.includes('ec') || q.includes('idroponica') || q.includes('conductivity') || q.includes('hydroponic')) {
+      return "Mineral nutrient levels dissolved in water to feed roots in hydroponic greenhouses. \n\n❗ **Frequency & Scale:** Value measured continuously **per growth/cultivation cycle** (e.g. '1.8 mS/cm for herbs or salad', '2.8 mS/cm for tomatoes'). Provide desired conductivity for your crop.";
     }
-    if (q.includes('consumi') || q.includes('led') || q.includes('artificiale')) {
-      return "La pianificazione dell'apporto energetico dei LED e dell'irraggiamento per ottimizzare la crescita bilanciando i costi elettrici. \n\n❗ **Frequenza e Scala:** Consumi energetici elettrici totali misurati **al mese** o **su base annuale**. Rispondi inserendo una priorità (es. 'priorità ai consumi ridotti su base mensile' o 'massima velocità di crescita').";
+    if (q.includes('consumi') || q.includes('led') || q.includes('artificiale') || q.includes('irradiance') || q.includes('lighting')) {
+      return "Scheduling of LED energy input and irradiance to optimize growth while balancing electrical costs. \n\n❗ **Frequency & Scale:** Total electricity power consumption measured **monthly** or **annually**. Respond with a priority (e.g. 'priority to reduced consumption on monthly basis' or 'maximum growth rate').";
     }
-    if (q.includes('tempo di ciclo robot') || q.includes('ciclo')) {
-      return "La durata temporale media richiesta a un braccio robotico o impianto per completare un'operazione ripetitiva prima di passare al pezzo successivo. \n\n❗ **Frequenza e Scala:** Espresso in secondi necessari **per singolo pezzo** (es. '120 secondi a pezzo'). Definisce la velocità reale di fabbrica della catena a regime.";
+    if (q.includes('tempo di ciclo robot') || q.includes('ciclo') || q.includes('cycle time') || q.includes('robot')) {
+      return "Average time duration required for a robotic arm or station to complete a repetitive task before moving to the next piece. \n\n❗ **Frequency & Scale:** Expressed in seconds needed **per single piece** (e.g. '120 seconds per piece'). Defines real factory line operating speed.";
     }
-    if (q.includes('consegna') || q.includes('ritardi')) {
-      return "La media storica dei ritardi riscontrati nell'approvvigionamento o nella consegna dei semilavorati o materiali per la catena. \n\n❗ **Frequenza e Scala:** Calcolato come ritardo medio in minuti **alla settimana** o **al giorno** (es. '10 minuti di ritardo medio alla settimana').";
+    if (q.includes('consegna') || q.includes('ritardi') || q.includes('delay') || q.includes('supply')) {
+      return "Historical average of delays encountered in supplying or delivering work-in-progress or materials for the assembly line. \n\n❗ **Frequency & Scale:** Calculated as average delay in minutes **per week** or **per day** (e.g. '10 minutes average delay per week').";
     }
-    if (q.includes('punti di saldatura') || q.includes('curvatura')) {
-      return "Descrive quanti punti fisici il robot deve toccare per la giunzioni o la mobilità dei giunti nello spazio tridimensionale. \n\n❗ **Frequenza e Scala:** Numero programmato di tocchi applicati **per singola unità lavorativa/pezzo** (es. '15 punti per pezzo').";
+    if (q.includes('punti di saldatura') || q.includes('curvatura') || q.includes('welding') || q.includes('touchpoint')) {
+      return "Describes how many physical touchpoints the robot must make for joints or mobility in 3D space. \n\n❗ **Frequency & Scale:** Programmed number of touches applied **per work unit/piece** (e.g. '15 points per piece').";
     }
-    if (q.includes('volumi') || q.includes('rimanenze') || q.includes('abbigliamento') || q.includes('maglia') || q.includes('invenduto') || q.includes('stagion') || q.includes('annual')) {
-      return "La quantità fisica di capi d'abbigliamento o invenduto di maglia fermi in magazzino da smaltire ad alto ritmo.\n\n❗ **Frequenza e Scala:** Bisogna distinguere con grande precisione l'orizzonte temporale richiesto dal modello quantistico. Specifica chiaramente se lo stock calcolato si riferisce ad un accumulo **stagionale (ad esempio, '1200 pezzi stagionali')** o ad una rimanenza complessiva **annuale (ad esempio, '3500 pezzi annuali')**. Questo livello di dettaglio è fondamentale affinché l'algoritmo calibri correttamente i pesi dei qubit d'ampiezza e determini l'esatto tasso di rotazione ottimale per gli sconti dinamici.";
+    if (q.includes('volumi') || q.includes('rimanenze') || q.includes('abbigliamento') || q.includes('maglia') || q.includes('invenduto') || q.includes('stagion') || q.includes('annual') || q.includes('inventory') || q.includes('stock')) {
+      return "Physical quantity of clothing or unsold knitwear inventory held in warehouse for high-rate clearance.\n\n❗ **Frequency & Scale:** You must distinguish with high precision the time horizon required by the quantum model. Specify clearly if calculated stock refers to **Seasonal (e.g. '1200 seasonal pieces')** or total **Annual (e.g. '3500 annual pieces')** inventory. This detail is essential for the algorithm to properly calibrate amplitude qubit weights and determine optimal dynamic discount turnover.";
     }
-    if (q.includes('margine minimo') || q.includes('perdita')) {
-      return "Il ricavo salvavita minimo accettabile per singolo articolo venduto per rimanere in profitto o in pareggio. \n\n❗ **Frequenza e Scala:** Espresso come percentuale rispetto al costo totale di produzione dell'articolo, calcolato **per singola vendita o su base stagionale/annuale** (es. '15% su base stagionale' o '15% per singolo pezzo'). Al di sotto di questa soglia, l'algoritmo non proporrà mai sconti.";
+    if (q.includes('margine minimo') || q.includes('perdita') || q.includes('margin') || q.includes('breakeven')) {
+      return "Minimum acceptable baseline margin per item sold to remain profitable or breakeven. \n\n❗ **Frequency & Scale:** Expressed as a percentage over total unit production cost, calculated **per single sale or on a seasonal/annual basis** (e.g. '15% seasonal basis' or '15% per piece'). Below this threshold, the algorithm will never propose discounts.";
     }
-    if (q.includes('antigeni') || q.includes('hla')) {
-      return "Gli antigeni leucocitari umani usati per determinare la compatibilità immunologica tra ricevente e donatore. \n\n❗ **Frequenza e Scala:** Riferita a ciascun singolo test clinico di matching per trapianto. Una corrispondenza biologica perfetta è **'6 su 6'** o **'8 su 8'** antigeni totali corrispondenti.";
+    if (q.includes('antigeni') || q.includes('hla') || q.includes('antigen')) {
+      return "Human leukocyte antigens used to determine immunological compatibility between recipient and donor. \n\n❗ **Frequency & Scale:** Refers to each individual clinical matching test for transplant. A perfect biological match is **'6 out of 6'** or **'8 out of 8'** total matching antigens.";
     }
-    if (q.includes('ischemia fredda') || q.includes('ore')) {
-      return "La finestra temporale di sicurezza biologica in cui l'organo può rimanere a freddo fuori dal corpo umano prima dell'impianto. \n\n❗ **Frequenza e Scala:** Espresso in ore utili conservate **per singolo organo prelevato** (es. 'da 4 a 6 ore' per il cuore, '12 ore' per il fegato).";
+    if (q.includes('ischemia fredda') || q.includes('ore') || q.includes('ischemia') || q.includes('hours')) {
+      return "Biological safety time window during which the organ can remain cold outside the human body before implantation. \n\n❗ **Frequency & Scale:** Expressed in useful hours **per harvested organ** (e.g. '4 to 6 hours' for heart, '12 hours' for liver).";
     }
-    if (q.includes('residui amminoacidici') || q.includes('simulazione proteica')) {
-      return "La dimensione complessiva del segmento proteico o di peptide da modellare geometricamente sui qubit. \n\n❗ **Frequenza e Scala:** Lunghezza della sequenza amminoacidica analizzata **per singola run di calcolo statico** (es. 'segmento corto di 10 amminoacidi per run').";
+    if (q.includes('residui amminoacidici') || q.includes('simulazione proteica') || q.includes('amino') || q.includes('protein')) {
+      return "Total size of the protein segment or peptide to geometrically model on qubits. \n\n❗ **Frequency & Scale:** Amino acid sequence length analyzed **per single static run** (e.g. 'short segment of 10 amino acids per run').";
     }
-    if (q.includes('forze di legame') || q.includes('idrogeno') || q.includes('van der waals')) {
-      return "Indica se l'algoritmo debba analizzare prioritariamente i legami ad idrogeno primari duri o le interazioni molecolari di superficie (Van Der Waals) più deboli. \n\n❗ **Frequenza e Scala:** Valutato come parametro chimico statico **per modello strutturale**.";
+    if (q.includes('forze di legame') || q.includes('idrogeno') || q.includes('van der waals') || q.includes('bond')) {
+      return "Indicates whether the algorithm should prioritize primary hard hydrogen bonds or weaker surface molecular interactions (Van Der Waals). \n\n❗ **Frequency & Scale:** Evaluated as a static chemical parameter **per structural model**.";
     }
-    if (q.includes('età') || q.includes('riammissione') || q.includes('dimissioni')) {
-      return "I cluster demografici di pazienti a maggior rischio statistico di ricovero imprevisto post-dimissione. \n\n❗ **Frequenza e Scala:** Monitorato sui dati accumulati **all'anno** (es. 'pazienti over 65 anni dell'ultimo anno'). Fornisci la fascia d'età o rispondi 'standard'.";
+    if (q.includes('età') || q.includes('riammissione') || q.includes('dimissioni') || q.includes('age') || q.includes('readmission')) {
+      return "Demographic clusters of patients at highest statistical risk of unplanned post-discharge readmission. \n\n❗ **Frequency & Scale:** Monitored on data accumulated **annually** (e.g. 'patients over 65 years old in the past year'). Provide age range or respond 'standard'.";
     }
-    if (q.includes('visite') || q.includes('follow-up') || q.includes('controlli')) {
-      return "Il piano di controlli preventivi medici pianificato per monitorare il recupero del paziente dimesso dall'ospedale. \n\n❗ **Frequenza e Scala:** Numero totale di controlli pianificati **nel primo mese (30 giorni) post-dimissione** (es. '1 controllo a settimana nel primo mese').";
+    if (q.includes('visite') || q.includes('follow-up') || q.includes('controlli') || q.includes('followup')) {
+      return "Planned preventive medical check-up schedule to monitor patient recovery after hospital discharge. \n\n❗ **Frequency & Scale:** Total planned check-ups **in the first month (30 days) post-discharge** (e.g. '1 visit per week in the first month').";
     }
-    if (q.includes('distanza') || q.includes('fibra') || q.includes('qkd')) {
-      return "La lunghezza fisica del cablaggio in fibra ottica tra le sedi per distribuire le chiavi quantistiche di sicurezza in modo protetto contro hacker. \n\n❗ **Frequenza e Scala:** Tratta fisica complessiva della rete geografica aziendale misurata **una tantum** (es. '50 km totali di estensione di tratta').";
+    if (q.includes('distanza') || q.includes('fibra') || q.includes('qkd') || q.includes('fiber') || q.includes('distance')) {
+      return "Physical fiber optic cabling length between sites to distribute quantum security keys protected against hackers. \n\n❗ **Frequency & Scale:** Total physical link length of corporate geographic network measured **one-time** (e.g. '50 km total link extension').";
     }
-    if (q.includes('connessioni') || q.includes('insolito') || q.includes('allerta')) {
-      return "Il numero di tentativi di connessione insoliti o tentati attacchi di forza bruta oltre il quale l'algoritmo quantistico fa scattare l'alert di entanglement protettivo. \n\n❗ **Frequenza e Scala:** Frequenza misurata come connessioni sospette **al minuto** (es. 'oltre 50 connessioni anomale al minuto').";
+    if (q.includes('connessioni') || q.includes('insolito') || q.includes('allerta') || q.includes('connection') || q.includes('attack')) {
+      return "Number of unusual connection attempts or brute-force attack attempts triggering the protective entanglement alert. \n\n❗ **Frequency & Scale:** Frequency measured as suspicious connections **per minute** (e.g. 'over 50 anomalous connections per minute').";
     }
-    if (q.includes('rotazione')) {
-      return "La frequenza programmata per rigenerare e ricalcolare l'intero set di chiavi crittografiche per prevenire l'intrusione. \n\n❗ **Frequenza e Scala:** Cadenza programmata espressa in giorni o ore (es. 'ogni 14 giorni' o 'ogni 24 ore').";
+    if (q.includes('rotazione') || q.includes('rotation')) {
+      return "Programmed frequency to regenerate and recalculate the entire set of cryptographic keys to prevent intrusion. \n\n❗ **Frequency & Scale:** Programmed schedule expressed in days or hours (e.g. 'every 14 days' or 'every 24 hours').";
     }
     if (q.includes('post-quantum') || q.includes('nist') || q.includes('pqc')) {
-      return "Lo standard post-quantum che l'azienda intende mappare. 'ML-KEM' (Kyber) è lo standard di cifratura post-quantum più utilizzato. \n\n❗ **Frequenza e Scala:** Riferito allo standard crittografico aziendale fisso impostato nel software.";
+      return "Post-quantum standard the organization intends to map. 'ML-KEM' (Kyber) is the most widely used post-quantum encryption standard. \n\n❗ **Frequency & Scale:** Refers to fixed corporate cryptographic standard configured in software.";
     }
-    if (q.includes('archivi') || q.includes('migrazione') || q.includes('database')) {
-      return "La sorgente informativa strategica più esposta a minaccia da migrare prioritariamente alle reti protette da algoritmi quantistici. \n\n❗ **Frequenza e Scala:** Asset informativo aziendale fisso (es: 'database centrale dell'anno corrente' o 'server di backup locale').";
+    if (q.includes('archivi') || q.includes('migrazione') || q.includes('database') || q.includes('archive') || q.includes('migration')) {
+      return "Most vulnerable strategic information asset requiring priority migration to networks protected by quantum algorithms. \n\n❗ **Frequency & Scale:** Fixed corporate information asset (e.g. 'current year central database' or 'local backup server').";
     }
 
-    return "Questo indicatore serve per impostare un peso probabilistico corretto nel database del modello quantistico. Puoi rispondere fornendo una stima riferita all'anno, al mese o al giorno, oppure indicare semplicemente se desideri un comportamento incentrato sulla massima sicurezza operativa o sull'efficienza di calcolo.";
+    return "This indicator serves to set a correct probabilistic weight in the quantum model database. You can respond with an estimate per year, month, or day, or simply indicate whether you desire maximum operational security or computational efficiency.";
   };
 
   function getScenarioDetails(macroarea: string, option: 'A' | 'B' | 'C') {

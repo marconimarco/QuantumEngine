@@ -56,7 +56,7 @@ export default function QuantumChat() {
       const newMessage: Message = {
         id: Math.random().toString(),
         senderId: data.senderId,
-        senderName: data.senderId === newSocket.id ? 'Tu' : 'Agente_' + data.senderId.substring(0, 4),
+        senderName: data.senderId === newSocket.id ? 'You' : 'Agent_' + data.senderId.substring(0, 4),
         content: data.message,
         cipher: data.encapsulatedKey,
         isEncrypted: true
@@ -88,7 +88,7 @@ export default function QuantumChat() {
         id: '1',
         senderId: 'system',
         senderName: 'SYSTEM',
-        content: `Sessione Quantistica creata. ID: ${newRoomId}. Solo chi ha il codice può entrare.`,
+        content: `Quantum Session created. ID: ${newRoomId}. Only code holders can join.`,
         isEncrypted: false
       }]);
     } catch (error) {
@@ -111,11 +111,11 @@ export default function QuantumChat() {
         id: '1',
         senderId: 'system',
         senderName: 'SYSTEM',
-        content: `Accesso alla sessione ${joinedRoomId} autorizzato via ML-KEM.`,
+        content: `Access to session ${joinedRoomId} authorized via ML-KEM.`,
         isEncrypted: false
       }]);
     } catch (error) {
-      alert("Codice non valido");
+      alert("Invalid code");
     } finally {
       setIsJoining(false);
     }
@@ -173,7 +173,7 @@ export default function QuantumChat() {
               Quantum <span className="text-quantum-primary drop-shadow-[0_0_10px_rgba(0,242,255,0.5)]">Safe Chat</span>
             </h2>
             <p className="text-[10px] sm:text-[11px] text-gray-500 font-mono uppercase tracking-[0.3em] max-w-md mx-auto leading-relaxed">
-              Standard NIST FIPS 203 • Crittografia Lattice-Based
+              Standard NIST FIPS 203 • Lattice-Based Cryptography
             </p>
           </div>
         </div>
@@ -189,8 +189,8 @@ export default function QuantumChat() {
                 <Plus className="w-8 h-8 text-quantum-primary" />
               </div>
               <div>
-                <h3 className="text-white font-display font-bold uppercase tracking-[0.15em] text-sm">Nuova Sessione</h3>
-                <p className="text-[10px] text-gray-400 uppercase mt-1.5 tracking-wider">Avvia stanza privata ML-KEM-768</p>
+                <h3 className="text-white font-display font-bold uppercase tracking-[0.15em] text-sm">New Session</h3>
+                <p className="text-[10px] text-gray-400 uppercase mt-1.5 tracking-wider">Start private ML-KEM-768 room</p>
               </div>
             </div>
             <ChevronRight className="w-6 h-6 text-gray-700 group-hover:text-quantum-primary group-hover:translate-x-1 transition-all" />
@@ -203,15 +203,15 @@ export default function QuantumChat() {
                 <KeyIcon className="w-8 h-8 text-gray-500" />
               </div>
               <div>
-                <h3 className="text-white font-display font-bold uppercase tracking-[0.15em] text-sm">Accesso Rapido</h3>
-                <p className="text-[10px] text-gray-400 uppercase mt-1.5 tracking-wider">Inserisci il codice di invito</p>
+                <h3 className="text-white font-display font-bold uppercase tracking-[0.15em] text-sm">Quick Access</h3>
+                <p className="text-[10px] text-gray-400 uppercase mt-1.5 tracking-wider">Enter invitation code</p>
               </div>
             </div>
             
             <div className="flex gap-3 relative z-10">
               <input 
                 type="text"
-                placeholder="CODICE 6 CIFRE"
+                placeholder="6-DIGIT CODE"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 className="flex-1 bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-sm text-white uppercase tracking-[0.4em] font-mono focus:ring-2 focus:ring-quantum-primary/50 outline-none transition-all placeholder:text-gray-700"
@@ -272,13 +272,13 @@ export default function QuantumChat() {
                   <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-[7px] sm:text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-0.5">Invito Generato</p>
+                  <p className="text-[7px] sm:text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-0.5">Generated Invitation</p>
                   <p className="text-[11px] sm:text-[13px] font-mono text-white font-black tracking-[0.2em]">{inviteCode}</p>
                 </div>
                 <button 
                   onClick={() => { navigator.clipboard.writeText(inviteCode); }}
                   className="ml-auto sm:ml-2 p-1.5 sm:p-2 hover:bg-white/5 rounded-lg sm:rounded-xl transition-all text-quantum-primary"
-                  title="Copia Codice"
+                  title="Copy Code"
                 >
                   <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
@@ -383,7 +383,7 @@ export default function QuantumChat() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Comando sicuro..."
+            placeholder="Secure command..."
             className="w-full bg-white/[0.03] border border-white/10 rounded-2xl sm:rounded-[1.5rem] py-4 sm:py-6 pl-11 sm:pl-16 pr-20 sm:pr-24 text-xs sm:text-base text-white placeholder:text-gray-700 focus:ring-2 focus:ring-quantum-primary/40 shadow-inner outline-none transition-all backdrop-blur-md"
           />
           <button 

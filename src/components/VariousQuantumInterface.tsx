@@ -131,11 +131,11 @@ export default function VariousQuantumInterface({ onBack }: VariousQuantumInterf
           <div className="space-y-4">
             <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-white mb-2 pb-2 border-b border-white/5 flex items-center gap-2">
               <Database className="w-4 h-4 text-quantum-primary" />
-              Fonti Eterogenee (Entanglement Sources)
+              Heterogeneous Entanglement Sources
             </h3>
             
             <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">
-              Seleziona le reti da immettere nella camera quantistica per misurare l'effetto farfalla globale.
+              Select networks to inject into the quantum chamber to measure the global butterfly effect.
             </p>
 
             <div className="space-y-2.5">
