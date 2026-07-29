@@ -1,8 +1,8 @@
-import { GoogleGenAI, Type } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+import { Type } from "@google/genai";
+import { getGeminiClient } from "./apiKeyService";
 
 export async function optimizeQuantumCode(userCode: string, lang: string = 'en') {
+  const ai = getGeminiClient();
   const langNames: Record<string, string> = {
     it: 'ITALIAN',
     en: 'ENGLISH',

@@ -1,7 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
 import { SectorId, SimulationResult } from "../types";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+import { getGeminiClient } from "./apiKeyService";
 
 export async function generateQuantumStrategy(
   sectorId: SectorId,
@@ -15,6 +13,12 @@ export async function generateQuantumStrategy(
   volatilityTarget?: string | null,
   lang: string = 'en'
 ): Promise<SimulationResult> {
+  let ai;
+  try {
+    ai = getGeminiClient();
+  } catch (e) {
+    ai = null;
+  }
   const model = "gemini-3-flash-preview";
   
   const contextText = userContext 

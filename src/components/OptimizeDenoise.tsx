@@ -14,10 +14,14 @@ import {
   Sparkles,
   Download,
   Copy,
-  Check
+  Check,
+  Key,
+  AlertCircle
 } from 'lucide-react';
 
 import { optimizeQuantumCode } from '../services/geminiQuantumService';
+import ApiKeyModal from './ApiKeyModal';
+import { getStoredApiKey } from '../services/apiKeyService';
 
 type Tab = 'optimize' | 'denoise';
 
@@ -26,6 +30,8 @@ export default function OptimizeDenoise() {
   const [activeTab, setActiveTab] = useState<Tab>('optimize');
   const [code, setCode] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const [results, setResults] = useState<{
     analysis: string;
     optimizedCode: string;
@@ -55,13 +61,19 @@ export default function OptimizeDenoise() {
   const handleOptimize = async () => {
     if (!code.trim()) return;
     setIsProcessing(true);
+    setErrorMsg(null);
     
     try {
       const result = await optimizeQuantumCode(code, language);
       setResults(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      // In case of error, you might want to show a notification or fallback
+      if (error?.message === 'API_KEY_MISSING' || !getStoredApiKey()) {
+        setErrorMsg("Google AI Studio API Key non configurata. Inserisci una chiave API per utilizzare l'ottimizzazione.");
+        setIsKeyModalOpen(true);
+      } else {
+        setErrorMsg("Errore durante l'ottimizzazione del codice. Verifica la tua API Key o riprova.");
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -158,6 +170,27 @@ export default function OptimizeDenoise() {
   return (
     <div className="space-y-8 mt-8 pb-32">
       {/* Header Section */}
+      <ApiKeyModal
+        isOpen={isKeyModalOpen}
+        onClose={() => setIsKeyModalOpen(false)}
+        onKeySaved={() => setErrorMsg(null)}
+      />
+
+      {errorMsg && (
+        <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+          <button
+            onClick={() => setIsKeyModalOpen(true)}
+            className="px-3 py-1.5 bg-amber-400 text-black font-bold uppercase text-[10px] rounded-lg hover:bg-amber-300 transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
+          >
+            <Key className="w-3.5 h-3.5" /> Imposta Key
+          </button>
+        </div>
+      )}
+
       <div className="p-5 sm:p-6 bg-quantum-primary/5 border border-quantum-primary/20 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start lg:items-center gap-4 sm:gap-6 text-center sm:text-left">
         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-quantum-primary/20 flex items-center justify-center shrink-0">
           <Wand2 className="w-7 h-7 sm:w-8 sm:h-8 text-quantum-primary" />

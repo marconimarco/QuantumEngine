@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SectorSelector from './components/SectorSelector';
 import QuantumDashboard from './components/QuantumDashboard';
 import LanguageSelector from './components/LanguageSelector';
 import IBMQuantumInterface from './components/IBMQuantumInterface';
 import QuantumAgentsInterface from './components/QuantumAgentsInterface';
+import ApiKeyModal from './components/ApiKeyModal';
 import { SectorId, SECTORS, LanguageCode } from './types';
 import { TranslationProvider, useTranslation } from './lib/TranslationContext';
-import { Cpu, Terminal, ArrowLeft, Layers, HelpCircle } from 'lucide-react';
+import { Cpu, Terminal, ArrowLeft, Layers, HelpCircle, Key, ShieldCheck, AlertCircle } from 'lucide-react';
+import { getStoredApiKey } from './services/apiKeyService';
 
 export default function App() {
   const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('it');
@@ -28,6 +30,15 @@ function AppContent({ currentLanguage, setCurrentLanguage }: { currentLanguage: 
   const [isAgentsOpen, setIsAgentsOpen] = useState(false);
   const [returnToSubMenu, setReturnToSubMenu] = useState<SectorId | null>(null);
   const [sharedQasm, setSharedQasm] = useState<string>('');
+  
+  // API Key modal state
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  useEffect(() => {
+    const key = getStoredApiKey();
+    setHasApiKey(!!key);
+  }, [isApiKeyModalOpen]);
 
   const selectedSector = SECTORS.find(s => s.id === selectedSectorId);
 
@@ -63,6 +74,27 @@ function AppContent({ currentLanguage, setCurrentLanguage }: { currentLanguage: 
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]" />
       </div>
 
+      {/* API Key Modal */}
+      <ApiKeyModal
+        isOpen={isApiKeyModalOpen}
+        onClose={() => setIsApiKeyModalOpen(false)}
+        onKeySaved={() => setHasApiKey(!!getStoredApiKey())}
+      />
+
+      {/* Top Banner if API Key is missing */}
+      {!hasApiKey && (
+        <div className="relative z-50 bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 text-center text-xs text-amber-200 flex items-center justify-center gap-2 font-mono">
+          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>Chiave API Google AI Studio non trovata. Per utilizzare le funzionalità AI, inserisci la tua API Key.</span>
+          <button
+            onClick={() => setIsApiKeyModalOpen(true)}
+            className="px-2.5 py-0.5 bg-amber-400 text-black font-bold uppercase text-[10px] rounded hover:bg-amber-300 transition-colors ml-2 cursor-pointer"
+          >
+            Inserisci Key
+          </button>
+        </div>
+      )}
+
       {/* Elegant glassmorphism Top Header bar when on the primary Landing selector */}
       {!selectedSectorId && !isIbmInterfaceOpen && !isAgentsOpen && (
         <header className="relative z-50 w-full px-6 py-4 mx-auto max-w-7xl flex items-center justify-between border-b border-white/5 bg-black/20 backdrop-blur-md">
@@ -74,6 +106,18 @@ function AppContent({ currentLanguage, setCurrentLanguage }: { currentLanguage: 
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
+            <button
+              onClick={() => setIsApiKeyModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-mono transition-all cursor-pointer"
+            >
+              <Key className="w-3.5 h-3.5 text-quantum-primary" />
+              <span>API Key</span>
+              {hasApiKey ? (
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              ) : (
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+              )}
+            </button>
           </div>
         </header>
       )}
