@@ -36,6 +36,7 @@ import QuantumChat from './pqc/QuantumChat';
 import LargeQuantumInterface from './LargeQuantumInterface';
 import VariousQuantumInterface from './VariousQuantumInterface';
 
+
 const LogisticsMap = ({ data }: { data: NonNullable<SimulationResult['logisticsData']> }) => {
   const { t } = useTranslation();
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -292,6 +293,11 @@ export default function QuantumDashboard({ sector, onBack, onSectorChange }: Pro
   
   // Real Quantum Job State
   const [isRealQMode, setIsRealQMode] = useState(sector.id === 'realq');
+  
+  React.useEffect(() => {
+    setIsRealQMode(sector.id === 'realq');
+  }, [sector.id]);
+
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
   const [isSubmittingToIBM, setIsSubmittingToIBM] = useState(false);
@@ -621,7 +627,7 @@ export default function QuantumDashboard({ sector, onBack, onSectorChange }: Pro
           {onSectorChange && sector.id !== 'realq' && (
             <button 
               onClick={() => onSectorChange('realq')}
-              className="flex items-center gap-2 text-red-500 animate-pulse transition-colors py-1 group"
+              className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors py-1 group"
               title={t('realq')}
             >
               <HelpCircle className="w-4 h-4 sm:w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -898,24 +904,7 @@ export default function QuantumDashboard({ sector, onBack, onSectorChange }: Pro
               >
                 <CrossCode onSwitchToBI={() => onSectorChange?.('quantumbi')} />
               </motion.div>
-            ) : sector.id === 'large' ? (
-              <motion.div
-                key="large"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-              >
-                <LargeQuantumInterface />
-              </motion.div>
-            ) : sector.id === 'various' ? (
-              <motion.div
-                key="various"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-              >
-                <VariousQuantumInterface onBack={onBack} />
-              </motion.div>
+
             ) : (sector.id === 'quantumbi' || sector.id === 'finance' || sector.id === 'insurance') ? (
               <motion.div
                 key={sector.id}
@@ -951,6 +940,24 @@ export default function QuantumDashboard({ sector, onBack, onSectorChange }: Pro
                 exit={{ opacity: 0, scale: 0.95 }}
               >
                 <QuantumChat />
+              </motion.div>
+            ) : sector.id === 'large' ? (
+              <motion.div
+                key="large"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <LargeQuantumInterface />
+              </motion.div>
+            ) : sector.id === 'various' ? (
+              <motion.div
+                key="various"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <VariousQuantumInterface onBack={onBack} />
               </motion.div>
             ) : isSimulating ? (
               <motion.div 

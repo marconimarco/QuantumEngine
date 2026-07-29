@@ -48,10 +48,12 @@ interface Props {
   onSelect: (id: SectorId) => void;
   initialSubMenu?: SectorId | null;
   onSubMenuToggle?: (isSub: boolean) => void;
+  onOpenAgents?: () => void;
+  onOpenIbm?: () => void;
 }
 
-export default function SectorSelector({ onSelect, initialSubMenu = null, onSubMenuToggle }: Props) {
-  const { t } = useTranslation();
+export default function SectorSelector({ onSelect, initialSubMenu = null, onSubMenuToggle, onOpenAgents, onOpenIbm }: Props) {
+  const { t, language } = useTranslation();
   const [activeSubMenu, setActiveSubMenu] = useState<SectorId | null>(initialSubMenu);
 
   const [sectorRotationIndex, setSectorRotationIndex] = useState(0);
@@ -84,7 +86,14 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
   const subMenuIds: SectorId[] = [...quantumCodeGroupIds, ...pqcGroupIds];
   
   const excludedSectors = ['energy', 'manufacturing', 'telecom', 'logistics', 'insurance', 'finance'];
-  const mainSectors = SECTORS.filter(s => !subMenuIds.includes(s.id) && !excludedSectors.includes(s.id) && s.id !== 'quantumbi');
+  const mainSectors = SECTORS.filter(s => 
+    !subMenuIds.includes(s.id) && 
+    !excludedSectors.includes(s.id) && 
+    s.id !== 'quantumbi' &&
+    s.id !== 'various' &&
+    s.id !== 'large' &&
+    s.id !== 'quantum_code'
+  );
   
   const getSubSectors = () => {
     if (activeSubMenu === 'quantum_code') return SECTORS.filter(s => quantumCodeGroupIds.includes(s.id));
@@ -109,7 +118,21 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
   };
 
   const isSubActive = activeSubMenu !== null;
-  const displayedSectors = isSubActive ? subSectors : mainSectors;
+  const displayedSectors = isSubActive 
+    ? subSectors 
+    : [
+        ...mainSectors,
+        {
+          id: 'send_to_ibm' as SectorId,
+          name: 'SEND TO IBM',
+          icon: 'Terminal',
+          description: 'Hardware Gateway: Invia i tuoi circuiti direttamente ai processori quantistici IBM e monitora i job in tempo reale.',
+          focus: 'Quantum Hardware Integration',
+          variablesLabel: 'Jobs/Qasm',
+          stressEvent: 'Network Latency',
+          isSpecial: true,
+        }
+      ];
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 md:p-8 relative overflow-hidden">
@@ -120,7 +143,11 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
         <div className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50">
           <button 
             onClick={handleBackToMain}
-            className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-black/40 border border-white/10 rounded-full text-gray-400 hover:text-quantum-primary hover:border-quantum-primary/50 transition-all group backdrop-blur-xl"
+            className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-black/40 border border-white/10 rounded-full text-gray-400 transition-all group backdrop-blur-xl ${
+              activeSubMenu === 'pqc_group' 
+                ? 'hover:text-emerald-400 hover:border-emerald-500/50' 
+                : 'hover:text-quantum-primary hover:border-quantum-primary/50'
+            }`}
           >
             <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:-translate-x-1 transition-transform" />
             <span className="font-mono text-[9px] sm:text-xs tracking-widest uppercase font-bold">{t('back')}</span>
@@ -145,7 +172,9 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
               <h1 className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-2 uppercase tracking-tighter">
                 {t(`s_${activeSubMenu}_name`)}
               </h1>
-              <p className="text-[9px] sm:text-xs text-quantum-primary font-mono uppercase tracking-[0.2em] sm:tracking-[0.3em]">
+              <p className={`text-[9px] sm:text-xs font-mono uppercase tracking-[0.2em] sm:tracking-[0.3em] ${
+                activeSubMenu === 'pqc_group' ? 'text-emerald-400' : 'text-quantum-primary'
+              }`}>
                 {activeSubMenu === 'pqc_group' ? t('pqc_cryptography') : t('advanced_dev_tools')}
               </p>
             </motion.div>
@@ -170,8 +199,11 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
         </AnimatePresence>
       </motion.div>
 
-      {/* Container with better responsive sizing */}
-      <div className="relative w-[90vmin] h-[90vmin] sm:w-[75vmin] sm:h-[75vmin] max-w-[550px] max-h-[550px] flex items-center justify-center mb-16 sm:mb-20">
+      {/* Centered layout for the orbital hub or active lists */}
+      <div className="flex items-center justify-center w-full max-w-7xl px-4 z-10 my-4">
+        
+        {/* Container with better responsive sizing */}
+        <div className="relative w-[90vmin] h-[90vmin] sm:w-[75vmin] sm:h-[75vmin] max-w-[550px] max-h-[550px] flex items-center justify-center mb-6 xl:mb-0 shrink-0">
         {/* Satellite Buttons / Button List for sub-menu */}
         <AnimatePresence mode="wait">
           {!isSubActive ? (
@@ -224,25 +256,27 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
                           <div className={`w-[12vmin] h-[12vmin] max-w-[55px] max-h-[55px] md:w-20 md:h-20 rounded-full border flex items-center justify-center mb-1 sm:mb-2 transition-all relative overflow-hidden ${
                             sector.id === 'translator' 
                               ? 'bg-quantum-secondary/20 border-quantum-secondary shadow-[0_0_20px_rgba(157,0,255,0.2)]' 
+                            : sector.id === 'send_to_ibm'
+                              ? 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.5)] group-hover:shadow-[0_0_35px_rgba(6,182,212,0.7)] group-hover:border-cyan-400'
+                            : sector.id === 'pqc_group'
+                              ? 'bg-emerald-500/20 border-emerald-400 shadow-[0_0_25px_rgba(52,211,153,0.5)] group-hover:shadow-[0_0_35px_rgba(52,211,153,0.7)] group-hover:border-emerald-400'
                             : sector.id === 'realq'
                               ? 'bg-red-500/20 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)] animate-pulse'
-                              : sector.id === 'mitigation'
+                            : sector.id === 'mitigation'
                               ? 'bg-amber-500/20 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
-                              : sector.id === 'quantum_code'
-                              ? 'bg-blue-500/20 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
                               : 'bg-black/80 border-white/10 group-hover:border-quantum-primary group-hover:shadow-[0_0_20px_rgba(0,242,255,0.15)]'
                           }`}>
                             <div className={`absolute inset-0 transition-colors ${
-                              sector.id === 'translator' ? 'bg-quantum-secondary/10' : sector.id === 'realq' ? 'bg-red-500/10' : sector.id === 'mitigation' ? 'bg-amber-500/10' : 'bg-quantum-primary/0 group-hover:bg-quantum-primary/10'
+                              sector.id === 'translator' ? 'bg-quantum-secondary/10' : sector.id === 'send_to_ibm' ? 'bg-cyan-500/10' : sector.id === 'pqc_group' ? 'bg-emerald-500/10' : sector.id === 'realq' ? 'bg-red-500/10' : sector.id === 'mitigation' ? 'bg-amber-500/10' : 'bg-quantum-primary/0 group-hover:bg-quantum-primary/10'
                             }`} />
                             <Icon className={`w-[5vmin] h-[5vmin] max-w-[24px] max-h-[24px] md:w-8 md:h-8 transition-transform group-hover:scale-110 ${
-                              sector.id === 'translator' ? 'text-quantum-secondary' : sector.id === 'realq' ? 'text-red-500' : sector.id === 'mitigation' ? 'text-amber-500' : 'text-quantum-primary'
+                              sector.id === 'translator' ? 'text-quantum-secondary' : sector.id === 'send_to_ibm' ? 'text-cyan-400 animate-pulse' : sector.id === 'pqc_group' ? 'text-emerald-400' : sector.id === 'realq' ? 'text-red-500' : sector.id === 'mitigation' ? 'text-amber-500' : 'text-quantum-primary'
                             }`} />
                           </div>
                           <span className={`text-[6px] min-[400px]:text-[8px] md:text-xs font-mono font-bold uppercase tracking-tighter sm:tracking-widest bg-black/60 px-1 py-0.5 md:py-1 rounded border border-white/5 backdrop-blur-sm transition-colors whitespace-nowrap overflow-hidden ${
-                            sector.id === 'translator' ? 'text-quantum-secondary border-quantum-secondary/30' : sector.id === 'realq' ? 'text-red-500 border-red-500/30' : sector.id === 'mitigation' ? 'text-amber-500 border-amber-500/30' : 'text-white group-hover:text-quantum-primary'
+                            sector.id === 'translator' ? 'text-quantum-secondary border-quantum-secondary/30' : sector.id === 'send_to_ibm' ? 'text-cyan-400 border-cyan-500/30' : sector.id === 'pqc_group' ? 'text-emerald-400 border-emerald-500/30' : sector.id === 'realq' ? 'text-red-500 border-red-500/30' : sector.id === 'mitigation' ? 'text-amber-500 border-amber-500/30' : 'text-white group-hover:text-quantum-primary'
                           }`}>
-                            {t(`s_${sector.id}_name`)}
+                            {sector.id === 'send_to_ibm' ? 'SEND TO IBM' : t(`s_${sector.id}_name`)}
                           </span>
                         </motion.div>
                       </motion.button>
@@ -251,43 +285,27 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
                 })}
               </motion.div>
 
-              {/* Central Fixed Sun (Primary Portal - Dynamic Routing) */}
+              {/* Central Fixed Sun (Primary Portal - Quantum AI Agents) */}
               <div className="absolute w-[28vmin] h-[28vmin] max-w-[155px] max-h-[155px] sm:w-36 sm:h-36 rounded-full flex items-center justify-center z-30 pointer-events-auto">
                 <motion.div
                   whileHover={{ scale: 1.1, boxShadow: "0 0 55px rgba(0,242,255,0.5)" }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => onSelect(currentCycling.id as SectorId)}
+                  onClick={() => onOpenAgents?.()}
                   className="w-full h-full bg-black/95 border-2 border-quantum-primary hover:border-quantum-primary rounded-full flex flex-col items-center justify-center cursor-pointer shadow-[0_0_35px_rgba(0,242,255,0.25)] relative overflow-hidden backdrop-blur-xl group/hub"
-                  title={`Accedi a ${t(`s_${currentCycling.id}_name`)} (Clicca per entrare)`}
+                  title={language === 'it' ? "Accedi a Quantum AI Agents" : "Access Quantum AI Agents"}
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-quantum-primary/10 to-transparent pointer-events-none animate-pulse" />
                   
                   <div className="flex flex-col items-center justify-center select-none p-3 text-center h-full w-full">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentCycling.id}
-                        initial={{ opacity: 0, scale: 0.7 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.7 }}
-                        transition={{ duration: 0.25 }}
-                        className="flex flex-col items-center justify-center"
-                      >
-                        {(() => {
-                          const CyclingIcon = ICON_MAP[currentCycling.iconId] || Landmark;
-                          return <CyclingIcon className="w-8 h-8 sm:w-10 sm:h-10 text-quantum-primary filter drop-shadow-[0_0_12px_rgba(0,242,255,0.6)] group-hover/hub:scale-110 transition-transform duration-300" />;
-                        })()}
-                        <span className="text-[10px] sm:text-[12px] md:text-sm font-display font-black uppercase tracking-widest text-white mt-1.5 group-hover/hub:text-quantum-primary transition-colors max-w-[125px] truncate">
-                          {t(`s_${currentCycling.id}_name`)}
-                        </span>
-                        <span className="text-[5px] sm:text-[7px] font-mono text-quantum-primary/60 uppercase tracking-widest mt-0.5 scale-90">
-                          {currentCycling.id === 'finance' ? 'NODE 01' : 
-                           currentCycling.id === 'insurance' ? 'NODE 02' :
-                           currentCycling.id === 'logistics' ? 'NODE 03' :
-                           currentCycling.id === 'telecom' ? 'NODE 04' :
-                           currentCycling.id === 'manufacturing' ? 'NODE 05' : 'NODE 06'}
-                        </span>
-                      </motion.div>
-                    </AnimatePresence>
+                    <div className="flex flex-col items-center justify-center">
+                      <Cpu className="w-8 h-8 sm:w-10 sm:h-10 text-quantum-primary filter drop-shadow-[0_0_12px_rgba(0,242,255,0.6)] group-hover/hub:scale-110 transition-transform duration-300 animate-pulse" />
+                      <span className="text-[10px] sm:text-[11px] md:text-xs font-display font-black uppercase tracking-widest text-white mt-1.5 group-hover/hub:text-quantum-primary transition-colors max-w-[125px]">
+                        {language === 'it' ? 'AGENTS AI' : 'AI AGENTS'}
+                      </span>
+                      <span className="text-[5px] sm:text-[7px] font-mono text-quantum-primary/60 uppercase tracking-widest mt-0.5 scale-90">
+                        {language === 'it' ? 'APRI INTERFACCIA' : 'LAUNCH GATEWAY'}
+                      </span>
+                    </div>
                   </div>
                 </motion.div>
               </div>
@@ -307,6 +325,7 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
             >
               {displayedSectors.map((sector, index) => {
                 const Icon = ICON_MAP[sector.icon] || Cpu;
+                const isPqcSub = activeSubMenu === 'pqc_group';
                 return (
                   <motion.button
                     key={sector.id}
@@ -318,14 +337,26 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
                     whileTap={{ scale: 0.95 }}
                     className="w-full max-w-lg group relative"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-quantum-primary/0 via-quantum-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl sm:rounded-2xl" />
-                    <div className="relative p-3 sm:p-5 md:p-6 bg-black/60 border border-white/10 rounded-xl sm:rounded-2xl flex items-center gap-3 sm:gap-5 md:gap-6 transition-all group-hover:border-quantum-primary group-hover:shadow-[0_0_40px_rgba(0,242,255,0.2)] backdrop-blur-xl overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-quantum-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-lg sm:rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center group-hover:border-quantum-primary group-hover:bg-quantum-primary/10 transition-all shadow-inner relative z-10">
-                        <Icon className="w-5 h-5 sm:w-7 sm:h-7 md:w-10 md:h-10 text-quantum-primary group-hover:scale-110 group-hover:rotate-6 transition-transform" />
+                    <div className={`absolute inset-0 bg-gradient-to-r ${isPqcSub ? 'from-emerald-500/0 via-emerald-500/10' : 'from-quantum-primary/0 via-quantum-primary/10'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl sm:rounded-2xl`} />
+                    <div className={`relative p-3 sm:p-5 md:p-6 bg-black/60 border border-white/10 rounded-xl sm:rounded-2xl flex items-center gap-3 sm:gap-5 md:gap-6 transition-all backdrop-blur-xl overflow-hidden ${
+                      isPqcSub 
+                        ? 'group-hover:border-emerald-500 group-hover:shadow-[0_0_40px_rgba(16,185,129,0.3)]' 
+                        : 'group-hover:border-quantum-primary group-hover:shadow-[0_0_40px_rgba(0,242,255,0.2)]'
+                    }`}>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${isPqcSub ? 'from-emerald-500/5' : 'from-quantum-primary/5'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
+                      <div className={`w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-lg sm:rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center transition-all shadow-inner relative z-10 ${
+                        isPqcSub 
+                          ? 'group-hover:border-emerald-500 group-hover:bg-emerald-500/10' 
+                          : 'group-hover:border-quantum-primary group-hover:bg-quantum-primary/10'
+                      }`}>
+                        <Icon className={`w-5 h-5 sm:w-7 sm:h-7 md:w-10 md:h-10 group-hover:scale-110 group-hover:rotate-6 transition-transform ${
+                          isPqcSub ? 'text-emerald-400' : 'text-quantum-primary'
+                        }`} />
                       </div>
                       <div className="flex-1 text-left min-w-0 relative z-10">
-                        <h3 className="text-[10px] sm:text-xs md:text-sm font-black text-white uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 group-hover:text-quantum-primary transition-colors">
+                        <h3 className={`text-[10px] sm:text-xs md:text-sm font-black text-white uppercase tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 transition-colors ${
+                          isPqcSub ? 'group-hover:text-emerald-400' : 'group-hover:text-quantum-primary'
+                        }`}>
                           {t(`s_${sector.id}_name`)}
                         </h3>
                         <p className="text-[8px] sm:text-[9px] md:text-[10px] text-gray-500 font-mono tracking-wider line-clamp-1 sm:line-clamp-2 leading-relaxed">
@@ -333,8 +364,14 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
                         </p>
                       </div>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity pr-1 sm:pr-2 md:pr-4 relative z-10 hidden sm:block">
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full border border-quantum-primary/50 flex items-center justify-center bg-quantum-primary/5 shadow-[0_0_15px_rgba(0,242,255,0.2)]">
-                          <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-quantum-primary rotate-180" />
+                        <div className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full border flex items-center justify-center bg-black/45 ${
+                          isPqcSub 
+                            ? 'border-emerald-500/50 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
+                            : 'border-quantum-primary/50 bg-quantum-primary/5 shadow-[0_0_15px_rgba(0,242,255,0.2)]'
+                        }`}>
+                          <ArrowLeft className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 rotate-180 ${
+                            isPqcSub ? 'text-emerald-400' : 'text-quantum-primary'
+                          }`} />
                         </div>
                       </div>
                     </div>
@@ -344,6 +381,8 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
       </div>
     </div>
   );

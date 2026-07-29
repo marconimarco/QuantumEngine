@@ -877,7 +877,7 @@ export const translations: Record<LanguageCode, any> = {
     s_manufacturing_name: "Fertigung",
     s_mitigation_name: "Fehlerkorrektur",
     s_translator_name: "Übersetzer",
-    s_realq_name: "Quantum Embedding",
+    s_realq_name: "HELP",
   },
   fr: {
     title: "Quantum Engine",

@@ -1,4 +1,4 @@
-export type SectorId = 'finance' | 'insurance' | 'logistics' | 'energy' | 'telecom' | 'manufacturing' | 'mitigation' | 'translator' | 'crosscode' | 'quantumbi' | 'quantum_code' | 'pqc_group' | 'pqc_locker' | 'pqc_keygen' | 'pqc_chat' | 'realq' | 'large' | 'various';
+export type SectorId = 'finance' | 'insurance' | 'logistics' | 'energy' | 'telecom' | 'manufacturing' | 'mitigation' | 'translator' | 'crosscode' | 'quantumbi' | 'quantum_code' | 'pqc_group' | 'pqc_locker' | 'pqc_keygen' | 'pqc_chat' | 'realq' | 'large' | 'various' | 'send_to_ibm';
 
 export interface Sector {
   id: SectorId;
@@ -160,16 +160,7 @@ export const SECTORS: Sector[] = [
     stressEvent: 'Data Corruption',
     isSpecial: true,
   },
-  {
-    id: 'quantum_code',
-    name: 'Write Q Code',
-    icon: 'Code2',
-    description: 'Accedi agli strumenti avanzati di sviluppo e analisi quantistica.',
-    focus: 'Quantum Development Suite',
-    variablesLabel: 'Code Modules',
-    stressEvent: 'Compilation Fail',
-    isSpecial: true,
-  },
+
   {
     id: 'pqc_group',
     name: 'pqc_cryptography',
@@ -222,12 +213,12 @@ export const SECTORS: Sector[] = [
   },
   {
     id: 'large',
-    name: 'Universal B2B',
+    name: 'LARGE',
     icon: 'Cpu',
     description: 'Interfaccia Quantistica B2B Universale per l\'elaborazione di scenari macroeconomici e codice Qiskit.',
-    focus: 'Universal B2B Translation',
-    variablesLabel: 'Scenario Variables',
-    stressEvent: 'Quantum Decoherence',
+    focus: 'Universal Code Generation',
+    variablesLabel: 'Scenario Params',
+    stressEvent: 'Quantum Collapse',
     isSpecial: true,
   },
   {
@@ -236,8 +227,19 @@ export const SECTORS: Sector[] = [
     icon: 'Globe',
     description: 'Motore Quantistico Eterogeneo per l\'interconnessione globale e l\'analisi dell\'effetto farfalla.',
     focus: 'Heterogeneous Entanglement',
-    variablesLabel: 'Fonti Eterogenee',
+    variablesLabel: 'Heterogeneous Sources',
     stressEvent: 'Butterfly Effect Peak',
     isSpecial: true,
   },
+  {
+    id: 'quantum_code',
+    name: 'Write Q Code',
+    icon: 'Code2',
+    description: 'Accedi agli strumenti avanzati di sviluppo e analisi quantistica.',
+    focus: 'Quantum Development Suite',
+    variablesLabel: 'Code Modules',
+    stressEvent: 'Compilation Fail',
+    isSpecial: true,
+  },
+
 ];

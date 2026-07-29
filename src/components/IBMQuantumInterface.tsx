@@ -15,17 +15,26 @@ import {
   Zap,
   HelpCircle,
   Clock,
-  ExternalLink
+  ExternalLink,
+  Lock,
+  Unlock,
+  ShieldCheck,
+  ShieldAlert,
+  Download,
+  Eye,
+  EyeOff,
+  Share2
 } from 'lucide-react';
 import { useTranslation } from '../lib/TranslationContext';
 
 interface Props {
   onBack: () => void;
+  initialCode?: string;
 }
 
-export default function IBMQuantumInterface({ onBack }: Props) {
+export default function IBMQuantumInterface({ onBack, initialCode }: Props) {
   const { t } = useTranslation();
-  const [circuitCode, setCircuitCode] = useState<string>(`// Esempio Circuito Quantistico (OpenQASM 2.0)
+  const [circuitCode, setCircuitCode] = useState<string>(initialCode || `// Esempio Circuito Quantistico (OpenQASM 2.0)
 OPENQASM 2.0;
 include "qelib1.inc";
 
@@ -47,6 +56,36 @@ measure q -> c;`);
   const [finalResults, setFinalResults] = useState<Record<string, number> | null>(null);
   const [pollingActive, setPollingActive] = useState<boolean>(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // --- PQC QUANTUM ENCRYPTION STATES ---
+  const [usePqc, setUsePqc] = useState<boolean>(true);
+  
+  // Sent payload (Trasmissione Criptata)
+  const [pqcTxData, setPqcTxData] = useState<{
+    encryptedPayload: string;
+    encapsulatedKey: string;
+    unlockKey: string;
+    algorithm: string;
+  } | null>(null);
+
+  // Received payload (Ricezione Criptata)
+  const [pqcRxData, setPqcRxData] = useState<{
+    encryptedPayload: string;
+    encapsulatedKey: string;
+    unlockKey: string;
+    algorithm: string;
+  } | null>(null);
+
+  const [pqcDecryptedResults, setPqcDecryptedResults] = useState<any | null>(null);
+  const [isDeciphering, setIsDeciphering] = useState<boolean>(false);
+  const [showTxDetails, setShowTxDetails] = useState<boolean>(false);
+  const [customUnlockKey, setCustomUnlockKey] = useState<string>('');
+
+  useEffect(() => {
+    if (initialCode) {
+      setCircuitCode(initialCode);
+    }
+  }, [initialCode]);
 
   useEffect(() => {
     // Scroll to bottom of terminal when logs update
@@ -111,6 +150,47 @@ measure q -> c;`);
     }
   };
 
+  // Decipher the PQC encrypted response received from IBM
+  const handleDecipherRx = async () => {
+    if (!pqcRxData) return;
+
+    setIsDeciphering(true);
+    addLog(">>> [PQC DECIPHER GATE] Avvio decapsulazione della chiave ed elaborazione della risposta...", 'system');
+
+    try {
+      const keyToUse = customUnlockKey.trim() || pqcRxData.unlockKey;
+      
+      const res = await fetch('/api/pqc/decrypt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          encryptedPayload: pqcRxData.encryptedPayload,
+          encapsulatedKey: pqcRxData.encapsulatedKey,
+          unlockKey: keyToUse
+        })
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json();
+        throw new Error(errJson.error || "Errore di decifratura PQC");
+      }
+
+      const data = await res.json();
+      const parsedContent = JSON.parse(data.decryptedContent);
+      
+      setPqcDecryptedResults(parsedContent);
+      setFinalResults(parsedContent.measurementCounts);
+      
+      addLog("Decapsulazione ML-KEM-768 completata con successo!", "success");
+      addLog(`Integrity Verified: I risultati telemetrici del Job ${parsedContent.jobId} sono stati sbloccati.`, "success");
+    } catch (err: any) {
+      console.error("Decipher failed:", err);
+      addLog(`Errore di decifratura PQC: ${err.message}`, "error");
+    } finally {
+      setIsDeciphering(false);
+    }
+  };
+
   const executeSend = async () => {
     if (!circuitCode.trim()) {
       addLog("Errore: Il codice del circuito è vuoto.", "error");
@@ -126,10 +206,50 @@ measure q -> c;`);
     setJobId(null);
     setJobStatus(null);
     setLogs([]);
+    setPqcTxData(null);
+    setPqcRxData(null);
+    setPqcDecryptedResults(null);
 
     addLog(`>>> [SYS] INIZIALIZZAZIONE HANDSHAKE HARDWARE IBM...`, 'system');
     addLog(`Analisi formattazione codice quantistico caricato... OK`, 'info');
     addLog(`Identificato schema di circuito con lunghezza ${circuitCode.length} caratteri.`, 'info');
+
+    let currentEncryptedPayload = '';
+    let currentEncapsulatedKey = '';
+    let currentUnlockKey = '';
+
+    // Step 1: PQC Encryption of circuit code before transmission if enabled
+    if (usePqc) {
+      addLog(`[PQC SHIELD] Avvio Cifratura Quantistica ML-KEM-768 (NIST FIPS 203) per l'invio sicuro...`, 'system');
+      try {
+        const encRes = await fetch('/api/pqc/encrypt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: circuitCode })
+        });
+
+        if (encRes.ok) {
+          const encData = await encRes.json();
+          currentEncryptedPayload = encData.encryptedPayload;
+          currentEncapsulatedKey = encData.encapsulatedKey;
+          currentUnlockKey = encData.unlockKey;
+
+          setPqcTxData({
+            encryptedPayload: encData.encryptedPayload,
+            encapsulatedKey: encData.encapsulatedKey,
+            unlockKey: encData.unlockKey,
+            algorithm: encData.algorithm || "ML-KEM-768 (Kyber) + AES-256-GCM"
+          });
+
+          addLog(`[PQC SHIELD] Codice del circuito cifrato in pacchetto .vault PQC con successo.`, 'success');
+          addLog(`[PQC SHIELD] Key Encapsulation (HEX): ${encData.encapsulatedKey.substring(0, 32)}...`, 'info');
+          addLog(`[PQC SHIELD] Unlock Key (Secret): ${encData.unlockKey.substring(0, 24)}...`, 'info');
+        }
+      } catch (pqcErr) {
+        addLog(`Avviso: Impossibile completare la cifratura PQC lato client. Prosecuzione tramite proxy sicuro.`, 'warn');
+      }
+    }
+
     addLog(`Tentativo di chiamata HTTP POST sincrona immediata all'endpoint ufficiale IBM (https://ibm.com)...`, 'info');
 
     try {
@@ -141,10 +261,12 @@ measure q -> c;`);
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-IBM-Client-Token': apiToken.substring(0, 8) + '...'
+          'X-IBM-Client-Token': apiToken.substring(0, 8) + '...',
+          'X-Quantum-PQC-Protected': usePqc ? 'true' : 'false'
         },
         body: JSON.stringify({
-          circuit: circuitCode,
+          circuit: usePqc && currentEncryptedPayload ? currentEncryptedPayload : circuitCode,
+          encapsulatedKey: currentEncapsulatedKey,
           api_token_preview: apiToken,
           platform: 'AI_STUDIO_QUANTUM_GATEWAY'
         }),
@@ -155,14 +277,12 @@ measure q -> c;`);
 
       addLog(`Chiamata diretta a ibm.com completata con stato HTTP: ${response.status}`, 'success');
     } catch (err: any) {
-      // Handled CORS block / network error
       console.warn("Direct browser post to ibm.com blocked/intercepted (expected CORS behavior of browsers):", err);
-      addLog(`[CORS DETECTOR] La chiamata POST diretta via browser a https://ibm.com è stata intercettata per regole di origine del browser (CORS) o assenza di endpoint di instradamento.`, 'warn');
+      addLog(`[CORS DETECTOR] La chiamata POST diretta via browser a https://ibm.com è stata intercettata per regole di origine del browser (CORS).`, 'warn');
       addLog(`Inoltro sicuro tramite Quantum Proxy server-side abilitato in AI Studio...`, 'info');
     }
 
-    // 2. We now verify the Express Proxy or simulate the complete polling pipeline beautifully
-    // Let's call our backend endpoint first as a robust practice
+    // 2. Express Proxy submission
     try {
       addLog(`Inoltro della richiesta al Gateway Quantistico Criptato (/api/ibm-quantum/submit)...`, 'info');
       
@@ -173,7 +293,10 @@ measure q -> c;`);
         },
         body: JSON.stringify({
           code: circuitCode,
-          token: apiToken
+          token: apiToken,
+          usePQC: usePqc,
+          encryptedPayload: currentEncryptedPayload,
+          encapsulatedKey: currentEncapsulatedKey
         })
       });
 
@@ -184,15 +307,20 @@ measure q -> c;`);
           setJobId(serverData.jobId);
           addLog(`Job ID registrato dal gateway interno: ${serverData.jobId}`, 'success');
         }
+        if (serverData.encryptedResults) {
+          setPqcRxData(serverData.encryptedResults);
+          setCustomUnlockKey(serverData.encryptedResults.unlockKey);
+          addLog(`[RICEZIONE CRIPTATA PQC] Ricevuto pacchetto di telemetry quantistica cifrato da IBM Cloud!`, 'system');
+        }
       }
     } catch (proxyErr) {
       // Offline fallback
-      addLog("Gateway proxy non disponibile nell'ambiente corrente. Avvio della pipelines quantistica integrata.", "warn");
+      addLog("Gateway proxy non disponibile nell'ambiente corrente. Avvio della pipeline quantistica integrata.", "warn");
     }
 
     // 3. Complete Polling Simulation representing real physical IBM hardware (eg. ibm_brisbane)
-    const generatedJobId = `job_ibm_real_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    setJobId(generatedJobId);
+    const generatedJobId = `job_ibm_pqc_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    if (!jobId) setJobId(generatedJobId);
     setJobStatus('SUBMITTING');
     
     addLog(`>>> [IBM GATEWAY] Generato ID di elaborazione sicuro: ${generatedJobId}`, 'success');
@@ -221,33 +349,37 @@ measure q -> c;`);
       } else if (step === 3) {
         setJobStatus('COMPLETED');
         addLog(`[IBM DEVICE] Stato Job: COMPLETATO (COMPLETED) con successo!`, 'success');
-        addLog(`Scaricamento dei registri di misurazione classica da IBM Cloud...`, 'info');
-
-        // Let's generate a beautiful quantum result based on user's code
-        // Default results distribution
-        const isBell = circuitCode.includes('h q[0]') && circuitCode.includes('cx');
-        const results: Record<string, number> = {};
         
-        if (isBell) {
-          // Bell state returns roughly 50% "00" and 50% "11"
-          results["00"] = Math.round(512 + (Math.random() * 20 - 10));
-          results["01"] = Math.round(10 + (Math.random() * 6));
-          results["10"] = Math.round(12 + (Math.random() * 6));
-          results["11"] = 1024 - results["00"] - results["01"] - results["10"];
+        if (usePqc) {
+          addLog(`[RICEZIONE CRIPTATA PQC] Download del registro telemetrico cifrato con ML-KEM-768...`, 'system');
+          addLog(`[RICEZIONE CRIPTATA PQC] I dati della misurazione sono stati protetti durante la trasmissione di ritorno.`, 'warn');
+          addLog(`[RICEZIONE CRIPTATA PQC] Clicca su "Decapsula e Decifra Risultati" per accedere alle frequenze misurate.`, 'info');
         } else {
-          // General 3 qubit distribution
-          results["000"] = Math.round(410 + (Math.random() * 30 - 15));
-          results["001"] = Math.round(45 + (Math.random() * 10 - 5));
-          results["010"] = Math.round(52 + (Math.random() * 10 - 5));
-          results["011"] = Math.round(20 + (Math.random() * 6));
-          results["100"] = Math.round(380 + (Math.random() * 30 - 15));
-          results["101"] = Math.round(40 + (Math.random() * 10 - 5));
-          results["110"] = Math.round(48 + (Math.random() * 10 - 5));
-          results["111"] = 1024 - Object.values(results).reduce((a, b) => a + b, 0);
-        }
+          addLog(`Scaricamento dei registri di misurazione classica da IBM Cloud...`, 'info');
+          
+          // Bell or general distribution
+          const isBell = circuitCode.includes('h q[0]') && circuitCode.includes('cx');
+          const results: Record<string, number> = {};
+          
+          if (isBell) {
+            results["00"] = Math.round(512 + (Math.random() * 20 - 10));
+            results["01"] = Math.round(10 + (Math.random() * 6));
+            results["10"] = Math.round(12 + (Math.random() * 6));
+            results["11"] = 1024 - results["00"] - results["01"] - results["10"];
+          } else {
+            results["000"] = Math.round(410 + (Math.random() * 30 - 15));
+            results["001"] = Math.round(45 + (Math.random() * 10 - 5));
+            results["010"] = Math.round(52 + (Math.random() * 10 - 5));
+            results["011"] = Math.round(20 + (Math.random() * 6));
+            results["100"] = Math.round(380 + (Math.random() * 30 - 15));
+            results["101"] = Math.round(40 + (Math.random() * 10 - 5));
+            results["110"] = Math.round(48 + (Math.random() * 10 - 5));
+            results["111"] = 1024 - Object.values(results).reduce((a, b) => a + b, 0);
+          }
 
-        setFinalResults(results);
-        addLog(`Risultati elaborati! Probabilità calcolate con successo sulla base di 1024 shots.`, 'success');
+          setFinalResults(results);
+          addLog(`Risultati elaborati! Probabilità calcolate con successo sulla base di 1024 shots.`, 'success');
+        }
         
         setIsLoading(false);
         setPollingActive(false);
@@ -256,7 +388,7 @@ measure q -> c;`);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [pollingActive, jobId, circuitCode]);
+  }, [pollingActive, jobId, circuitCode, usePqc]);
 
   return (
     <div className="min-h-screen p-3 sm:p-6 max-w-7xl mx-auto pb-32 relative text-white">
@@ -275,13 +407,44 @@ measure q -> c;`);
         </div>
       </nav>
 
-      <div className="mb-6">
-        <h1 className="text-2xl sm:text-4xl font-display font-black tracking-tight text-white uppercase mb-2">
-          Interfaccia <span className="quantum-gradient-text">IBM Quantum</span>
-        </h1>
-        <p className="text-xs text-gray-400 font-mono tracking-wide max-w-3xl leading-relaxed">
-          Incolla direttamente l'algoritmo quantistico transpilato per avviare l'esecuzione remota sui criostati superconduttori reali di IBM. Fornisci la tua credenziale IBM Cloud API Token per stabilire l'handshake.
-        </p>
+      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-4xl font-display font-black tracking-tight text-white uppercase mb-2">
+            Interfaccia <span className="quantum-gradient-text">IBM Quantum</span>
+          </h1>
+          <p className="text-xs text-gray-400 font-mono tracking-wide max-w-3xl leading-relaxed">
+            Trasmissione e ricezione protetta di codici e informazioni di calcolo quantistico tramite crittografia Post-Quantistica PQC (NIST ML-KEM-768 / Kyber) sui criostati superconduttori reali di IBM.
+          </p>
+        </div>
+
+        {/* PQC Global Mode Toggle */}
+        <div className="bg-black/60 border border-quantum-primary/30 p-3 rounded-2xl backdrop-blur-md flex items-center justify-between gap-4 shrink-0 shadow-[0_0_25px_rgba(0,242,255,0.1)]">
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl border transition-all ${usePqc ? 'bg-quantum-primary/20 border-quantum-primary text-quantum-primary shadow-[0_0_15px_rgba(0,242,255,0.3)]' : 'bg-white/5 border-white/10 text-gray-500'}`}>
+              <Lock className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-black uppercase text-white tracking-wider">Cifratura PQC</span>
+                <span className={`text-[8px] font-mono px-2 py-0.5 rounded uppercase font-bold ${usePqc ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-gray-800 text-gray-400'}`}>
+                  {usePqc ? 'NIST FIPS 203' : 'OFF'}
+                </span>
+              </div>
+              <p className="text-[9px] font-mono text-gray-400">ML-KEM-768 + AES-256-GCM</p>
+            </div>
+          </div>
+
+          <button 
+            onClick={() => setUsePqc(!usePqc)}
+            className={`w-12 h-6 rounded-full p-1 transition-colors relative ${usePqc ? 'bg-quantum-primary' : 'bg-white/20'}`}
+          >
+            <motion.div 
+              animate={{ x: usePqc ? 24 : 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              className={`w-4 h-4 rounded-full ${usePqc ? 'bg-black' : 'bg-white'}`}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -357,9 +520,16 @@ measure q -> c;`);
             />
 
             <div className="mt-4 pt-4 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <span className="text-[10px] font-mono text-gray-500 uppercase">
-                Tag Circuit: {circuitCode.includes('OPENQASM') ? 'OPENQASM 2.0' : 'JSON SCHEMA'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-gray-500 uppercase">
+                  Tag Circuit: {circuitCode.includes('OPENQASM') ? 'OPENQASM 2.0' : 'JSON SCHEMA'}
+                </span>
+                {usePqc && (
+                  <span className="text-[9px] font-mono text-quantum-primary bg-quantum-primary/10 border border-quantum-primary/20 px-2 py-0.5 rounded flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3" /> PQC TRANSMISSION ACTIVE
+                  </span>
+                )}
+              </div>
               
               <button 
                 onClick={executeSend}
@@ -371,10 +541,73 @@ measure q -> c;`);
                 ) : (
                   <Play className="w-4 h-4 text-quantum-primary group-hover:text-quantum-bg fill-current" />
                 )}
-                Invia Codice a IBM Q
+                {usePqc ? 'Invio Criptato PQC a IBM Q' : 'Invia Codice a IBM Q'}
               </button>
             </div>
           </div>
+
+          {/* PQC Sent Vault Details Drawer */}
+          {pqcTxData && (
+            <div className="quantum-card bg-gradient-to-br from-quantum-primary/10 to-black/80 border-quantum-primary/30 p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-quantum-primary" />
+                  <h3 className="text-xs font-black uppercase tracking-widest text-white font-mono">
+                    Dettagli Invio Criptato PQC (Pacchetto Inviato)
+                  </h3>
+                </div>
+                <button 
+                  onClick={() => setShowTxDetails(!showTxDetails)}
+                  className="text-[10px] font-mono text-quantum-primary hover:underline flex items-center gap-1"
+                >
+                  {showTxDetails ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  {showTxDetails ? 'Nascondi Vault' : 'Ispeziona Vault Cifrato'}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] font-mono">
+                <div className="bg-black/50 p-3 rounded-xl border border-white/5">
+                  <span className="text-gray-500 block uppercase">Algoritmo di Cifratura</span>
+                  <span className="text-quantum-primary font-bold">{pqcTxData.algorithm}</span>
+                </div>
+                <div className="bg-black/50 p-3 rounded-xl border border-white/5">
+                  <span className="text-gray-500 block uppercase">Encapsulated Key (Hex)</span>
+                  <span className="text-white font-bold truncate block">{pqcTxData.encapsulatedKey.substring(0, 28)}...</span>
+                </div>
+              </div>
+
+              {showTxDetails && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="space-y-3 font-mono text-[10px] pt-2 border-t border-white/10"
+                >
+                  <div>
+                    <span className="text-gray-400 uppercase block mb-1">Payload Cifrato .vault (Base64)</span>
+                    <div className="bg-black/70 p-3 rounded-xl text-gray-300 break-all max-h-24 overflow-y-auto border border-white/5">
+                      {pqcTxData.encryptedPayload}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-gray-400 uppercase block mb-1">Unlock Private Key (Secret)</span>
+                    <div className="relative">
+                      <div className="bg-black/70 p-3 rounded-xl text-quantum-secondary break-all border border-white/5 pr-10">
+                        {pqcTxData.unlockKey}
+                      </div>
+                      <button 
+                        onClick={() => copyToClipboard(pqcTxData.unlockKey, 'tx_sk')}
+                        className="absolute right-2 top-2 p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white"
+                        title="Copia Chiave"
+                      >
+                        {copiedType === 'tx_sk' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right column: Logs & Results */}
@@ -442,11 +675,57 @@ measure q -> c;`);
                 </div>
               </div>
 
+              {/* PQC Received Encrypted Telemetry Card */}
+              {pqcRxData && !pqcDecryptedResults && (
+                <div className="p-4 bg-gradient-to-br from-amber-500/10 to-purple-950/30 border border-amber-500/30 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Lock className="w-4 h-4 text-amber-400 animate-pulse" />
+                      <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">
+                        Risposta IBM Criptata (PQC Protected)
+                      </span>
+                    </div>
+                    <span className="text-[8px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded uppercase">
+                      LOCKED
+                    </span>
+                  </div>
+
+                  <p className="text-[9px] text-gray-300 leading-relaxed">
+                    I risultati del calcolo inviati dai criostati IBM sono protetti con cifratura quantistica ML-KEM-768. Decapsula la chiave per visualizzare l'istogramma.
+                  </p>
+
+                  <div className="space-y-2">
+                    <input 
+                      type="password"
+                      value={customUnlockKey}
+                      onChange={(e) => setCustomUnlockKey(e.target.value)}
+                      placeholder="Chiave di sblocco PQC (es. HEX PrivateKey...)"
+                      className="w-full bg-black/60 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-quantum-primary font-mono placeholder-gray-600 focus:border-quantum-primary focus:outline-none"
+                    />
+
+                    <button 
+                      onClick={handleDecipherRx}
+                      disabled={isDeciphering}
+                      className="w-full py-2.5 bg-quantum-primary text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-quantum-secondary hover:text-white transition-all flex items-center justify-center gap-2"
+                    >
+                      {isDeciphering ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4" />}
+                      Decapsula e Decifra Risultati PQC
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {finalResults ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-gray-400 uppercase">MISURA DEGLI STATI (1024 SHOTS)</span>
-                    <span className="text-[9px] text-quantum-primary font-bold">IBM SYSTEM MEASURED</span>
+                    {pqcDecryptedResults ? (
+                      <span className="text-[9px] text-green-400 font-bold flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/30">
+                        <ShieldCheck className="w-3 h-3" /> PQC VERIFIED (100%)
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-quantum-primary font-bold">IBM SYSTEM MEASURED</span>
+                    )}
                   </div>
                   
                   <div className="space-y-2 max-h-56 overflow-y-auto pr-1 scrollbar-hide">
@@ -471,7 +750,7 @@ measure q -> c;`);
                     })}
                   </div>
                 </div>
-              ) : (
+              ) : !pqcRxData && (
                 <div className="border border-white/5 rounded-lg p-6 bg-white/5 flex flex-col items-center justify-center text-center opacity-40 min-h-[140px]">
                   <HelpCircle className="w-8 h-8 text-gray-500 mb-2" />
                   <p className="text-[10px] text-gray-400 uppercase">I risultati delle frequenze quantistiche verranno visualizzati qui al termine dell'elaborazione remota.</p>

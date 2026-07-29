@@ -1,62 +1,69 @@
 import React, { useState } from 'react';
-import { Globe, ChevronUp } from 'lucide-react';
-import { LANGUAGES, LanguageCode } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { useTranslation } from '../lib/TranslationContext';
+import { Globe, Check } from 'lucide-react';
+import { LANGUAGES, LanguageCode } from '../types';
 
 interface Props {
   currentLanguage: LanguageCode;
-  onLanguageChange: (code: LanguageCode) => void;
+  onLanguageChange: (lang: LanguageCode) => void;
 }
 
 export default function LanguageSelector({ currentLanguage, onLanguageChange }: Props) {
-  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const selectedLang = LANGUAGES.find(l => l.code === currentLanguage);
+  const activeLang = LANGUAGES.find(l => l.code === currentLanguage) || LANGUAGES[0];
 
   return (
-    <div className="fixed bottom-28 right-4 sm:bottom-16 sm:right-6 z-50">
-      <div className="relative">
-        <AnimatePresence>
-          {isOpen && (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-black/60 border border-white/10 rounded-full text-gray-400 hover:text-quantum-primary hover:border-quantum-primary/50 transition-all font-mono text-[10px] sm:text-xs uppercase tracking-wider backdrop-blur-md"
+      >
+        <Globe className="w-3.5 h-3.5" />
+        <span>{activeLang.label}</span>
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Click outside overlay */}
+            <div 
+              className="fixed inset-0 z-40" 
+              onClick={() => setIsOpen(false)} 
+            />
+            
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 10 }}
-              className="absolute bottom-full right-0 mb-2 w-48 quantum-card p-2 overflow-hidden"
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="absolute right-0 bottom-full mb-2 w-40 sm:w-48 bg-black/95 border border-white/10 rounded-xl overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.5)] z-50 backdrop-blur-xl"
             >
-              <div className="max-h-64 overflow-y-auto scrollbar-hide">
-                {LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      onLanguageChange(lang.code);
-                      setIsOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${
-                      currentLanguage === lang.code
-                        ? 'bg-quantum-primary text-quantum-bg font-bold'
-                        : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                    }`}
-                  >
-                    {t(`lang_${lang.code}`) || lang.label}
-                  </button>
-                ))}
+              <div className="py-1 max-h-60 overflow-y-auto scrollbar-hide">
+                {LANGUAGES.map((lang) => {
+                  const isSelected = lang.code === currentLanguage;
+                  return (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        onLanguageChange(lang.code);
+                        setIsOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 sm:px-4 py-2 text-left text-[10px] sm:text-xs font-mono uppercase tracking-wider transition-colors ${
+                        isSelected 
+                          ? 'text-quantum-primary bg-quantum-primary/5' 
+                          : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <span>{lang.label}</span>
+                      {isSelected && <Check className="w-3 h-3 text-quantum-primary" />}
+                    </button>
+                  );
+                })}
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 quantum-glass px-4 py-2 hover:border-quantum-primary transition-colors group"
-        >
-          <Globe className="w-4 h-4 text-quantum-primary group-hover:animate-pulse" />
-          <span className="text-sm font-medium text-white">{t(`lang_${currentLanguage}`) || selectedLang?.label}</span>
-          <ChevronUp className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
-      </div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
