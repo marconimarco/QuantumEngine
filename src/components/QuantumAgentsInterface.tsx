@@ -54,8 +54,8 @@ export default function QuantumAgentsInterface({ onBack, onSendToIbm }: Props) {
   // Scenario explorer state
   const [selectedScenario, setSelectedScenario] = useState<QuantumScenario | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedMacroarea, setSelectedMacroarea] = useState<string>('Tutte');
-  const [selectedTechnology, setSelectedTechnology] = useState<string>('Tutte');
+  const [selectedMacroarea, setSelectedMacroarea] = useState<string>('All');
+  const [selectedTechnology, setSelectedTechnology] = useState<string>('All');
   
   // Scenarios and interview responses
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -76,44 +76,44 @@ export default function QuantumAgentsInterface({ onBack, onSendToIbm }: Props) {
 
   function getScenarioQuestions(scenario: QuantumScenario): string[] {
     const vars = scenario.targetVariables.split(',').map(v => v.trim());
-    const mainVar = vars[0] || 'Saturazione';
-    const secondVar = vars[1] || 'Legame';
+    const mainVar = vars[0] || 'Saturation';
+    const secondVar = vars[1] || 'Bonding';
     
-    if (scenario.macroarea.includes('Finanza')) {
+    if (scenario.macroarea.includes('Finance') || scenario.macroarea.includes('Finanza')) {
       return [
-        `Qual è la tua tolleranza massima al rischio (conservativa, moderata, aggressiva) nell'ambito di "${scenario.name}"?`,
-        `Come intendi ponderare la variabile "${mainVar}" per mitigare l'impatto sul modulo quantistico?`,
-        `Quale deviazione massima ritieni tollerabile sulla metrica "${secondVar}" prima di applicare misure protettive?`
+        `What is your maximum risk tolerance (conservative, moderate, aggressive) regarding "${scenario.name}"?`,
+        `How do you intend to weigh the variable "${mainVar}" to mitigate the impact on the quantum module?`,
+        `What maximum deviation do you consider tolerable on metric "${secondVar}" before applying protective measures?`
       ];
-    } else if (scenario.macroarea.includes('Logistica')) {
+    } else if (scenario.macroarea.includes('Logistics') || scenario.macroarea.includes('Logistica')) {
       return [
-        `Qual è il ritardo medio o colletto di bottiglia massimo tollerabile per l'asset "${scenario.name}"?`,
-        `In che modo la variabile "${mainVar}" influenza la stabilità dei nodi interconnessi?`,
-        `In caso di blocco di un canale critico basato su "${secondVar}", disponi di rotte secondarie ridondanti già operative per l'entanglement distributivo?`
+        `What is the maximum tolerable average delay or bottleneck for asset "${scenario.name}"?`,
+        `How does the variable "${mainVar}" affect the stability of interconnected nodes?`,
+        `In case of a channel bottleneck on "${secondVar}", do you have redundant secondary routes available?`
       ];
-    } else if (scenario.macroarea.includes('Chimica') || scenario.macroarea.includes('Genomica')) {
+    } else if (scenario.macroarea.includes('Chemistry') || scenario.macroarea.includes('Genomics') || scenario.macroarea.includes('Chimica')) {
       return [
-        `Qual è la precisione molecolare o energetica richiesta durante la simulazione di "${scenario.name}"?`,
-        `Come viene monitorata o calcolata la stabilità correlata a "${mainVar}"?`,
-        `Quale impatto ha "${secondVar}" sulla stabilità o decadimento a lungo termine dell'elemento?`
+        `What is the required molecular or energy precision during simulation of "${scenario.name}"?`,
+        `How is the stability correlated with "${mainVar}" monitored or calculated?`,
+        `What impact does "${secondVar}" have on the long-term stability or decay of the element?`
       ];
-    } else if (scenario.macroarea.includes('Manifattura')) {
+    } else if (scenario.macroarea.includes('Manufacturing') || scenario.macroarea.includes('Manifattura')) {
       return [
-        `Con quale frequenza monitorate l'usura meccanica e il ciclo produttivo per "${scenario.name}"?`,
-        `In che modo l'accumulo di tensione sulla variabile "${mainVar}" accelera l'usura della linea?`,
-        `Qual è il costo orario stimato per un blocco improvviso dovuto a instabilità su "${secondVar}"?`
+        `How frequently do you monitor mechanical wear and the production cycle for "${scenario.name}"?`,
+        `How does stress accumulation on variable "${mainVar}" accelerate line wear?`,
+        `What is the estimated hourly cost of a sudden outage due to instability in "${secondVar}"?`
       ];
     } else if (scenario.macroarea.includes('Cybersecurity')) {
       return [
-        `Qual è la lunghezza e forza delle chiavi (es. bit o standard NIST) richieste in "${scenario.name}"?`,
-        `Qual è la magnitudine dell'esposizione legata alla variabile "${mainVar}" in caso di attacco cyber?`,
-        `Quale flusso automatico deve scattare se "${secondVar}" supera la percentuale di soglia critica?`
+        `What key length and strength (e.g. bits or NIST standards) are required in "${scenario.name}"?`,
+        `What is the exposure magnitude tied to variable "${mainVar}" in case of a cyber attack?`,
+        `What automated workflow should trigger if "${secondVar}" exceeds the critical threshold percentage?`
       ];
     }
     
     return [
-      `Qual è la tolleranza al rischio o errore in questo scenario pilota di "${scenario.name}"?`,
-      `In che modo la variabile "${mainVar}" influenzerà il processo decisionale classico?`
+      `What is the risk or error tolerance in this pilot scenario for "${scenario.name}"?`,
+      `How will the variable "${mainVar}" influence the classical decision-making process?`
     ];
   }
 
@@ -839,243 +839,243 @@ ${asset3},0.78,LIBERO${l3}`;
   };
 
   function getScenarioDetails(macroarea: string, option: 'A' | 'B' | 'C') {
-    if (macroarea.includes('Finanza')) {
+    if (macroarea.includes('Finanza') || macroarea.includes('Finance')) {
       if (option === 'A') {
         return {
-          name: "Hedging Quantistico Multilivello Cross-Asset",
-          benefit: "Protezione automatica dei tuoi capitali incrociando i rischi di asset diversi.",
-          headers: ["Volatilità_Implicita", "Correlazione_Dinamica", "Tassi_Cambio_Spot"],
-          q1: "Qual è la tua propensione massima al rischio nell'ambito di Hedging (espressa su base strategica annuale: conservativa, moderata o aggressiva)?",
-          q2: "Come desideri pesare gli sbalzi di volatilità dei capitali (es. valutati su fluttuazioni storiche annuali o variazione media mensile)?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Volatilità_Implicita,Correlazione_Dinamica,Tassi_Cambio_Spot,Abbinamento
+          name: "Cross-Asset Multilevel Quantum Hedging",
+          benefit: "Automatic capital protection by cross-referencing multi-asset risks.",
+          headers: ["Implicit_Volatility", "Dynamic_Correlation", "Spot_Exchange_Rates"],
+          q1: "What is your maximum risk tolerance for Hedging (expressed on an annual strategic basis: conservative, moderate, or aggressive)?",
+          q2: "How do you wish to weigh capital volatility spikes (e.g., historical annual fluctuations or monthly average variation)?",
+          sample: `Item_Code,Saturation_Percentage,Implicit_Volatility,Dynamic_Correlation,Spot_Exchange_Rates,Entanglement_Link
 ASSET_A,0.35,0.45,0.12,0.58,SET_PRIMA
 ASSET_B,0.35,0.85,0.65,0.72,SET_PRIMA
-ASSET_C,0.12,0.20,0.45,0.45,LIBERO`
+ASSET_C,0.12,0.20,0.45,0.45,INDEPENDENT`
         };
       } else if (option === 'B') {
         return {
-          name: "Pricing Opzioni Americane e Derivati",
-          benefit: "Calcolo del momento esatto e della scadenza ottimale per esercitare un diritto finanziario.",
-          headers: ["Prezzo_Underlying", "Strike_Price", "Tasso_Risk_Free", "Tempo_Scadenza"],
-          q1: "Quale livello di precisione richiedi per la modellazione della scadenza (es. precisione elevata per scadenze tipiche su 3 o 6 mesi)?",
-          q2: "Qual è il tasso risk-free medio stimato nel modello finanziario (valore percentuale annuo, es. '4.5% all'anno')?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Prezzo_Underlying,Strike_Price,Tasso_Risk_Free,Tempo_Scadenza,Abbinamento
-OPZIONE_A,0.45,0.85,0.80,0.04,0.50,GRUPPO_R
-OPZIONE_B,0.45,0.75,0.80,0.04,0.90,GRUPPO_R
-BOND_X,0.10,0.98,0.95,0.03,0.20,LIBERO`
+          name: "American Option Pricing and Derivatives",
+          benefit: "Calculation of the exact timing and optimal expiration to exercise a financial right.",
+          headers: ["Underlying_Price", "Strike_Price", "Risk_Free_Rate", "Time_To_Maturity"],
+          q1: "What accuracy level do you require for expiry modeling (e.g. high precision for typical 3 or 6 month maturities)?",
+          q2: "What is the estimated average risk-free rate in your financial model (annual percentage value, e.g. '4.5% per year')?",
+          sample: `Item_Code,Saturation_Percentage,Underlying_Price,Strike_Price,Risk_Free_Rate,Time_To_Maturity,Entanglement_Link
+OPTION_A,0.45,0.85,0.80,0.04,0.50,GROUP_R
+OPTION_B,0.45,0.75,0.80,0.04,0.90,GROUP_R
+BOND_X,0.10,0.98,0.95,0.03,0.20,INDEPENDENT`
         };
       } else {
         return {
-          name: "Stima dei Flussi di Cassa a Breve Termine",
-          benefit: "Una previsione probabilistica delle entrate e delle uscite per evitare crisi di liquidità.",
-          headers: ["Fatture_Attive_Emesse", "Fatture_Passive_Ricevute", "Scadenze_Pagamenti"],
-          q1: "Qual è l'orizzonte temporale ideale per la stima predittiva dei flussi di cassa (espressa in giorni totali di analisi, tipicamente '30 giorni' o '60 giorni')?",
-          q2: "Quale quota percentuale media di fatture insolute storiche registrate in bilancio ogni anno (es. '2% all'anno')?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Fatture_Attive_Emesse,Fatture_Passive_Ricevute,Scadenze_Pagamenti,Abbinamento
-FLUSSO_GEN,0.28,0.75,0.60,0.15,LIQUIDITY_SET
-FLUSSO_FEB,0.28,0.90,0.70,0.30,LIQUIDITY_SET
-FLUSSO_INDIP,0.15,0.25,0.10,0.10,LIBERO`
+          name: "Short-Term Cash Flow Estimation",
+          benefit: "A probabilistic forecast of inflows and outflows to prevent liquidity crises.",
+          headers: ["Invoices_Issued", "Invoices_Received", "Payment_Maturities"],
+          q1: "What is the ideal time horizon for predictive cash flow estimation (expressed in total analysis days, typically '30 days' or '60 days')?",
+          q2: "What is the average annual percentage share of unpaid invoices recorded in your financial statement (e.g. '2% per year')?",
+          sample: `Item_Code,Saturation_Percentage,Invoices_Issued,Invoices_Received,Payment_Maturities,Entanglement_Link
+FLOW_JAN,0.28,0.75,0.60,0.15,LIQUIDITY_SET
+FLOW_FEB,0.28,0.90,0.70,0.30,LIQUIDITY_SET
+FLOW_IND,0.15,0.25,0.10,0.10,INDEPENDENT`
         };
       }
-    } else if (macroarea.includes('Logistica')) {
+    } else if (macroarea.includes('Logistica') || macroarea.includes('Logistics')) {
       if (option === 'A') {
         return {
-          name: "Vehicle Routing Problem con Finestre Temporali",
-          benefit: "Il percorso perfetto per i tuoi mezzi che ottimizza sia il carico sia gli orari di consegna.",
-          headers: ["Coordinate_Geografiche", "Finestre_Orarie", "Capacità_Carico", "Tempi_Sosta"],
-          q1: "Qual è il numero massimo di veicoli operativi contemporanei da tracciare in flotta (attivi giornalmente, es. '10 veicoli al giorno')?",
-          q2: "Come preferisci gestire le finestre temporali di prelievo e scarico (es. priorità giornaliera rigida alle fasce orarie della mattina)?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Coordinate_Geografiche,Finestre_Orarie,Capacità_Carico,Tempi_Sosta,Abbinamento
-VEICOLO_HUB_A,0.55,0.45,0.12,0.80,0.50,ROTTA_MILANO
-VEICOLO_HUB_B,0.55,0.48,0.14,0.92,0.80,ROTTA_MILANO
-VEICOLO_BACK,0.15,0.30,0.18,0.50,0.10,LIBERO`
+          name: "Vehicle Routing Problem with Time Windows",
+          benefit: "The optimal route for your fleet optimizing both load capacity and delivery schedules.",
+          headers: ["Geo_Coordinates", "Time_Windows", "Load_Capacity", "Dwell_Times"],
+          q1: "What is the maximum number of daily active vehicles to track in your fleet (e.g. '10 vehicles per day')?",
+          q2: "How do you prefer to manage pickup and unloading time windows (e.g. strict morning shift priority)?",
+          sample: `Item_Code,Saturation_Percentage,Geo_Coordinates,Time_Windows,Load_Capacity,Dwell_Times,Entanglement_Link
+TRUCK_HUB_A,0.55,0.45,0.12,0.80,0.50,ROUTE_NORTH
+TRUCK_HUB_B,0.55,0.48,0.14,0.92,0.80,ROUTE_NORTH
+TRUCK_BACK,0.15,0.30,0.18,0.50,0.10,INDEPENDENT`
         };
       } else if (option === 'B') {
         return {
-          name: "Caricamento Stive delle Navi (3D Bin Packing)",
-          benefit: "La disposizione geometrica perfetta dei container per bilanciare la nave ed evitare sfasamenti.",
-          headers: ["Peso_Container", "Dimensioni_Volumetriche", "Porto_Destinazione", "Baricentro"],
-          q1: "Qual è la portata utile o capacità limite massima del container/stiva (espressa in tonnellate complessive per singola spedizione/viaggio)?",
-          q2: "Quale tolleranza consentite sugli sfasamenti del baricentro ad ogni spedizione (espressa in metri di offset per singolo viaggio)?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Peso_Container,Dimensioni_Volumetriche,Porto_Destinazione,Baricentro,Abbinamento
+          name: "Vessel Cargo Packing (3D Bin Packing)",
+          benefit: "Perfect geometric arrangement of containers to balance the vessel and avoid center-of-gravity shifts.",
+          headers: ["Container_Weight", "Volumetric_Dimensions", "Destination_Port", "Center_Of_Gravity"],
+          q1: "What is the payload limit or container capacity (expressed in total tons per single voyage/shipment)?",
+          q2: "What tolerance do you allow for center-of-gravity offset per shipment (expressed in meters per voyage)?",
+          sample: `Item_Code,Saturation_Percentage,Container_Weight,Volumetric_Dimensions,Destination_Port,Center_Of_Gravity,Entanglement_Link
 CONTAINER_A,0.60,0.25,0.60,0.80,0.12,BALANCE_01
 CONTAINER_B,0.60,0.28,0.65,0.80,0.15,BALANCE_01
-BOX_SINGLE,0.22,0.05,0.10,0.30,0.00,LIBERO`
+BOX_SINGLE,0.22,0.05,0.10,0.30,0.00,INDEPENDENT`
         };
       } else {
         return {
-          name: "Bilanciamento Contratti Acquisto e Costo Container Spot",
-          benefit: "Il calcolo probabilistico per capire se ti conviene comprare un container subito o aspettare le tariffe spot.",
-          headers: ["Indice_Noli_Drewry", "Quota_Contratti_Fissi", "Prezzo_Spot_Container"],
-          q1: "Qual è la quota percentuale della spesa noli coperta da contratti a tariffa fissa (rispetto all'anno corrente, es. '40% all'anno')?",
-          q2: "Quale target di riduzione dei costi complessivi sui noli container vi ponete (risparmio medio desiderato mensile o annuo, es. '15% al mese')?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Indice_Noli_Drewry,Quota_Contratti_Fissi,Prezzo_Spot_Container,Abbinamento
+          name: "Purchasing Contracts vs. Spot Container Freight Balance",
+          benefit: "Probabilistic calculation to decide whether to purchase container capacity now or wait for spot rates.",
+          headers: ["Drewry_Freight_Index", "Fixed_Contract_Share", "Spot_Container_Price"],
+          q1: "What percentage share of freight expenditure is covered by fixed-rate contracts (e.g. '40% per year')?",
+          q2: "What total container freight cost reduction target are you aiming for (average monthly or annual target, e.g. '15% per month')?",
+          sample: `Item_Code,Saturation_Percentage,Drewry_Freight_Index,Fixed_Contract_Share,Spot_Container_Price,Entanglement_Link
 SPOT_X,0.40,0.32,0.40,0.31,SPOT_GRP
 SPOT_Y,0.40,0.34,0.50,0.33,SPOT_GRP
-SPOT_Z,0.12,0.30,0.80,0.29,LIBERO`
+SPOT_Z,0.12,0.30,0.80,0.29,INDEPENDENT`
         };
       }
-    } else if (macroarea.includes('Chimica')) {
+    } else if (macroarea.includes('Chimica') || macroarea.includes('Chemistry')) {
       if (option === 'A') {
         return {
-          name: "Dispacciamento Ottimale Energia Rinnovabile Intermittente",
-          benefit: "La combinazione esatta per accumulare e distribuire energia solare ed eolica riducendo al minimo gli sprechi.",
-          headers: ["Velocità_Vento", "Irraggiamento_Solare", "Capacità_BESS"],
-          q1: "Qual è la capacità nominale in MWh complessiva del vostro storage di batterie BESS (accumulo massimo consentito al giorno, es. '10 MWh')?",
-          q2: "Qual è la potenza limite istantanea in MW di immissione in rete del vostro impianto al fine di evitare sanzioni giornaliere (es. '1.5 MW istantanei al giorno')?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Velocità_Vento,Irraggiamento_Solare,Capacità_BESS,Abbinamento
-EOLICO_A,0.45,0.12,0.00,0.10,RETE_SLOT
-SOLARE_B,0.45,0.00,0.85,0.12,RETE_SLOT
-STORAGE_C,0.10,0.00,0.00,0.05,LIBERO`
+          name: "Optimal Intermittent Renewable Energy Dispatch",
+          benefit: "Exact combination to store and dispatch solar and wind energy while minimizing waste.",
+          headers: ["Wind_Speed", "Solar_Irradiance", "BESS_Capacity"],
+          q1: "What is the total MWh nominal storage capacity of your BESS battery system (maximum daily charge, e.g. '10 MWh')?",
+          q2: "What is the maximum instantaneous MW grid injection power limit to avoid penalties (e.g. '1.5 MW daily peak limit')?",
+          sample: `Item_Code,Saturation_Percentage,Wind_Speed,Solar_Irradiance,BESS_Capacity,Entanglement_Link
+WIND_A,0.45,0.12,0.00,0.10,GRID_SLOT
+SOLAR_B,0.45,0.00,0.85,0.12,GRID_SLOT
+STORAGE_C,0.10,0.00,0.00,0.05,INDEPENDENT`
         };
       } else if (option === 'B') {
         return {
-          name: "Calcolo Stato Fondamentale Elettronico tramite VQE",
-          benefit: "La mappatura geometrica dei legami e degli orbitali di una nuova molecola per verificarne la stabilità fisica.",
-          headers: ["Operatore_Hamiltoniano", "Numero_Orbitali", "Angoli_Variazionali_VQE"],
-          q1: "Qual è il numero massimo di orbitali molecolari attivi da mappare sui qubit (assegnati per singola simulazione di run chimico statico, es. '4 orbitali per run')?",
-          q2: "Quale ansatz variazionale per il ricalcolo delle interazioni chimiche preferisci adottare (es. 'UCCSD' o a preservazione di simmetria per run)?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Operatore_Hamiltoniano,Numero_Orbitali,Angoli_Variazionali_VQE,Abbinamento
-ORBITALE_1,0.55,0.24,0.40,0.35,VQE_CLUSTER
-ORBITALE_2,0.55,0.65,0.40,0.45,VQE_CLUSTER
-ORBITALE_IND,0.22,0.12,0.20,0.00,LIBERO`
+          name: "Electronic Ground State Calculation via VQE",
+          benefit: "Geometric mapping of molecular bonds and orbitals for physical stability verification.",
+          headers: ["Hamiltonian_Operator", "Orbital_Number", "VQE_Variational_Angles"],
+          q1: "What is the maximum number of active molecular orbitals mapped to qubits (per chemical simulation run, e.g. '4 orbitals per run')?",
+          q2: "Which variational ansatz for chemical interactions do you prefer (e.g. 'UCCSD' or symmetry-preserving per run)?",
+          sample: `Item_Code,Saturation_Percentage,Hamiltonian_Operator,Orbital_Number,VQE_Variational_Angles,Entanglement_Link
+ORBITAL_1,0.55,0.24,0.40,0.35,VQE_CLUSTER
+ORBITAL_2,0.55,0.65,0.40,0.45,VQE_CLUSTER
+ORBITAL_IND,0.22,0.12,0.20,0.00,INDEPENDENT`
         };
       } else {
         return {
-          name: "Controllo del Microclima Serre Idroponiche",
-          benefit: "La stima predittiva dei consumi e della crescita delle colture impostando i parametri nutritivi ed elettrici.",
-          headers: ["Livelli_CO2", "Conducibilità_EC", "pH_Nutrimento", "Ore_LED"],
-          q1: "Qual è l'ambiente di coltivazione (es: pomodori o lattuga) e il valore EC desiderato nel nutrimento idroponico (es. '1.8 per singolo ciclo di crescita')?",
-          q2: "In che modo desideri bilanciare l'illuminazione solare ed artificiale LED (es. con priorità al risparmio di energia sui consumi medi mensili o annui)?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Livelli_CO2,Conducibilità_EC,pH_Nutrimento,Ore_LED,Abbinamento
-SERRA_A,0.35,0.80,0.18,0.58,0.66,MICRO_GRP
-SERRA_B,0.35,0.75,0.19,0.60,0.54,MICRO_GRP
-SERRA_C,0.15,0.40,0.12,0.65,0.38,LIBERO`
+          name: "Hydroponic Greenhouse Microclimate Control",
+          benefit: "Predictive estimation of resource usage and crop growth based on nutritional and electrical parameters.",
+          headers: ["CO2_Levels", "EC_Conductivity", "Nutrient_pH", "LED_Hours"],
+          q1: "What is the crop environment (e.g., tomatoes or lettuce) and target EC value in hydroponic nutrient feed (e.g. '1.8 per growth cycle')?",
+          q2: "How do you wish to balance solar and artificial LED lighting (e.g., prioritizing energy savings on monthly or annual consumption)?",
+          sample: `Item_Code,Saturation_Percentage,CO2_Levels,EC_Conductivity,Nutrient_pH,LED_Hours,Entanglement_Link
+GREENHOUSE_A,0.35,0.80,0.18,0.58,0.66,MICRO_GRP
+GREENHOUSE_B,0.35,0.75,0.19,0.60,0.54,MICRO_GRP
+GREENHOUSE_C,0.15,0.40,0.12,0.65,0.38,INDEPENDENT`
         };
       }
-    } else if (macroarea.includes('Manutenzione') || macroarea.includes('Fabbrica') || macroarea.includes('Manifattura')) {
+    } else if (macroarea.includes('Manutenzione') || macroarea.includes('Fabbrica') || macroarea.includes('Manifattura') || macroarea.includes('Manufacturing')) {
       if (option === 'A') {
         return {
-          name: "Ottimizzazione Catene Montaggio Just-In-Time Adattive",
-          benefit: "La sincronizzazione istantanea tra i robot di fabbrica e l'arrivo dei componenti per azzerare i tempi morti.",
-          headers: ["Tempo_Ciclo_Robot", "Scarti_Linea", "Ritardi_Componenti"],
-          q1: "Qual è il tempo di ciclo robot standard sulla linea a pieno regime (espresso in secondi necessari per singolo pezzo prodotto, es. '120 secondi a pezzo')?",
-          q2: "Quali ritardi medi di approvvigionamento state riscontrando nella catena dei componenti (espressi in minuti medi e valutati alla settimana)?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Tempo_Ciclo_Robot,Scarti_Linea,Ritardi_Componenti,Abbinamento
-ROBOT_A,0.50,0.12,0.40,0.12,CORRELATO_LINEA
-ROBOT_B,0.50,0.15,0.20,0.30,CORRELATO_LINEA
-CNC_SING,0.12,0.90,0.80,0.24,LIBERO`
+          name: "Adaptive Just-In-Time Assembly Line Optimization",
+          benefit: "Instantaneous synchronization between factory robots and component arrivals to eliminate downtime.",
+          headers: ["Robot_Cycle_Time", "Line_Scrap", "Component_Delays"],
+          q1: "What is the standard robot cycle time on the line at full speed (expressed in seconds per single piece, e.g. '120 seconds per piece')?",
+          q2: "What average supply delays are you experiencing in the component supply chain (expressed in minutes per week)?",
+          sample: `Item_Code,Saturation_Percentage,Robot_Cycle_Time,Line_Scrap,Component_Delays,Entanglement_Link
+ROBOT_A,0.50,0.12,0.40,0.12,LINE_CORRELATED
+ROBOT_B,0.50,0.15,0.20,0.30,LINE_CORRELATED
+CNC_SINGLE,0.12,0.90,0.80,0.24,INDEPENDENT`
         };
       } else if (option === 'B') {
         return {
-          name: "Commesso Viaggiatore (TSP) per Robot Saldatura 3D",
-          benefit: "La traiettoria spaziale e il movimento geometrico più rapido possibile per il braccio meccanico del robot.",
-          headers: ["Punti_Saldatura_XYZ", "Raggio_Curvatura", "Tempo_Arresto"],
-          q1: "Qual è il numero stimato di punti di saldatura tridimensionali da percorrere (valutati per singola scocca / capo o pezzo unico per ciclo di lavoro, es. '15 punti per scocca')?",
-          q2: "Quale tolleranza consentite sul raggio di curvatura spaziale del braccio meccanico per singolo ciclo (espressa in millimetri)?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Punti_Saldatura_XYZ,Raggio_Curvatura,Tempo_Arresto,Abbinamento
-PUNTO_S1,0.60,0.45,0.12,0.50,TRAIETTORIA_1
-PUNTO_S2,0.60,0.48,0.15,0.80,TRAIETTORIA_1
-PUNTO_AUTO,0.22,0.30,0.05,0.10,LIBERO`
+          name: "Traveling Salesperson Problem (TSP) for 3D Robot Welding",
+          benefit: "Fastest spatial trajectory and geometric movement for the mechanical robot arm.",
+          headers: ["Welding_Points_XYZ", "Curvature_Radius", "Stop_Time"],
+          q1: "What is the estimated number of 3D welding touchpoints per piece/work unit (e.g. '15 points per chassis')?",
+          q2: "What curvature radius tolerance do you allow for the mechanical arm per cycle (expressed in millimeters)?",
+          sample: `Item_Code,Saturation_Percentage,Welding_Points_XYZ,Curvature_Radius,Stop_Time,Entanglement_Link
+POINT_S1,0.60,0.45,0.12,0.50,TRAJECTORY_1
+POINT_S2,0.60,0.48,0.15,0.80,TRAJECTORY_1
+POINT_AUTO,0.22,0.30,0.05,0.10,INDEPENDENT`
         };
       } else {
         return {
-          name: "Variazione Consecutiva Prezzi per Smaltire 100% Rimanenze",
-          benefit: "La strategia di sconti e prezzi dinamici ottimale per svuotare il magazzino dei prodotti invenduti senza perdere margine.",
-          headers: ["Elasticità_Prezzo_Storica", "Volume_Rimanenze_Maglia", "Margine_Minimo"],
-          q1: "Qual è il volume totale di rimanenze accumulate di maglia/abbigliamento? Specifica obbligatoriamente se questo dato si riferisce ad un orizzonte Stagionale (es. '1200 pezzi stagionali') o Annuale (es. '3500 pezzi annuali') poiché è richiesta massima precisione per la calibrazione.",
-          q2: "Qual è le condizioni di margine minimo assoluto per evitare vendite in perdita (espresso in percentuale sul costo di produzione per singolo articolo venduto, es. '15% per pezzo')?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Elasticità_Prezzo_Storica,Volume_Rimanenze_Maglia,Margine_Minimo,Abbinamento
-ARTICOLO_SCONTO_A,0.30,0.14,0.12,0.15,SCONTI_SET
-ARTICOLO_SCONTO_B,0.30,0.12,0.15,0.18,SCONTI_SET
-PANTALONE_FREE,0.05,0.08,0.02,0.30,LIBERO`
+          name: "Dynamic Consecutive Price Variation for 100% Inventory Clearance",
+          benefit: "Optimal dynamic discount and pricing strategy to clear unsold inventory without sacrificing profit margins.",
+          headers: ["Price_Elasticity_Hist", "Volume_Rimanenze_Maglia", "Minimum_Margin"],
+          q1: "What is the total unsold knitwear/clothing inventory volume? You must specify whether this refers to a Seasonal horizon (e.g. '1200 seasonal pieces') or Annual horizon (e.g. '3500 annual pieces').",
+          q2: "What absolute minimum profit margin is required to avoid selling at a loss (expressed as a percentage over unit production cost, e.g. '15% per piece')?",
+          sample: `Item_Code,Saturation_Percentage,Price_Elasticity_Hist,Volume_Rimanenze_Maglia,Minimum_Margin,Entanglement_Link
+DISCOUNT_ITEM_A,0.30,0.14,0.12,0.15,DISCOUNT_SET
+DISCOUNT_ITEM_B,0.30,0.12,0.15,0.18,DISCOUNT_SET
+PANTS_FREE,0.05,0.08,0.02,0.30,INDEPENDENT`
         };
       }
-    } else if (macroarea.includes('Sanità') || macroarea.includes('Genomica') || macroarea.includes('Sanit')) {
+    } else if (macroarea.includes('Sanità') || macroarea.includes('Genomica') || macroarea.includes('Sanit') || macroarea.includes('Healthcare')) {
       if (option === 'A') {
         return {
-          name: "Matchmaking Nazionale Strategico Trapianti d'Organo",
-          benefit: "L'incrocio immediato tra la compatibilità biologica del paziente e i tempi geografici di trasporto dell'organo.",
-          headers: ["Compatibilità_HLA", "Ore_Ischemia_Fredda", "Distanza_Ospedali"],
-          q1: "Qual è il numero medio di antigeni HLA considerati fondamentali per calcolare la compatibilità (es. matching su un totale fisso di 6 o 8 antigeni per trapianto)?",
-          q2: "Qual è le condizioni limite massimo tollerabile per l'Ischemia Fredda dell'organo (espresso in ore massime per singolo trasporto biologico di conservazione, es. '6 ore')?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Compatibilità_HLA,Ore_Ischemia_Fredda,Distanza_Ospedali,Abbinamento
-PAZIENTE_DON,0.35,0.95,0.40,0.12,SET_HLA_DUP
-PAZIENTE_REC,0.35,0.95,0.60,0.15,SET_HLA_DUP
-PAZIENTE_ISO,0.10,0.10,0.24,0.30,LIBERO`
+          name: "Strategic National Matchmaking for Organ Transplants",
+          benefit: "Instant matching between biological patient compatibility and geographic transport time.",
+          headers: ["HLA_Match_Score", "Cold_Ischemia_Hours", "Hospital_Distance"],
+          q1: "What is the average number of HLA antigens considered crucial for compatibility (e.g., matching on 6 or 8 total antigens)?",
+          q2: "What is the maximum tolerable Cold Ischemia time limit for the organ (expressed in maximum hours per transport, e.g. '6 hours')?",
+          sample: `Item_Code,Saturation_Percentage,HLA_Match_Score,Cold_Ischemia_Hours,Hospital_Distance,Entanglement_Link
+PATIENT_DONOR,0.35,0.95,0.40,0.12,SET_HLA_DUP
+PATIENT_RECPT,0.35,0.95,0.60,0.15,SET_HLA_DUP
+PATIENT_ISO,0.10,0.10,0.24,0.30,INDEPENDENT`
         };
       } else if (option === 'B') {
         return {
-          name: "Modellazione Folding Proteico (Ripiegamento 3D)",
-          benefit: "La visualizzazione di come una proteina si piega nello spazio tridimensionale per creare nuovi farmaci efficaci.",
-          headers: ["Angoli_Torsione", "Energie_Legame_H", "Forze_Van_Der_Waals"],
-          q1: "Qual è il numero di residui amminoacidici attivi da mappare nella simulazione proteica (lunghezza sequenza da elaborare per singola run di calcolo statico, es. '10 residui per run')?",
-          q2: "Quale tipologia di forze biologiche di legame ritieni debba pesare maggiormente nel folding (es. legami ad idrogeno primari o interazioni di superficie Van Der Waals)?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Angoli_Torsione,Energie_Legame_H,Forze_Van_Der_Waals,Abbinamento
-SEGMENTO_A,0.55,0.20,0.45,0.12,FOLD_PROTEIN_01
-SEGMENTO_B,0.55,0.10,0.52,0.15,FOLD_PROTEIN_01
-ACID_AUTO,0.12,0.45,0.12,0.02,LIBERO`
+          name: "Protein Folding 3D Modeling",
+          benefit: "Visualization of how a protein folds in 3D space to develop effective new therapeutics.",
+          headers: ["Torsion_Angles", "H_Bond_Energies", "Van_Der_Waals_Forces"],
+          q1: "What is the number of active amino acid residues mapped in the protein simulation (sequence length per static run, e.g. '10 residues per run')?",
+          q2: "Which type of biological binding forces should be prioritized in folding (e.g., primary hydrogen bonds or Van Der Waals surface interactions)?",
+          sample: `Item_Code,Saturation_Percentage,Torsion_Angles,H_Bond_Energies,Van_Der_Waals_Forces,Entanglement_Link
+SEGMENT_A,0.55,0.20,0.45,0.12,FOLD_PROTEIN_01
+SEGMENT_B,0.55,0.10,0.52,0.15,FOLD_PROTEIN_01
+ACID_AUTO,0.12,0.45,0.12,0.02,INDEPENDENT`
         };
       } else {
         return {
-          name: "Analisi Predittiva Tasso Riammissione Pazienti 30 Giorni",
-          benefit: "Il calcolo del rischio percentuale che un paziente debba essere nuovamente ricoverato dopo le dimissioni.",
-          headers: ["Giorni_Ricovero", "Numero_Farmaci", "Età", "Controlli"],
-          q1: "Quali cluster anagrafici e di età consideri più vulnerabili e meritevoli di monitoraggio nei dati accumulati in un anno (es. 'pazienti over 65 anni')?",
-          q2: "Quanti controlli medici obbligatori post-dimissione sono programmati a breve termine (espressi in numero totale contatti previsti nel premier mese / 30 giorni, es. '2 visite follow-up')?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Giorni_Ricovero,Numero_Farmaci,Età,Controlli,Abbinamento
-PAZ_RE_ADMIT_A,0.65,0.12,0.15,0.68,0.20,RE_ADMIT_GRP
-PAZ_RE_ADMIT_B,0.65,0.14,0.12,0.71,0.10,RE_ADMIT_GRP
-PAZ_STABLE_C,0.15,0.03,0.04,0.35,0.00,LIBERO`
+          name: "30-Day Patient Readmission Risk Predictive Analysis",
+          benefit: "Percentage risk calculation for patient readmission post-discharge.",
+          headers: ["Admission_Days", "Medication_Count", "Age", "Followup_Visits"],
+          q1: "Which age and demographic clusters do you consider most vulnerable for annual tracking (e.g. 'patients over 65 years old')?",
+          q2: "How many mandatory post-discharge medical follow-up visits are scheduled in the short term (first 30 days, e.g. '2 follow-up visits')?",
+          sample: `Item_Code,Saturation_Percentage,Admission_Days,Medication_Count,Age,Followup_Visits,Entanglement_Link
+PATIENT_READMIT_A,0.65,0.12,0.15,0.68,0.20,READMIT_GRP
+PATIENT_READMIT_B,0.65,0.14,0.12,0.71,0.10,READMIT_GRP
+PATIENT_STABLE_C,0.15,0.03,0.04,0.35,0.00,INDEPENDENT`
         };
       }
     } else { // Cybersecurity
       if (option === 'A') {
         return {
-          name: "Generazione e Distribuzione Chiavi Quantistiche (QKD) con Mitigazione Botnet",
-          benefit: "Una rete di comunicazione aziendale inattaccabile, capace di deviare attacchi DDoS intercettando i nodi di intrusione.",
-          headers: ["Tasso_Errore_QBER", "Attenuazione_dB", "Connessioni_Insolite"],
-          q1: "Qual è la distanza massima coperta dal sistema QKD per la fibra ottica aziendale (tratta di collegamento geografico misurata in chilometri totali, es. '50 km')?",
-          q2: "Quali picchi di traffico di connessione anomala consideri allerta (espressi in numero di tentativi di connessione anomala rilevati al minuto, es. 'oltre 50 al minuto')?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Tasso_Errore_QBER,Attenuazione_dB,Connessioni_Insolite,Abbinamento
-QKD_NODO_X,0.85,0.14,0.12,0.04,RETE_CRYPT
-QKD_NODO_Y,0.85,0.58,0.04,0.08,RETE_CRYPT
-BACKUP_VM,0.30,0.02,0.00,0.01,LIBERO`
+          name: "Quantum Key Distribution (QKD) Generation with Botnet Mitigation",
+          benefit: "Unsackable corporate communication network capable of rerouting DDoS attacks.",
+          headers: ["QBER_Error_Rate", "Attenuation_dB", "Unusual_Connections"],
+          q1: "What is the maximum distance covered by the QKD optical fiber system (total link distance in kilometers, e.g. '50 km')?",
+          q2: "What anomalous traffic connection peaks trigger alerts (expressed in connection attempts per minute, e.g. 'over 50 per minute')?",
+          sample: `Item_Code,Saturation_Percentage,QBER_Error_Rate,Attenuation_dB,Unusual_Connections,Entanglement_Link
+QKD_NODE_X,0.85,0.14,0.12,0.04,CRYPT_NET
+QKD_NODE_Y,0.85,0.58,0.04,0.08,CRYPT_NET
+BACKUP_VM,0.30,0.02,0.00,0.01,INDEPENDENT`
         };
       } else if (option === 'B') {
         return {
-          name: "Audit e Verifica Resilienza Ledger Web3 e Crypto",
-          benefit: "La scansione strutturale delle chiavi crittografiche analizzando le rotazioni degli algoritmi di firma contro bug latenti.",
-          headers: ["Algoritmo_Firma_ECDSA", "Volume_Transazioni", "Rotazione_Chiavi"],
-          q1: "Quali curve ellittiche primarie utilizzate stabilmente per le firme crittografiche digitali (es standard secp256k1 per transazione)?",
-          q2: "Qual è la frequenza programmata per la rotazione di ricalcolo del set di chiavi crittografiche (espressa in giorni totali o ore di ciclo, es. 'ogni 14 giorni')?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Algoritmo_Firma_ECDSA,Volume_Transazioni,Rotazione_Chiavi,Abbinamento
-LEDGER_A,0.50,0.10,0.12,0.12,KEYS_ROTATIVE
-LEDGER_B,0.50,0.10,0.15,0.14,KEYS_ROTATIVE
-LEDGER_AUTO,0.12,0.00,0.05,0.00,LIBERO`
+          name: "Web3 Ledger and Crypto Resilience Audit",
+          benefit: "Structural scan of cryptographic keys analyzing signature algorithm rotation against latent bugs.",
+          headers: ["ECDSA_Signature_Alg", "Transaction_Volume", "Key_Rotation"],
+          q1: "Which primary elliptic curves do you use for digital cryptographic signatures (e.g., secp256k1 standard per transaction)?",
+          q2: "What is the scheduled cryptographic key rotation frequency (expressed in total days or cycle hours, e.g. 'every 14 days')?",
+          sample: `Item_Code,Saturation_Percentage,ECDSA_Signature_Alg,Transaction_Volume,Key_Rotation,Entanglement_Link
+LEDGER_A,0.50,0.10,0.12,0.12,ROTATING_KEYS
+LEDGER_B,0.50,0.10,0.15,0.14,ROTATING_KEYS
+LEDGER_AUTO,0.12,0.00,0.05,0.00,INDEPENDENT`
         };
       } else {
         return {
-          name: "Scansione Vulnerabilità e Migrazione a Reticoli (PQC)",
-          benefit: "Il calcolo della probabilità statistica di violazione (Data Breach) per pianificare barriere di cifratura post-quantum.",
-          headers: ["Lunghezza_Chiavi", "Volume_Dati_A_Rischio", "Tempi_Firma"],
-          q1: "Quali standard di migrazione post-quantum del NIST state considerando impostare nel software (es. standard ML-KEM / Kyber)?",
-          q2: "Quali sono i canali informativi storici prioritari o archivi da migrare prioritariamente alle reti protette (es. database cloud o server fisici)?",
-          sample: `Codice_Articolo,Percentuale_Saturazione,Lunghezza_Chiavi,Volume_Dati_A_Rischio,Tempi_Firma,Abbinamento
+          name: "Vulnerability Scanning and Lattice Migration (PQC)",
+          benefit: "Statistical probability calculation of data breaches to plan post-quantum encryption barriers.",
+          headers: ["Key_Length", "At_Risk_Data_Volume", "Signing_Times"],
+          q1: "Which NIST post-quantum migration standards are you planning to configure (e.g., ML-KEM / Kyber standard)?",
+          q2: "Which priority historical data channels or archives need priority migration to protected networks (e.g., cloud database or local servers)?",
+          sample: `Item_Code,Saturation_Percentage,Key_Length,At_Risk_Data_Volume,Signing_Times,Entanglement_Link
 INFRA_DATABASE,0.30,0.30,0.50,0.45,MIGRATE_GRP
 INFRA_CLOUD,0.30,0.40,0.65,0.55,MIGRATE_GRP
-DESKTOP_CLIENT,0.01,0.20,0.02,0.10,LIBERO`
+DESKTOP_CLIENT,0.01,0.20,0.02,0.10,INDEPENDENT`
         };
       }
     }
   }
 
-  const welcomeText = `Benvenuto nel sistema di compilazione ed entanglement quantistico aziendale. Per restringere il campo d'azione e formulare domande specifiche, seleziona la tua macro-area principale d'interesse:
-📊 1. Finanza e Mercati
-🚚 2. Logistica e Smart Cities
-🔬 3. Chimica e Green Tech
-🏭 4. Manutenzione, Manifattura e Abbigliamento
-🧬 5. Sanità e Genomica
+  const welcomeText = `Welcome to the enterprise quantum compilation and entanglement system. To narrow down the scope and formulate specific questions, select your main macro-area of interest:
+📊 1. Finance & Markets
+🚚 2. Logistics & Smart Cities
+🔬 3. Chemistry & Green Tech
+🏭 4. Maintenance, Manufacturing & Apparel
+🧬 5. Healthcare & Genomics
 🛡️ 6. Cybersecurity`;
 
   // Initialize welcome
@@ -1112,63 +1112,63 @@ DESKTOP_CLIENT,0.01,0.20,0.02,0.10,LIBERO`
   // Preset loading helpers
   const handleLoadSample = () => {
     let csvContent = '';
-    let scenarioName = selectedScenario?.name || 'Esempio Pre-Maudito';
+    let scenarioName = selectedScenario?.name || 'Pre-Audited Sample';
 
     if (selectedScenario) {
       csvContent = generateScenarioCSV(selectedScenario);
     } else if (selectedSector === 'Finanza') {
-      csvContent = `Codice_Articolo,Percentuale_Saturazione,Rendimento_Previsto,Abbinamento
+      csvContent = `Item_Code,Saturation_Percentage,Expected_Return,Entanglement_Link
 AZ_ENEL,0.15,0.04,HEDGE_PORTFOLIO_01
 AZ_GENERALI,0.45,0.08,HEDGE_PORTFOLIO_01
-BOND_USA_10Y,0.78,0.03,singoli
-AZ_UNICREDIT,0.60,0.12,PROTETTO_HIGH_YIELD
-AZ_INTESA,0.30,0.09,PROTETTO_HIGH_YIELD
-ETH_RESERVE,0.85,0.25,SINGOLI`;
+BOND_USA_10Y,0.78,0.03,INDEPENDENT
+AZ_UNICREDIT,0.60,0.12,PROTECTED_HIGH_YIELD
+AZ_INTESA,0.30,0.09,PROTECTED_HIGH_YIELD
+ETH_RESERVE,0.85,0.25,INDEPENDENT`;
     } else if (selectedSector === 'Logistica') {
-      csvContent = `Codice_Articolo,Percentuale_Saturazione,Priorita,Abbinamento
-TRUCK_01,0.28,Alta,ROTTA_MILANO_ROMA
-TRUCK_02,0.45,Alta,ROTTA_MILANO_ROMA
-VAN_LOCAL,0.78,Media,singoli
-CARGO_CONTAINER,0.60,Critica,ROTTA_LOG_WEST
-SHIP_CARRIER,0.30,Bassa,ROTTA_LOG_WEST
-DRONE_EXPRESS,0.85,Critica,SINGOLI`;
+      csvContent = `Item_Code,Saturation_Percentage,Priority,Entanglement_Link
+TRUCK_01,0.28,High,ROUTE_NORTH
+TRUCK_02,0.45,High,ROUTE_NORTH
+VAN_LOCAL,0.78,Medium,INDEPENDENT
+CARGO_CONTAINER,0.60,Critical,ROUTE_WEST
+SHIP_CARRIER,0.30,Low,ROUTE_WEST
+DRONE_EXPRESS,0.85,Critical,INDEPENDENT`;
     } else if (selectedSector === 'Chimica') {
-      csvContent = `Codice_Articolo,Percentuale_Saturazione,Temperatura_Limite,Abbinamento
-CATALIZZATORE_PT,0.25,120.0,REAZIONE_TERMICA
-REATTIVO_N2,0.55,150.0,REAZIONE_TERMICA
-ADDITIVO_STABILIZZANTE,0.70,90.0,singoli
-POLIMERO_HDPE,0.12,240.0,FUSIONE_DIPOLO
-SOLVENTE_B,0.35,85.0,FUSIONE_DIPOLO
-ELEMENTO_H2,0.95,300.0,SINGOLI`;
+      csvContent = `Item_Code,Saturation_Percentage,Limit_Temperature,Entanglement_Link
+CATALYST_PT,0.25,120.0,THERMAL_REACTION
+REACTANT_N2,0.55,150.0,THERMAL_REACTION
+STABILIZER_ADDITIVE,0.70,90.0,INDEPENDENT
+HDPE_POLYMER,0.12,240.0,DIPOLE_FUSION
+SOLVENT_B,0.35,85.0,DIPOLE_FUSION
+H2_ELEMENT,0.95,300.0,INDEPENDENT`;
     } else if (selectedSector === 'Sanita') {
-      csvContent = `Codice_Articolo,Percentuale_Saturazione,Compatibilita,Abbinamento
-PAZIENTE_DONATORE,0.35,0.95,COPPIA_TRAPIANTO_01
-PAZIENTE_RICEVENTE,0.65,0.95,COPPIA_TRAPIANTO_01
-PAZIENTE_AUTONOMO,0.80,0.10,singoli
-CAMPIONE_GEN_A,0.50,0.88,MUTAZIONE_LINK_X
-CAMPIONE_GEN_B,0.22,0.88,MUTAZIONE_LINK_X
-PAZIENTE_SANO,0.10,0.99,SINGOLI`;
+      csvContent = `Item_Code,Saturation_Percentage,Compatibility,Entanglement_Link
+DONOR_PATIENT,0.35,0.95,TRANSPLANT_PAIR_01
+RECIPIENT_PATIENT,0.65,0.95,TRANSPLANT_PAIR_01
+AUTONOMOUS_PATIENT,0.80,0.10,INDEPENDENT
+GEN_SAMPLE_A,0.50,0.88,MUTATION_LINK_X
+GEN_SAMPLE_B,0.22,0.88,MUTATION_LINK_X
+HEALTHY_PATIENT,0.10,0.99,INDEPENDENT`;
     } else if (selectedSector === 'Cybersecurity') {
-      csvContent = `Codice_Articolo,Percentuale_Saturazione,Porte_Attive,Abbinamento
-FIREWALL_GATEWAY,0.85,4,RETE_LAN_WEST
-REST_API_SERVER,0.50,8,RETE_LAN_WEST
-DEVELOPER_PC,0.12,12,singoli
+      csvContent = `Item_Code,Saturation_Percentage,Active_Ports,Entanglement_Link
+FIREWALL_GATEWAY,0.85,4,LAN_WEST
+REST_API_SERVER,0.50,8,LAN_WEST
+DEVELOPER_PC,0.12,12,INDEPENDENT
 DATA_STORAGE,0.30,1,BACKUP_LINK
 VIRTUAL_MACHINE_B,0.40,15,BACKUP_LINK
-ROUTER_WIFI_INTERNAL,0.95,44,SINGOLI`;
+INTERNAL_WIFI_ROUTER,0.95,44,INDEPENDENT`;
     } else {
-      csvContent = `Codice_Articolo,Percentuale_Saturazione,Ore_Lavoro,Abbinamento
-CNC_FRESATRICE,0.45,120.5,LINEA_MONTAGGIO_A
-ROBOT_SALDATORE,0.60,200.0,LINEA_MONTAGGIO_A
-STAMPANTE_3D_METALLO,0.85,78.2,singoli
-LINEA_VERNICIATURA_A,0.33,95.0,SERIE_COLLAUDO
-LINEA_VERNICIATURA_B,0.33,95.0,SERIE_COLLAUDO
-LINEA_IMBALLAGGIO,0.15,10.0,SINGOLI`;
+      csvContent = `Item_Code,Saturation_Percentage,Work_Hours,Entanglement_Link
+CNC_MILLING,0.45,120.5,ASSEMBLY_LINE_A
+WELDING_ROBOT,0.60,200.0,ASSEMBLY_LINE_A
+METAL_3D_PRINTER,0.85,78.2,INDEPENDENT
+PAINT_LINE_A,0.33,95.0,TEST_SERIES
+PAINT_LINE_B,0.33,95.0,TEST_SERIES
+PACKAGING_LINE,0.15,10.0,INDEPENDENT`;
     }
 
-    addMessage('user', `📋 Richiedo caricamento dei dati di esempio pre-mauditi per la simulazione: **${scenarioName}**`);
+    addMessage('user', `📋 Requesting pre-audited sample data load for simulation: **${scenarioName}**`);
     
-    addMessage('system', `Ecco i dati tratti dall'esempio pre-maudito caricato nel compilatore:\n\n\`\`\`csv\n${csvContent}\n\`\`\``);
+    addMessage('system', `Here is the sample data loaded in the compiler:\n\n\`\`\`csv\n${csvContent}\n\`\`\``);
 
     // Clear user typing field to prevent raw text residues
     setInputText('');
@@ -1184,7 +1184,7 @@ LINEA_IMBALLAGGIO,0.15,10.0,SINGOLI`;
     reader.onload = (event) => {
       const text = event.target?.result as string;
       if (text) {
-        addMessage('user', `Caricato file: ${file.name}`);
+        addMessage('user', `Uploaded file: ${file.name}`);
         prepareCsvMapping(text);
       }
     };
@@ -1209,7 +1209,7 @@ LINEA_IMBALLAGGIO,0.15,10.0,SINGOLI`;
     reader.onload = (event) => {
       const text = event.target?.result as string;
       if (text) {
-        addMessage('user', `Caricato file via Drag & Drop: ${file.name}`);
+        addMessage('user', `Uploaded file via Drag & Drop: ${file.name}`);
         prepareCsvMapping(text);
       }
     };
@@ -1222,121 +1222,121 @@ LINEA_IMBALLAGGIO,0.15,10.0,SINGOLI`;
     let csvTemplate = '';
 
     if (sectorName === 'Finanza') {
-      colsText = `- **Codice_Articolo** (Tipo: *Testo/Identificativo*, es: \`AZ_ENEL\` o \`BTC_PORTFOLIO\`): Rappresenta il singolo titolo o asset economico della tua società.
-- **Percentuale_Saturazione** (Tipo: *Decimale tra 0.00 e 1.00*, es: \`0.35\`): Corrisponde al livello di rischio, scostamento o volatilità misurato.
-- **Rendimento_Previsto** (Tipo: *Decimale*, es: \`0.06\`): Il tasso programmato di profitto annuo stimato.
-- **Abbinamento** (Tipo: *Testo*, es: \`HEDGE_PORTFOLIO_01\`): Colonna delle relazioni per l'entanglement quantistico. Usa lo stesso nome per correlare i titoli, o scrivi \`singoli\`/\`SINGOLI\`/\`INDIPENDENTE\` se l'asset è indipendente.`;
+      colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`AZ_ENEL\` or \`BTC_PORTFOLIO\`): Represents the single financial asset or stock of your company.
+- **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.35\`): Corresponds to the measured risk, variance or volatility level.
+- **Expected_Return** (Type: *Decimal*, e.g.: \`0.06\`): Estimated annual return rate.
+- **Entanglement_Link** (Type: *Text*, e.g.: \`HEDGE_PORTFOLIO_01\`): Relationship column for quantum entanglement. Use the same group name to correlate titles, or write \`INDEPENDENT\` if unlinked.`;
 
-      csvTemplate = `Codice_Articolo,Percentuale_Saturazione,Rendimento_Previsto,Abbinamento
+      csvTemplate = `Item_Code,Saturation_Percentage,Expected_Return,Entanglement_Link
 AZ_ENEL,0.15,0.04,HEDGE_PORTFOLIO_01
 AZ_GENERALI,0.45,0.08,HEDGE_PORTFOLIO_01
-BOND_USA_10Y,0.78,0.03,singoli
-AZ_UNICREDIT,0.60,0.12,PROTETTO_HIGH_YIELD
-AZ_INTESA,0.30,0.09,PROTETTO_HIGH_YIELD
-ETH_RESERVE,0.85,0.25,SINGOLI`;
+BOND_USA_10Y,0.78,0.03,INDEPENDENT
+AZ_UNICREDIT,0.60,0.12,PROTECTED_HIGH_YIELD
+AZ_INTESA,0.30,0.09,PROTECTED_HIGH_YIELD
+ETH_RESERVE,0.85,0.25,INDEPENDENT`;
     } else if (sectorName === 'Logistica') {
-      colsText = `- **Codice_Articolo** (Tipo: *Testo/Identificativo*, es: \`TRUCK_NORD\` o \`CONTAINER_X\`): Codice del mezzo, veicolo o del container merci.
-- **Percentuale_Saturazione** (Tipo: *Decimale tra 0.00 e 1.00*, es: \`0.85\`): Il grado di stivaggio, ritardo o saturazione dello spazio di carico.
-- **Priorita** (Tipo: *Testo*, es: \`Alta\` / \`Bassa\`): Priorità della spedizione o classe di urgenza.
-- **Abbinamento** (Tipo: *Testo*, es: \`ROTTA_MILANO_ROMA\`): Canale di instradamento condiviso per mappare l'entanglement dei flussi. Usa lo stesso nome per i lotti di viaggio uniti, o \`singoli\`/\`INDIPENDENTE\` se autonomi.`;
+      colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`TRUCK_NORTH\` or \`CONTAINER_X\`): Fleet vehicle, truck or cargo container code.
+- **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.85\`): Stowage level, delay or load capacity saturation.
+- **Priority** (Type: *Text*, e.g.: \`High\` / \`Low\`): Shipment priority or urgency level.
+- **Entanglement_Link** (Type: *Text*, e.g.: \`ROUTE_NORTH\`): Shared routing channel for quantum entanglement. Use the same group name for joint shipments, or \`INDEPENDENT\` if autonomous.`;
 
-      csvTemplate = `Codice_Articolo,Percentuale_Saturazione,Priorita,Abbinamento
-TRUCK_01,0.28,Alta,ROTTA_MILANO_ROMA
-TRUCK_02,0.45,Alta,ROTTA_MILANO_ROMA
-VAN_LOCAL,0.78,Media,singoli
-CARGO_CONTAINER,0.60,Critica,ROTTA_LOG_WEST
-SHIP_CARRIER,0.30,Bassa,ROTTA_LOG_WEST
-DRONE_EXPRESS,0.85,Critica,SINGOLI`;
+      csvTemplate = `Item_Code,Saturation_Percentage,Priority,Entanglement_Link
+TRUCK_01,0.28,High,ROUTE_NORTH
+TRUCK_02,0.45,High,ROUTE_NORTH
+VAN_LOCAL,0.78,Medium,INDEPENDENT
+CARGO_CONTAINER,0.60,Critical,ROUTE_WEST
+SHIP_CARRIER,0.30,Low,ROUTE_WEST
+DRONE_EXPRESS,0.85,Critical,INDEPENDENT`;
     } else if (sectorName === 'Chimica') {
-      colsText = `- **Codice_Articolo** (Tipo: *Testo/Identificativo*, es: \`MOL_REATTIVA\`): Identificante della molecola, del materiale o della materia prima.
-- **Percentuale_Saturazione** (Tipo: *Decimale tra 0.00 e 1.00*, es: \`0.40\`): Grado di stabilità energetica o instabilità chimica riscontrata.
-- **Temperatura_Limite** (Tipo: *Decimale*, es: \`180.5\`): Temperatura critica massima per il composto operativo.
-- **Abbinamento** (Tipo: *Testo*, es: \`REAZIONE_TERMICA\`): Accoppiamento d'entanglement catalitico o reazione condivisa. Imposta lo stesso identificativo per i reagenti correlati, oppure \`singoli\`/\`INDIPENDENTE\` se isolati.`;
+      colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`REACTIVE_MOL\`): Molecule, material, or raw material identifier.
+- **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.40\`): Energy stability or chemical instability level.
+- **Limit_Temperature** (Type: *Decimal*, e.g.: \`180.5\`): Maximum critical temperature for the compound.
+- **Entanglement_Link** (Type: *Text*, e.g.: \`THERMAL_REACTION\`): Catalytic entanglement coupling or shared reaction. Set the same ID for correlated reactants, or \`INDEPENDENT\` if isolated.`;
 
-      csvTemplate = `Codice_Articolo,Percentuale_Saturazione,Temperatura_Limite,Abbinamento
-CATALIZZATORE_PT,0.25,120.0,REAZIONE_TERMICA
-REATTIVO_N2,0.55,150.0,REAZIONE_TERMICA
-ADDITIVO_STABILIZZANTE,0.70,90.0,singoli
-POLIMERO_HDPE,0.12,240.0,FUSIONE_DIPOLO
-SOLVENTE_B,0.35,85.0,FUSIONE_DIPOLO
-ELEMENTO_H2,0.95,300.0,SINGOLI`;
+      csvTemplate = `Item_Code,Saturation_Percentage,Limit_Temperature,Entanglement_Link
+CATALYST_PT,0.25,120.0,THERMAL_REACTION
+REACTANT_N2,0.55,150.0,THERMAL_REACTION
+STABILIZER_ADDITIVE,0.70,90.0,INDEPENDENT
+HDPE_POLYMER,0.12,240.0,DIPOLE_FUSION
+SOLVENT_B,0.35,85.0,DIPOLE_FUSION
+H2_ELEMENT,0.95,300.0,INDEPENDENT`;
     } else if (sectorName === 'Sanita') {
-      colsText = `- **Codice_Articolo** (Tipo: *Testo/Identificativo*, es: \`PAZIENTE_Rossi\`): Codice identificativo anonimo del paziente o del filamento genomico analizzato.
-- **Percentuale_Saturazione** (Tipo: *Decimale tra 0.00 e 1.00*, es: \`0.65\`): Livello di rigetto immunitario, espressione biologica o incidenza.
-- **Compatibilita** (Tipo: *Decimale*, es: \`0.92\`): Grado di idoneità reciproca o efficacia terapeutica.
-- **Abbinamento** (Tipo: *Testo*, es: \`COPPIA_TRAPIANTO_01\`): Coppia di entanglement clinico / interconnessione biologica. Usa lo stesso nome di gruppo per i record accoppiati, o \`singoli\`/\`INDIPENDENTE\` se autonomi.`;
+      colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`PATIENT_Rossi\`): Anonymous patient code or genomic strand ID.
+- **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.65\`): Immune rejection level, biological expression or incidence.
+- **Compatibility** (Type: *Decimal*, e.g.: \`0.92\`): Reciprocal suitability or therapeutic efficacy score.
+- **Entanglement_Link** (Type: *Text*, e.g.: \`TRANSPLANT_PAIR_01\`): Clinical entanglement pair / biological connection. Use the same group name for coupled records, or \`INDEPENDENT\` if autonomous.`;
 
-      csvTemplate = `Codice_Articolo,Percentuale_Saturazione,Compatibilita,Abbinamento
-PAZIENTE_DONATORE,0.35,0.95,COPPIA_TRAPIANTO_01
-PAZIENTE_RICEVENTE,0.65,0.95,COPPIA_TRAPIANTO_01
-PAZIENTE_AUTONOMO,0.80,0.10,singoli
-CAMPIONE_GEN_A,0.50,0.88,MUTAZIONE_LINK_X
-CAMPIONE_GEN_B,0.22,0.88,MUTAZIONE_LINK_X
-PAZIENTE_SANO,0.10,0.99,SINGOLI`;
+      csvTemplate = `Item_Code,Saturation_Percentage,Compatibility,Entanglement_Link
+DONOR_PATIENT,0.35,0.95,TRANSPLANT_PAIR_01
+RECIPIENT_PATIENT,0.65,0.95,TRANSPLANT_PAIR_01
+AUTONOMOUS_PATIENT,0.80,0.10,INDEPENDENT
+GEN_SAMPLE_A,0.50,0.88,MUTATION_LINK_X
+GEN_SAMPLE_B,0.22,0.88,MUTATION_LINK_X
+HEALTHY_PATIENT,0.10,0.99,INDEPENDENT`;
     } else if (sectorName === 'Cybersecurity') {
-      colsText = `- **Codice_Articolo** (Tipo: *Testo/Identificativo*, es: \`IP_GATEWAY\`): Hostname, indirizzo IP o nodo di rete della tua infrastruttura societaria.
-- **Percentuale_Saturazione** (Tipo: *Decimale tra 0.00 e 1.00*, es: \`0.80\`): Grado di congestione, stress del processore o pacchetti anomali rilevati.
-- **Porte_Attive** (Tipo: *Intero*, es: \`14\`): Canali di comunicazione aperti rintracciati.
-- **Abbinamento** (Tipo: *Testo*, es: \`RETE_LAN_WEST\`): Sottorete o canale di entanglement di traffico cyber. Usa lo stesso gruppo identificativo per i nodi appartenenti alla stessa rete esposta, oppure \`singoli\`/\`INDIPENDENTE\` per elementi singoli.`;
+      colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`IP_GATEWAY\`): Hostname, IP address, or network node in your infrastructure.
+- **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.80\`): Congestion, CPU load, or anomalous packet rate.
+- **Active_Ports** (Type: *Integer*, e.g.: \`14\`): Number of open communication ports.
+- **Entanglement_Link** (Type: *Text*, e.g.: \`LAN_WEST\`): Subnet or cyber traffic entanglement channel. Use the same identifier for nodes in the same network, or \`INDEPENDENT\` for isolated elements.`;
 
-      csvTemplate = `Codice_Articolo,Percentuale_Saturazione,Porte_Attive,Abbinamento
-FIREWALL_GATEWAY,0.85,4,RETE_LAN_WEST
-REST_API_SERVER,0.50,8,RETE_LAN_WEST
-DEVELOPER_PC,0.12,12,singoli
+      csvTemplate = `Item_Code,Saturation_Percentage,Active_Ports,Entanglement_Link
+FIREWALL_GATEWAY,0.85,4,LAN_WEST
+REST_API_SERVER,0.50,8,LAN_WEST
+DEVELOPER_PC,0.12,12,INDEPENDENT
 DATA_STORAGE,0.30,1,BACKUP_LINK
 VIRTUAL_MACHINE_B,0.40,15,BACKUP_LINK
-ROUTER_WIFI_INTERNAL,0.95,44,SINGOLI`;
-    } else { // Manifatturiero / Fabbrica
-      colsText = `- **Codice_Articolo** (Tipo: *Testo/Identificativo*, es: \`MACCHINA_CNC\` o \`ROBOT_SALDATORE\`): Codice identificativo dell'apparato meccanico della società.
-- **Percentuale_Saturazione** (Tipo: *Decimale tra 0.00 e 1.00*, es: \`0.55\`): Il tasso di usura o fatica riscontrato sul macchinario nel ciclo.
-- **Ore_Lavoro** (Tipo: *Decimale*, es: \`180.5\`): Ore complessive di attività cumulate nell'ultimo mese di esercizio.
-- **Abbinamento** (Tipo: *Testo*, es: \`LINEA_MONTAGGIO_A\`): Gruppo di lavorazione condiviso per mappare l'entanglement quantistico dei diversi sensori. Inserisci lo stesso identificatore se legati sulla stessa catena fisica, oppure \`singoli\`/\`INDIPENDENTE\` se isolati.`;
+INTERNAL_WIFI_ROUTER,0.95,44,INDEPENDENT`;
+    } else { // Manufacturing / Factory
+      colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`CNC_MACHINE\` or \`WELDING_ROBOT\`): Mechanical equipment identifier.
+- **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.55\`): Wear or stress rate measured on the machine cycle.
+- **Work_Hours** (Type: *Decimal*, e.g.: \`180.5\`): Total operating hours accumulated over the last month.
+- **Entanglement_Link** (Type: *Text*, e.g.: \`ASSEMBLY_LINE_A\`): Shared processing group mapping quantum entanglement across sensors. Enter the same ID if linked on the same physical line, or \`INDEPENDENT\` if isolated.`;
 
-      csvTemplate = `Codice_Articolo,Percentuale_Saturazione,Ore_Lavoro,Abbinamento
-CNC_FRESATRICE,0.45,120.5,LINEA_MONTAGGIO_A
-ROBOT_SALDATORE,0.60,200.0,LINEA_MONTAGGIO_A
-STAMPANTE_3D_METALLO,0.85,78.2,singoli
-LINEA_VERNICIATURA_A,0.33,95.0,SERIE_COLLAUDO
-LINEA_VERNICIATURA_B,0.33,95.0,SERIE_COLLAUDO
-LINEA_IMBALLAGGIO,0.15,10.0,SINGOLI`;
+      csvTemplate = `Item_Code,Saturation_Percentage,Work_Hours,Entanglement_Link
+CNC_MILLING,0.45,120.5,ASSEMBLY_LINE_A
+WELDING_ROBOT,0.60,200.0,ASSEMBLY_LINE_A
+METAL_3D_PRINTER,0.85,78.2,INDEPENDENT
+PAINT_LINE_A,0.33,95.0,TEST_SERIES
+PAINT_LINE_B,0.33,95.0,TEST_SERIES
+PACKAGING_LINE,0.15,10.0,INDEPENDENT`;
     }
 
-    addMessage('system', `📋 **PROPOSTA REQUISITI FILE DATI PER LA TUA SOCIETÀ (AREA: ${sectorName.toUpperCase()}):**
-Per consentire a Quantum Machine Learning d'analizzare i tuoi prodotti o servizi, prepara un file CSV contenente queste colonne principali:
+    addMessage('system', `📋 **PROPOSED DATA FILE REQUIREMENTS FOR YOUR COMPANY (AREA: ${sectorName.toUpperCase()}):**
+To allow Quantum Machine Learning to analyze your products or services, prepare a CSV file containing these main columns:
 
 ${colsText}
 
-💡 **LINEE-GUIDA DI COMPILAZIONE DELLA TUA SOCIETÀ:**
-- I numeri decimali dovranno essere compresi tra **0.00** e **1.00** (percentuali superiori al 100% verranno auto-scalate).
-- Separatore decimale raccomandato: il punto (\`.\`). Se usi la virgola l'algoritmo la auto-correggerà.
+💡 **COMPILATION GUIDELINES FOR YOUR COMPANY:**
+- Decimal numbers must be between **0.00** and **1.00** (percentages over 100% will be auto-scaled).
+- Recommended decimal separator: period (\`.\`). If you use a comma, the algorithm auto-corrects it.
 
-Ecco un modello di esempio di file CSV pre-configurato pronto per essere caricato o copiato:
+Here is a pre-configured sample CSV model ready to be uploaded or copied:
 \`\`\`csv
 ${csvTemplate}
 \`\`\`
 
-👉 **COME FORNIRE I DATI:**
-1. Carica il tuo file CSV premendo **SFOGLIA COMPUTER** nel pannello centrale.
-2. Oppure trascinalo col mouse (Drag & Drop) nell'area tratteggiata.
-3. Oppure copia l'esempio sopra e incollalo direttamente nella riga di input in basso, quindi premi invio.`);
+👉 **HOW TO PROVIDE DATA:**
+1. Upload your CSV file by clicking **BROWSE COMPUTER** in the center panel.
+2. Or drag and drop it into the dashed area.
+3. Or copy the example above and paste it directly into the input row below, then press Enter.`);
   };
 
   const handleChoiceOption = (choice: 'A' | 'B' | 'C') => {
     setScenarioSelection(choice);
     setInterviewSubstep(1);
-    const details = getScenarioDetails(selectedSectorLong || 'Finanza e Mercati', choice);
-    addMessage('system', `Perfetto! Hai selezionato l'**Opzione ${choice}**: **${details.name}**.
+    const details = getScenarioDetails(selectedSectorLong || 'Finance & Markets', choice);
+    addMessage('system', `Great! You selected **Option ${choice}**: **${details.name}**.
     
-Iniziamo la calibrazione descrittiva. Rispondi a questa prima domanda:
+Let's start the calibration process. Please answer this first question:
 👉 **${details.q1}**`);
   };
 
   const handleSelectScenarioAndStart = (scenario: QuantumScenario) => {
     setSelectedScenario(scenario);
-    const sectorName = scenario.macroarea.includes('Finanza') ? 'Finanza' :
-                       scenario.macroarea.includes('Logistica') ? 'Logistica' :
-                       scenario.macroarea.includes('Chimica') ? 'Chimica' :
-                       scenario.macroarea.includes('Sanit') ? 'Sanita' :
+    const sectorName = scenario.macroarea.includes('Finanza') || scenario.macroarea.includes('Finance') ? 'Finanza' :
+                       scenario.macroarea.includes('Logistica') || scenario.macroarea.includes('Logistics') ? 'Logistica' :
+                       scenario.macroarea.includes('Chimica') || scenario.macroarea.includes('Chemistry') ? 'Chimica' :
+                       scenario.macroarea.includes('Sanit') || scenario.macroarea.includes('Healthcare') ? 'Sanita' :
                        scenario.macroarea.includes('Cyber') ? 'Cybersecurity' : 'Manifatturiero';
     
     let opt: 'A' | 'B' | 'C' = 'A';
@@ -1356,21 +1356,21 @@ Iniziamo la calibrazione descrittiva. Rispondi a questa prima domanda:
     setCalibrationAnswers([]);
 
     const details = getScenarioDetails(fullArea, opt);
-    addMessage('user', `Seleziono lo scenario specifico: ${scenario.name}`);
+    addMessage('user', `Selecting specific scenario: ${scenario.name}`);
     setTimeout(() => {
-      addMessage('system', `Hai selezionato lo scenario specifico **${scenario.name}** dall'archivio. Questo corrisponde a un'operatività di tipo **Opzione ${opt} (${opt === 'A' ? 'Misto/Entanglement' : opt === 'B' ? 'Geometria/Angolo' : 'Probabilità/Ampiezza'})**.
+      addMessage('system', `You selected the specific scenario **${scenario.name}** from the archive. This corresponds to **Option ${opt} (${opt === 'A' ? 'Mixed/Entanglement' : opt === 'B' ? 'Geometry/Angle' : 'Probability/Amplitude'})**.
       
-Per calibrare la simulazione, rispondi a questa prima domanda:
+To calibrate the simulation, please answer this first question:
 👉 **${details.q1}**`);
     }, 400);
   };
 
   const handleSelectSector = (sectorName: string) => {
-    let fullArea = "Finanza e Mercati";
-    if (sectorName === 'Logistica') fullArea = "Logistica e Smart Cities";
-    if (sectorName === 'Chimica') fullArea = "Chimica e Green Tech";
-    if (sectorName === 'Manifatturiero') fullArea = "Manutenzione, Manifattura e Abbigliamento";
-    if (sectorName === 'Sanita') fullArea = "Sanità e Genomica";
+    let fullArea = "Finance & Markets";
+    if (sectorName === 'Logistica') fullArea = "Logistics & Smart Cities";
+    if (sectorName === 'Chimica') fullArea = "Chemistry & Green Tech";
+    if (sectorName === 'Manifatturiero') fullArea = "Maintenance, Manufacturing & Apparel";
+    if (sectorName === 'Sanita') fullArea = "Healthcare & Genomics";
     if (sectorName === 'Cybersecurity') fullArea = "Cybersecurity";
 
     setSelectedSector(sectorName);
@@ -1383,9 +1383,9 @@ Per calibrare la simulazione, rispondi a questa prima domanda:
     const detB = getScenarioDetails(fullArea, 'B');
     const detC = getScenarioDetails(fullArea, 'C');
 
-    addMessage('user', `Seleziono la macro-area principale: ${fullArea}`);
+    addMessage('user', `Selecting main macro-area: ${fullArea}`);
     setTimeout(() => {
-      addMessage('system', `Ottima scelta! Abbiamo 3 scenari disponibili per la macro-area **${fullArea}**:\n\n* **Opzione A [Entanglement Misto]** - *${detA.name}*\n  👉 *Cosa otterrai:* ${detA.benefit}\n\n* **Opzione B [Solo Angolo/Geometria]** - *${detB.name}*\n  👉 *Cosa otterrai:* ${detB.benefit}\n\n* **Opzione C [Solo Ampiezza/Probabilità]** - *${detC.name}*\n  👉 *Cosa otterrai:* ${detC.benefit}\n\n❓ **Quale scenario preferisci attivare per la tua simulazione quantistica? Rispondi digitando 'A', 'B' o 'C'.**`);
+      addMessage('system', `Great choice! We have 3 scenarios available for **${fullArea}**:\n\n* **Option A [Mixed Entanglement]** - *${detA.name}*\n  👉 *What you will get:* ${detA.benefit}\n\n* **Option B [Angle/Geometry Only]** - *${detB.name}*\n  👉 *What you will get:* ${detB.benefit}\n\n* **Option C [Amplitude/Probability Only]** - *${detC.name}*\n  👉 *What you will get:* ${detC.benefit}\n\n❓ **Which scenario do you prefer to activate for your quantum simulation? Reply by typing 'A', 'B', or 'C'.**`);
     }, 400);
   };
 
@@ -1398,48 +1398,48 @@ Per calibrare la simulazione, rispondi a questa prima domanda:
     // Dynamic interview flow
     if (step === 1) {
       const lower = userText.toLowerCase().trim();
-      if (lower === '1' || lower.includes('finanz') || lower.includes('invest') || lower.includes('sold')) {
+      if (lower === '1' || lower.includes('finan') || lower.includes('invest') || lower.includes('money')) {
         handleSelectSector('Finanza');
-      } else if (lower === '2' || lower.includes('logist') || lower.includes('sped') || lower.includes('traspor') || lower.includes('camion')) {
+      } else if (lower === '2' || lower.includes('logist') || lower.includes('ship') || lower.includes('transp') || lower.includes('truck')) {
         handleSelectSector('Logistica');
-      } else if (lower === '3' || lower.includes('chimic') || lower.includes('laborat') || lower.includes('molecol')) {
+      } else if (lower === '3' || lower.includes('chem') || lower.includes('lab') || lower.includes('molecul')) {
         handleSelectSector('Chimica');
-      } else if (lower === '4' || lower.includes('manut') || lower.includes('fabbric') || lower.includes('manifatt') || lower.includes('industr') || lower.includes('abbigliam')) {
+      } else if (lower === '4' || lower.includes('maint') || lower.includes('factor') || lower.includes('manuf') || lower.includes('industr') || lower.includes('apparel') || lower.includes('cloth')) {
         handleSelectSector('Manifatturiero');
-      } else if (lower === '5' || lower.includes('sanit') || lower.includes('med') || lower.includes('osped') || lower.includes('pazient') || lower.includes('genom')) {
+      } else if (lower === '5' || lower.includes('health') || lower.includes('med') || lower.includes('hosp') || lower.includes('patient') || lower.includes('genom')) {
         handleSelectSector('Sanita');
-      } else if (lower === '6' || lower.includes('cyber') || lower.includes('sicur') || lower.includes('hacker') || lower.includes('firewall')) {
+      } else if (lower === '6' || lower.includes('cyber') || lower.includes('secur') || lower.includes('hacker') || lower.includes('firewall')) {
         handleSelectSector('Cybersecurity');
       } else {
         setTimeout(() => {
-          addMessage('system', `Scelta non riconosciuta. Si prega di digitare un numero da 1 a 6 o di cliccare su una macro-area aziendale dal pannello sottostante per iniziare il protocollo.`);
+          addMessage('system', `Unrecognized choice. Please type a number from 1 to 6 or click on a corporate macro-area from the panel below to start the protocol.`);
         }, 500);
       }
     } else if (step === 2) {
       if (isUserUnsureOrAsking(userText)) {
         let clarificationText = "";
         if (interviewSubstep === 0) {
-          clarificationText = `Nessun problema! Ecco un chiarimento sulle differenze delle 3 opzioni disponibili per **${selectedSectorLong || 'il tuo business'}**:
+          clarificationText = `No problem! Here is a clarification on the differences among the 3 options for **${selectedSectorLong || 'your business'}**:
 
-* 🅰️ **Opzione A [Entanglement Misto]**: Collega le variabili in una forte relazione di dipendenza reciproca. È la più avanzata, ideale per trovare impatti incrociati e gestire decisioni combinate (es. incrociare rischi, pianificare rotte con tempi, o bilanciare risorse intermittenti).
-* 🅱️ **Opzione B [Solo Angolo/Geometria]**: Converte i dati in coordinate angolari spaziali (rotazione interna dei dati). È perfetto se il tuo problema riguarda coordinate geometriche vere e proprie, layout spaziali, traiettorie o scadenze esatte temporali.
-* 🆃 **Opzione C [Solo Ampiezza/Probabilità]**: Adatto se ti interessa valutare la probabilità statistica di fallimento/successo, rischi di cassa, probabilità di sconti ottimali o tassi di riammissione.
+* 🅰️ **Option A [Mixed Entanglement]**: Connects variables in a strong reciprocal dependency relationship. Most advanced option, ideal for cross-impact analysis and multi-factor decisions.
+* 🅱️ **Option B [Angle/Geometry Only]**: Converts data into spatial angular coordinates (internal data rotation). Perfect if your problem involves geometric layout, spatial trajectories, or exact time deadlines.
+* 🆃 **Option C [Amplitude/Probability Only]**: Suitable for evaluating statistical failure/success probability, cash risk, optimal discount probability, or readmission rates.
 
-❓ **Quale scenario preferisci attivare? Rispondi digitando 'A', 'B' o 'C'.**`;
+❓ **Which scenario do you prefer to activate? Reply by typing 'A', 'B', or 'C'.**`;
         } else {
-          const details = getScenarioDetails(selectedSectorLong || 'Finanza e Mercati', scenarioSelection || 'A');
+          const details = getScenarioDetails(selectedSectorLong || 'Finance & Markets', scenarioSelection || 'A');
           const activeQuestion = interviewSubstep === 1 ? details.q1 : details.q2;
           const explanation = getClarificatoryExplanation(activeQuestion);
           
-          clarificationText = `Capisco perfettamente il tuo dubbio! Questa domanda serve a calibrare il circuito quantistico prima di caricare il CSV.
+          clarificationText = `I completely understand your query! This question calibrates the quantum circuit before loading CSV data.
 
-💡 **Spiegazione semplice:**
+💡 **Simple explanation:**
 ${explanation}
 
-✍ *Cosa puoi rispondere ora?*
-Puoi inserire un valore a tua scelta, oppure se preferisci procedere velocemente digitando semplicemente **'default'** o **'continua'**, mi autorizzerai ad assumere il parametro ideale pre-configurato!
+✍ *What can you reply now?*
+You can enter any value of your choice, or if you prefer to proceed quickly by typing **'default'** or **'continue'**, you authorize me to assume the ideal pre-configured parameter!
 
-Rispondi pure quando sei pronto/a:
+Feel free to reply when ready:
 👉 **${activeQuestion}**`;
         }
 
@@ -1452,8 +1452,8 @@ Rispondi pure quando sei pronto/a:
       // Process standard answers with default handling
       let processedAnswer = userText;
       const lowerTrimmed = userText.toLowerCase().trim();
-      if (lowerTrimmed === 'default' || lowerTrimmed === 'continua' || lowerTrimmed === 'va bene' || lowerTrimmed === 'procedi' || lowerTrimmed === 'ok_allora' || lowerTrimmed === 'vai' || lowerTrimmed === 'fai tu') {
-        processedAnswer = "Standard (Raccomandato dal compilatore QML)";
+      if (lowerTrimmed === 'default' || lowerTrimmed === 'continue' || lowerTrimmed === 'continua' || lowerTrimmed === 'proceed' || lowerTrimmed === 'ok' || lowerTrimmed === 'go') {
+        processedAnswer = "Standard (Recommended by QML compiler)";
       }
 
       if (interviewSubstep === 0) {
@@ -1462,26 +1462,26 @@ Rispondi pure quando sei pronto/a:
           handleChoiceOption(choice);
         } else {
           setTimeout(() => {
-            addMessage('system', `Inserimento non valido. Si prega di selezionare o digitare esattamente **A**, **B** o **C** per abilitare uno degli scenari quantistici disponibili.`);
+            addMessage('system', `Invalid entry. Please select or type exactly **A**, **B**, or **C** to enable one of the available quantum scenarios.`);
           }, 400);
         }
       } else if (interviewSubstep === 1) {
-        // High-specificity check for unsold clothing inventory (Volume_Rimanenze_Maglia)
+        // High-specificity check for unsold clothing inventory
         const isInventoryQuestion = selectedSector === 'Manifatturiero' && selectedScenario?.headers.includes('Volume_Rimanenze_Maglia');
         if (isInventoryQuestion) {
           const rawAnswer = userText.toLowerCase().trim();
-          const hasStagionale = rawAnswer.includes('stagion');
-          const hasAnnuale = rawAnswer.includes('annual') || rawAnswer.includes('anno') || rawAnswer.includes('annuo');
+          const hasSeasonal = rawAnswer.includes('season') || rawAnswer.includes('stagion');
+          const hasAnnual = rawAnswer.includes('annual') || rawAnswer.includes('annua') || rawAnswer.includes('year');
           
-          if (!hasStagionale && !hasAnnuale && (rawAnswer !== 'default' && rawAnswer !== 'continua' && rawAnswer !== 'procedi')) {
+          if (!hasSeasonal && !hasAnnual && (rawAnswer !== 'default' && rawAnswer !== 'continue' && rawAnswer !== 'proceed')) {
             setTimeout(() => {
-              addMessage('system', `⚠️ **RILEVATO DETTAGLIO GENERICO (AZIONE RICHIESTA):**
+              addMessage('system', `⚠️ **GENERIC DETAIL DETECTED (ACTION REQUIRED):**
               
-Hai indicato come valore: "${userText}". Per una calibrazione ottimale dell'algoritmo quantistico **Gemma QML-Core** sui tuoi sconti dinamici, il cliente ha il dovere di essere estremamente preciso sul tipo di orizzonte temporale dello stock:
-- **STAGIONALE (es: "1200 pezzi stagionali")**: Rimanenze legate a una specifica collezione di moda corrente.
-- **ANNUALE (es: "3500 pezzi annuali")**: Accumuli di inventario dell'intero anno solare.
+You indicated: "${userText}". For optimal calibration of the **Gemma QML-Core** quantum algorithm on your dynamic discounts, please specify the exact time horizon of the stock:
+- **SEASONAL (e.g. "1200 seasonal pieces")**: Inventory linked to a specific current fashion collection.
+- **ANNUAL (e.g. "3500 annual pieces")**: Stock accumulated across the entire calendar year.
 
-*Per favore, digita nuovamente la tua risposta specificando se è **'stagionali'** o **'annuali'**, oppure fai click su uno dei due suggerimenti rapidi presenti sotto la chat.*`);
+*Please re-type your answer specifying whether it is **'seasonal'** or **'annual'**, or click one of the quick suggestions below the chat.*`);
             }, 300);
             return; // Halt and wait for precise input
           }
@@ -1491,7 +1491,7 @@ Hai indicato come valore: "${userText}". Per una calibrazione ottimale dell'algo
         setInterviewSubstep(2);
         const details = getScenarioDetails(selectedSectorLong, scenarioSelection || 'A');
         setTimeout(() => {
-          addMessage('system', `Ricevuto. Seconda domanda per completare la calibrazione del compilatore:
+          addMessage('system', `Received. Second question to complete compiler calibration:
 👉 **${details.q2}**`);
         }, 400);
       } else if (interviewSubstep === 2) {
@@ -1510,35 +1510,35 @@ Hai indicato come valore: "${userText}". Per una calibrazione ottimale dell'algo
         }
 
         setTimeout(() => {
-          addMessage('system', `🎉 **Intervista guidata completata con successo!**
+          addMessage('system', `🎉 **Guided interview completed successfully!**
           
-Ho analizzato le tue risposte e impostato i parametri quantistici ad alta fedeltà di calcolo per la tua azienda:
-- **Risposta Calibrazione 1:** "${currentAnswers[0]}"
-- **Risposta Calibrazione 2:** "${currentAnswers[1]}"
+I analyzed your answers and configured high-fidelity quantum calculation parameters for your enterprise:
+- **Calibration Answer 1:** "${currentAnswers[0]}"
+- **Calibration Answer 2:** "${currentAnswers[1]}"
 
-Come richiesto dal protocollo **Gemma QML-Core**, ecco la tabella dati personalizzata per la tua simulazione:
+As required by the **Gemma QML-Core** protocol, here is the customized sample data table for your simulation:
 
 ${sampleTableMarkdown}
 
 ---
 
-Ecco la tabella dati che ho preparato per te con un campione di dati realistici. Puoi copiarla direttamente da qui per i tuoi usi. Se i dati ti sembrano corretti e rispecchiano le tue necessità, rispondi scrivendo 'CONFERMA' e avvierò immediatamente la simulazione predittiva quantistica nel backend!`);
+Here is the data table prepared with realistic sample data. You can copy it directly from here. If the data looks correct and meets your needs, reply with 'CONFIRM' and I will immediately start the quantum predictive simulation in the backend!`);
           setStep(3);
           setIsCsvLoaded(false);
         }, 400);
       }
     } else if (step === 3) {
       const cleanUserText = userText.trim().toUpperCase();
-      if (cleanUserText.includes('CONFERMA')) {
+      if (cleanUserText.includes('CONFIRM') || cleanUserText.includes('CONFERMA')) {
         const details = getScenarioDetails(selectedSectorLong, scenarioSelection || 'A');
         setTempCsvContent(details.sample);
         setIsCsvLoaded(true);
-        // Auto select "Abbinamento" column
+        // Auto select "Entanglement_Link" / "Abbinamento" column
         const lines = details.sample.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         if (lines.length > 0) {
           const headers = lines[0].split(',');
           const autoSelects = headers.filter(col => 
-            ['abbinamento', 'legame', 'relazione', 'gruppo', 'accoppiamento', 'entanglement'].some(term => col.toLowerCase().includes(term))
+            ['abbinamento', 'legame', 'relazione', 'gruppo', 'accoppiamento', 'entanglement', 'link'].some(term => col.toLowerCase().includes(term))
           );
           setSelectedEntanglementCols(autoSelects);
         }
@@ -1561,39 +1561,39 @@ Ecco la tabella dati che ho preparato per te con un campione di dati realistici.
         if (looksLikeCsv(userText)) {
           prepareCsvMapping(userText);
         } else {
-          // It's a natural language question or conversational query! Let's leverage our agentic RAG LLM endpoint!
+          // Conversational query: query agentic RAG LLM endpoint
           const tempMsgId = Math.random().toString();
           setMessages(prev => [
             ...prev,
             {
               id: tempMsgId,
               sender: 'system',
-              text: `⏳ **Elaborazione in corso...** Sto interrogando il compilatore quantistico **Gemma QML-Core** mediante il servizio **RAG** aziendale integrato...`,
+              text: `⏳ **Processing...** Querying the **Gemma QML-Core** quantum compiler via the integrated enterprise **RAG** service...`,
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             }
           ]);
 
           const details = getScenarioDetails(selectedSectorLong, scenarioSelection || 'A');
-          const promptContext = `Sei l'Agente Compilatore Quantistico di Quantum Agents S.r.l. dotato di RAG (Retrieval-Augmented Generation) integrato.
-Si tratta del modulo Gemma QML-Core ad alta affidabilità.
-Il cliente si trova attualmente nello scenario: **${details.name || selectedSectorLong}** (${selectedSectorLong}).
-L'opzione di scenario attiva è: **Opzione ${scenarioSelection || 'A'}**
+          const promptContext = `You are the Quantum Compiler Agent of Quantum Agents S.r.l. equipped with integrated RAG (Retrieval-Augmented Generation).
+This is the high-reliability Gemma QML-Core module.
+The client is currently in the scenario: **${details.name || selectedSectorLong}** (${selectedSectorLong}).
+Active scenario option: **Option ${scenarioSelection || 'A'}**
 
-I parametri definiti nell'intervista di calibrazione aziendale per l'utente sono:
-1. ${details.q1 || "Domanda di calibrazione 1"}: "${calibrationAnswers[0] || 'Non dichiarata'}"
-2. ${details.q2 || "Domanda di calibrazione 2"}: "${calibrationAnswers[1] || 'Non dichiarata'}"
+Corporate calibration parameters:
+1. ${details.q1 || "Calibration question 1"}: "${calibrationAnswers[0] || 'Undeclared'}"
+2. ${details.q2 || "Calibration question 2"}: "${calibrationAnswers[1] || 'Undeclared'}"
 
-Come richiesto, il modello dati che hanno sbloccato richiede le seguenti colonne:
-- **Codice_Articolo**
-- **Percentuale_Saturazione**
+Required data model columns:
+- **Item_Code**
+- **Saturation_Percentage**
 - ${details.headers.map(h => `- **${h}**`).join('\n')}
-- **Abbinamento**
+- **Entanglement_Link**
 
-Se l'utente fa domande sul circuito quantistico generato, su OpenQASM o Qiskit, spiega in dettaglio i concetti.
-Se l'utente fa riferimento allo stock invenduto, spiega che l'algoritmo quantistico calibra in modo svariato e differente le ampiezze dei qubit a seconda che abbiano specificato uno stock **Stagionale** (pesi ad alta frequenza e sconti aggressivi nel breve termine) o **Annuale** (curva smussata per massimizzare il recupero del margine totale sul lungo periodo per il cliente, evitando fallimenti).
-Rispondi sempre in lingua italiana, in modo estremamente chiaro, didattico e d'ampio respiro, fornendo qualora necessario schemi o tabelle reali di esempio per illustrare i tuoi punti, formattandoli con tabelle in markdown in modo che vengano renderizzati visivamente in modo perfetto nel nostro chat flow.`;
+If the user asks about OpenQASM 2.0 or Qiskit, explain in detail.
+If the user asks about unsold inventory, explain that the algorithm calibrates qubit amplitudes differently based on Seasonal (high frequency, short-term discount) or Annual (smoothed curve for long-term margin recovery) stock.
+ALWAYS RESPOND IN ENGLISH, clearly and educationally, using markdown tables where helpful.`;
 
-          // Pass the cleaned history to prevent rate limits or system prompt overload
+          // Pass cleaned history
           const cleanedHistory = messages.map(m => ({
             role: m.sender === 'user' ? 'user' : 'model',
             text: m.text
@@ -1604,20 +1604,20 @@ Rispondi sempre in lingua italiana, in modo estremamente chiaro, didattico e d'a
             systemPrompt: promptContext
           })
           .then(response => {
-            const botText = response.data?.text || "Non ho ricevuto risposta dal compilatore quantistico. Riprova tra poco.";
+            const botText = response.data?.text || "Did not receive a response from the quantum compiler. Please retry shortly.";
             setMessages(prev => prev.filter(m => m.id !== tempMsgId));
             addMessage('system', botText);
           })
           .catch(err => {
             console.error("AI Error:", err);
             setMessages(prev => prev.filter(m => m.id !== tempMsgId));
-            addMessage('system', `❌ **ERRORE DI CONTESTO RAG:** Impossibile connettersi in tempo reale con l'agente Gemma QML-Core. Si prega di riprovare tra qualche istante.`);
+            addMessage('system', `❌ **RAG CONTEXT ERROR:** Unable to connect in real time with the Gemma QML-Core agent. Please try again shortly.`);
           });
         }
       }
     } else {
       setTimeout(() => {
-        addMessage('system', `Il circuito quantistico OpenQASM 2.0 è pronto. Puoi trasmetterlo a IBM Q premendo il relativo pulsante o caricare un altro file CSV per rifare la simulazione.`);
+        addMessage('system', `The OpenQASM 2.0 quantum circuit is ready. You can transmit it to IBM Q by pressing the button or upload another CSV file to re-run the simulation.`);
       }, 500);
     }
   };
@@ -1626,11 +1626,11 @@ Rispondi sempre in lingua italiana, in modo estremamente chiaro, didattico e d'a
     // Split rows on any newline representation
     const lines = csvTextContent.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
     if (lines.length < 2) {
-      addMessage('system', `❌ **ERRORE FORMATTO:** Il file CSV inserito non possiede una struttura valida di intestazione + dati.`);
+      addMessage('system', `❌ **FORMAT ERROR:** The inserted CSV file does not have a valid header + data structure.`);
       return;
     }
 
-    // Auto-detect the column delimiter: semicolon is preferred if present in header, otherwise fallback to comma
+    // Auto-detect column delimiter
     const headerLine = lines[0];
     const delimiter = headerLine.includes(';') ? ';' : ',';
 
@@ -1641,30 +1641,30 @@ Rispondi sempre in lingua italiana, in modo estremamente chiaro, didattico e d'a
     setTempCsvContent(csvTextContent);
     setIsCsvLoaded(true);
 
-    // Auto-select column matching primary abbinamento terms
+    // Auto-select column matching primary entanglement terms
     const primaryAbbinamentoTerms = ['abbinamento', 'combinazione', 'legame', 'relazione', 'link', 'group', 'gruppo', 'connessione', 'accoppiamento', 'coppia', 'entanglement', 'cluster', 'partner', 'nodo', 'associazione', 'set'];
     const autoSelects = originalHeaders.filter(col => 
       primaryAbbinamentoTerms.some(term => col.toLowerCase().includes(term))
     );
     setSelectedEntanglementCols(autoSelects.length > 0 ? autoSelects : []);
 
-    addMessage('system', `📄 **File CSV letto correttamente!**
-Ho rilevato le seguenti colonne presenti nel tuo file:
+    addMessage('system', `📄 **CSV File Read Successfully!**
+Detected columns in your file:
 ${originalHeaders.map(c => `• **${c}**`).join('\n')}
 
-*(Nota: I dati all'interno delle righe sono interamente grezzi e privi di associazioni pre-impostate)*
+*(Note: Row data is completely raw without pre-set associations)*
 
-❓ **Ho caricato il tuo file CSV. Quali di queste colonne desideri mettere in relazione tramite entanglement quantistico per la tua previsione? (Ad esempio: associare la colonna dei Consumi con la colonna delle Date).**
+❓ **Which of these columns would you like to link via quantum entanglement for your prediction? (For example: link the Consumption column with the Date column).**
 
-⚠️ **Perché è necessario?**
-Se non si esegue l'entanglement per associare le colonne prescelte, non ha alcun senso pratico e matematico impiegare un hardware quantistico. Un'elaborazione priva di questi legami coordinati può essere svolta più velocemente, a minori consumi e a costo nullo da un computer classico normale.`);
+⚠️ **Why is this necessary?**
+Without entanglement to link chosen columns, using quantum hardware offers no mathematical advantage. Processing without these linked relationships can be done faster and cheaper on a classical computer.`);
   };
 
   const processInputCSV = (csvTextContent: string, forceIgnoreWarning = false) => {
     // Split rows on any newline representation
     const lines = csvTextContent.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
     if (lines.length < 2) {
-      addMessage('system', `❌ **ERRORE FORMATTO:** Il file CSV inserito non possiede una struttura valida di intestazione + dati.`);
+      addMessage('system', `❌ **FORMAT ERROR:** The inserted CSV file does not have a valid header + data structure.`);
       return;
     }
 
@@ -1675,12 +1675,12 @@ Se non si esegue l'entanglement per associare le colonne prescelte, non ha alcun
     const originalHeaders = headerLine.split(delimiter).map(h => h.trim());
     const headers = originalHeaders.map(h => h.trim().toLowerCase());
     
-    // Identify key column indices with intelligent multi-language, concept detection and prioritization
+    // Identify key column indices
     let idxArticolo = -1;
     let idxSaturazione = -1;
 
-    // 1. Article/Asset Column Finding (Primary terms first to avoid false-positives)
-    const primaryArticoloTerms = ['articolo', 'codice', 'asset', 'prodotto', 'id_', 'lotto', 'item'];
+    // 1. Article/Asset Column Finding
+    const primaryArticoloTerms = ['articolo', 'codice', 'asset', 'prodotto', 'id_', 'lotto', 'item', 'code'];
     const secondaryArticoloTerms = ['id', 'name', 'oggetto', 'nome'];
 
     idxArticolo = headers.findIndex(h => primaryArticoloTerms.some(term => h.includes(term)));
@@ -1688,9 +1688,9 @@ Se non si esegue l'entanglement per associare le colonne prescelte, non ha alcun
       idxArticolo = headers.findIndex(h => secondaryArticoloTerms.some(term => h.includes(term)));
     }
 
-    // 2. Saturation Column Finding (Primary terms like "saturazione" get absolute priority over "efficienza" or "indice")
+    // 2. Saturation Column Finding
     const primarySaturazioneTerms = ['saturazione', 'percentuale', 'saturation', 'percentage'];
-    const secondarySaturazioneTerms = ['rischio', 'valore', 'level', 'ratio', 'efficienza', 'indice', 'load', 'rate', 'dazi', 'index', 'value'];
+    const secondarySaturazioneTerms = ['rischio', 'valore', 'level', 'ratio', 'efficienza', 'indice', 'load', 'rate', 'dazi', 'index', 'value', 'risk'];
 
     idxSaturazione = headers.findIndex(h => primarySaturazioneTerms.some(term => h.includes(term)));
     if (idxSaturazione === -1) {
@@ -1698,12 +1698,10 @@ Se non si esegue l'entanglement per associare le colonne prescelte, non ha alcun
     }
 
     // Intelligent Fallbacks:
-    // 1. If Code/Article is not found, default to first column (index 0)
     if (idxArticolo === -1 && headers.length > 0) {
       idxArticolo = 0;
     }
 
-    // 2. If Saturation/Risk is not found, default to second column or any non-id column
     if (idxSaturazione === -1) {
       if (headers.length > 1) {
         idxSaturazione = idxArticolo === 0 ? 1 : 0;
@@ -1713,8 +1711,7 @@ Se non si esegue l'entanglement per associare le colonne prescelte, non ha alcun
     }
 
     if (idxArticolo === -1 || idxSaturazione === -1) {
-      addMessage('system', `❌ **ERRORE COLONNE MANCANTI:** Impossibile rilevare una colonna identificativa e una colonna con i valori numerici.
-Assicurati che il tuo file contenga almeno una colonna ID e una coi valori.`);
+      addMessage('system', `❌ **MISSING COLUMNS ERROR:** Unable to detect an ID column and a numeric value column. Ensure your file contains at least one ID column and one value column.`);
       return;
     }
 
@@ -1748,9 +1745,9 @@ Assicurati che il tuo file contenga almeno una colonna ID e una coi valori.`);
       let originalSaturationText = parts[idxSaturazione] ? parts[idxSaturazione].replace(/^["']|["']$/g, '').trim() : '0.0';
 
       // Build key based on selected entanglement columns
-      let abbinamento = 'LIBERO';
+      let abbinamento = 'INDEPENDENT';
       const idxAbbinamento = originalHeaders.findIndex(h => 
-        ['abbinamento', 'legame', 'relazione', 'gruppo', 'accoppiamento', 'entanglement'].some(term => h.toLowerCase().includes(term))
+        ['abbinamento', 'legame', 'relazione', 'gruppo', 'accoppiamento', 'entanglement', 'link'].some(term => h.toLowerCase().includes(term))
       );
       if (idxAbbinamento !== -1 && parts[idxAbbinamento]) {
         abbinamento = parts[idxAbbinamento].replace(/^["']|["']$/g, '').trim().toUpperCase();
@@ -1768,7 +1765,7 @@ Assicurati che il tuo file contenga almeno una colonna ID e una coi valori.`);
         }
       }
 
-      // Auto-correct comma decimals (e.g. "0,25" -> "0.25")
+      // Auto-correct comma decimals
       if (originalSaturationText.includes(',')) {
         if (/^\d+,\d+$/.test(originalSaturationText)) {
           originalSaturationText = originalSaturationText.replace(',', '.');
@@ -1786,7 +1783,7 @@ Assicurati che il tuo file contenga almeno una colonna ID e una coi valori.`);
       }
     }
 
-    // Intelligent auto-scaling for values using 0-100% scale instead of standard 0.0-1.0
+    // Auto-scaling for values using 0-100% scale
     let percentageScalingApplied = false;
     if (maxSeenSaturation > 1.0) {
       percentageScalingApplied = true;
@@ -1799,63 +1796,57 @@ Assicurati che il tuo file contenga almeno una colonna ID e una coi valori.`);
     }
 
     if (cleanRecords.length === 0) {
-      addMessage('system', `❌ **ERRORE CONTENUTO:** Non è stato possibile estrarre righe di dati numerici validi dal file.`);
+      addMessage('system', `❌ **CONTENT ERROR:** Could not extract valid numeric data rows from the file.`);
       return;
     }
 
     // Process Qasm logic
     const N = cleanRecords.length;
-    let logicSummary = `✅ **DATA CLEANING E DATA REDUCTION COMPLETATI**
-- **Soglia di delimitazione rilevata:** colonna divisa da \`${delimiter}\`
-- **Mappatura Intelligente delle Colonne:**
-  * Identificativo (Codice/ID): colonna \`${originalHeaders[idxArticolo]?.trim()}\` (indice ${idxArticolo})
-  * Stato Critico (Saturazione/Rischio): colonna \`${originalHeaders[idxSaturazione]?.trim()}\` (indice ${idxSaturazione})
-  * Relazioni (Entanglement/Abbinamenti): ${hasEntanglementMapping ? `basato su colonne \`${selectedEntanglementCols.join('`, `')}\`` : '*Nessuna (Tutti impostati a LIBERO)*'}
-- **Righe utili rilevate (N):** ${N}
-- **Colonne in eccesso scartate:** ${ignored.length > 0 ? ignored.map(c => `\`${c}\``).join(', ') : 'Nessuna colonna ridondante rilevata.'}
-${autoCorrectedDecimalCount > 0 ? `- **Auto-Correzione Decimali:** Sostituiti in automatico **${autoCorrectedDecimalCount}** separatori a virgola con il punto decimale matematico standard.\n` : ''}${percentageScalingApplied ? `- **Auto-Scaling dei Percentili:** Valori di saturazione maggiori di 1.0 (es. **${maxSeenSaturation}%**) convertiti in decimali coerenti (range 0.0 - 1.0) per la simulazione quantistica.\n` : ''}- **Righe elaborate:**
-${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturazione: **${r.saturation}**, Relazione: **${r.abbinamento}**)`).join('\n')}
+    let logicSummary = `✅ **DATA CLEANING AND DATA REDUCTION COMPLETED**
+- **Delimiter detected:** column separated by \`${delimiter}\`
+- **Smart Column Mapping:**
+  * Identifier (Code/ID): column \`${originalHeaders[idxArticolo]?.trim()}\` (index ${idxArticolo})
+  * Critical State (Saturation/Risk): column \`${originalHeaders[idxSaturazione]?.trim()}\` (index ${idxSaturazione})
+  * Relationships (Entanglement/Links): ${hasEntanglementMapping ? `based on columns \`${selectedEntanglementCols.join('`, `')}\`` : '*None (All set to INDEPENDENT)*'}
+- **Useful rows detected (N):** ${N}
+- **Excess columns discarded:** ${ignored.length > 0 ? ignored.map(c => `\`${c}\``).join(', ') : 'No redundant columns detected.'}
+${autoCorrectedDecimalCount > 0 ? `- **Decimal Auto-Correction:** Auto-replaced **${autoCorrectedDecimalCount}** comma separators with standard mathematical period decimals.\n` : ''}${percentageScalingApplied ? `- **Percentile Auto-Scaling:** Saturation values greater than 1.0 (e.g. **${maxSeenSaturation}%**) converted to consistent decimals (0.0 - 1.0 range) for quantum simulation.\n` : ''}- **Processed rows:**
+${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation: **${r.saturation}**, Relationship: **${r.abbinamento}**)`).join('\n')}
  
-- **Allocazione Registro Quantistico:** \`qreg q[${N + 1}];\` (incluso qubit targets/Comparatore a indice q[${N}])`;
+- **Quantum Register Allocation:** \`qreg q[${N + 1}];\` (including target Comparator qubit at index q[${N}])`;
 
     setMappingSummary(logicSummary);
 
-    // Math formulation with clipping logic to prevent NaN
-    // Angle: theta = 2 * arcsin(sqrt(P_clipped))
     let qasmCircuitCode = `OPENQASM 2.0;\ninclude "qelib1.inc";\n\n`;
-    qasmCircuitCode += `// Registro quantetizzato di dimensione esatta N + 1 per il Comparatore\n`;
+    qasmCircuitCode += `// Quantum register of exact size N + 1 for Comparator\n`;
     qasmCircuitCode += `qreg q[${N + 1}];\n`;
     qasmCircuitCode += `creg c[${N + 1}];\n\n`;
 
-    qasmCircuitCode += `// === FASE 1: INIZIALIZZAZIONE PORTATE (ROTAZIONI RY) ===\n`;
+    qasmCircuitCode += `// === PHASE 1: INITIALIZATION ROTATIONS (RY) ===\n`;
     cleanRecords.forEach((record, index) => {
-      // Clip check
       const pClipped = Math.max(0, Math.min(record.saturation, 1.0));
       const theta = 2 * Math.asin(Math.sqrt(pClipped));
-      qasmCircuitCode += `// Mappatura d'onda protetta per ${record.article} (Input: ${record.saturation})\n`;
+      qasmCircuitCode += `// Protected wave mapping for ${record.article} (Input: ${record.saturation})\n`;
       qasmCircuitCode += `ry(${theta.toFixed(5)}) q[${index}];\n`;
     });
     qasmCircuitCode += `\n`;
 
-    // CNOT Entanglement based on Abbinamento / Mappatura Relazioni
-    qasmCircuitCode += `// === FASE 2: ENTANGLEMENT DI CORRELAZIONE COERENTE ===\n`;
+    qasmCircuitCode += `// === PHASE 2: COHERENT CORRELATION ENTANGLEMENT ===\n`;
     const groups: Record<string, number[]> = {};
     let uniqueGroupCounter = 0;
 
     cleanRecords.forEach((record, index) => {
       const match = record.abbinamento.trim().toUpperCase();
-      // Identify independent, single or non-associated identifiers
       const isIndependent = [
         'SINGOLI', 'SINGOLO', 'INDIPENDENTE', 'INDIPENDENTI', 'LIBERO', 'FREE', 
-        'DECOUPLED', 'DECOLLEGATO', 'DECOLLEGATI', ''
+        'DECOUPLED', 'INDEPENDENT', ''
       ].includes(match);
 
       if (!isIndependent) {
         if (!groups[match]) groups[match] = [];
         groups[match].push(index);
       } else {
-        // Individual rows treated as isolated / independent nodes
-        const uniqueKey = `_INDIPENDENTE_ROW_${index}_${uniqueGroupCounter++}`;
+        const uniqueKey = `_INDEPENDENT_ROW_${index}_${uniqueGroupCounter++}`;
         groups[uniqueKey] = [index];
       }
     });
@@ -1863,16 +1854,15 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturazion
     let entanglementAdded = false;
     Object.entries(groups).forEach(([groupName, indices]) => {
       if (indices.length > 1) {
-        qasmCircuitCode += `// Gruppo di relazione con valori identici (q[${indices[0]}] assunto come qubit di controllo comune): ${groupName}\n`;
+        qasmCircuitCode += `// Relationship group with identical values (q[${indices[0]}] as common control qubit): ${groupName}\n`;
         for (let g = 1; g < indices.length; g++) {
           qasmCircuitCode += `cx q[${indices[0]}], q[${indices[g]}];\n`;
           entanglementAdded = true;
         }
       } else if (indices.length === 1) {
-        // Valori unici/singoli sono mappati come nodi indipendenti all'interno della Feature Map / Ansatz
         const idx = indices[0];
-        qasmCircuitCode += `// Nodo indipendente nella Feature Map per valore unico/singolo (q[${idx}])\n`;
-        qasmCircuitCode += `rz(pi/4) q[${idx}]; // Rotazione parametrica di fase per coerenza quantistica distribuita\n`;
+        qasmCircuitCode += `// Independent node in Feature Map for single value (q[${idx}])\n`;
+        qasmCircuitCode += `rz(pi/4) q[${idx}]; // Parametric phase rotation for distributed quantum coherence\n`;
       }
     });
 
@@ -1883,39 +1873,36 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturazion
       setWarningReason(!hasEntanglementMapping ? 'missing_column' : 'no_associations');
       setShowEntanglementWarning(true);
       
-      addMessage('system', `⚠️ **AVVISO IMPORTANTE:** Non è stato rilevato alcun legame di **Entanglement** (accoppiamento) nel file CSV caricato o selezionato.
-- **Motivo principale:** ${!hasEntanglementMapping ? "Non è stata selezionata alcuna colonna per l'Entanglement." : "Le colonne selezionate contengono valori unici o impostazioni su 'LIBERO'."}
+      addMessage('system', `⚠️ **IMPORTANT WARNING:** No **Entanglement** links detected in the CSV file uploaded or selected.
+- **Main reason:** ${!hasEntanglementMapping ? "No column selected for Entanglement." : "Selected columns contain unique values or settings set to 'INDEPENDENT'."}
 
-Senza entanglement, i qubit elaboreranno i dati in modo del tutto autonomo, senza sfruttare la coerenza collettiva e i calcoli cooperativi distribuiti.
+Without entanglement, qubits process data autonomously without leveraging collective coherence and distributed quantum calculations.
 
-*Si prega di verificare la scelta dell'azione desiderata nel pannello interattivo comparso qui sotto per procedere comunque o correggere il file.*`);
+*Please review the choice in the interactive panel below to proceed anyway or adjust the file.*`);
       return;
     }
 
-    // Reset warnings if passed successfully or bypassed
     setShowEntanglementWarning(false);
     setPendingCsvData('');
 
     if (!entanglementAdded) {
-      qasmCircuitCode += `// Nessun gruppo di correlazione condivisa rilevato dal CSV (Nessuna porta CNOT applicata)\n`;
+      qasmCircuitCode += `// No correlation groups detected from CSV (No CNOT gates applied)\n`;
     }
     qasmCircuitCode += `\n`;
 
-    // Comparator threshold architecture (uniform distribution)
-    qasmCircuitCode += `// === FASE 3: LOGICA DISTRIBUITA DEL COMPARATORE (CRY) ===\n`;
-    qasmCircuitCode += `// Soglia critica impostata: ${threshold * 100}% (${threshold})\n`;
+    qasmCircuitCode += `// === PHASE 3: DISTRIBUTED COMPARATOR LOGIC (CRY) ===\n`;
+    qasmCircuitCode += `// Critical threshold set: ${threshold * 100}% (${threshold})\n`;
     const thresholdClipped = Math.max(0, Math.min(threshold, 1.0));
     const totalThresholdAngle = 2 * Math.asin(Math.sqrt(thresholdClipped));
     const distributedAngle = totalThresholdAngle / N;
 
-    qasmCircuitCode += `// Angolo totale sferico: ${totalThresholdAngle.toFixed(5)} diviso uniformemente per N (${distributedAngle.toFixed(5)} rad su ciascun qubit)\n`;
+    qasmCircuitCode += `// Total angle: ${totalThresholdAngle.toFixed(5)} divided uniformly over N (${distributedAngle.toFixed(5)} rad per qubit)\n`;
     for (let u = 0; u < N; u++) {
       qasmCircuitCode += `cry(${distributedAngle.toFixed(5)}) q[${u}], q[${N}];\n`;
     }
     qasmCircuitCode += `\n`;
 
-    // Measurements
-    qasmCircuitCode += `// === FASE 4: REGISTRAZIONE STATI E STRUMENTAZIONE ===\n`;
+    qasmCircuitCode += `// === PHASE 4: STATE REGISTRATION & MEASUREMENT ===\n`;
     for (let m = 0; m <= N; m++) {
       qasmCircuitCode += `measure q[${m}] -> c[${m}];\n`;
     }
@@ -1923,43 +1910,42 @@ Senza entanglement, i qubit elaboreranno i dati in modo del tutto autonomo, senz
     setQasmOutput(qasmCircuitCode);
     setCsvData(csvTextContent);
 
-    // Simulated responses
     addMessage('system', logicSummary);
 
     const mappedColumnsText = selectedEntanglementCols.length > 0 
-      ? selectedEntanglementCols.map((col, cIdx) => `  * Colonna \`${col}\` ➔ Mappata su Qubit \`q[${cIdx}]\``).join('\n')
-      : '  * Nessuna colonna selezionata (Elaborazione classica isolata)';
+      ? selectedEntanglementCols.map((col, cIdx) => `  * Column \`${col}\` ➔ Mapped to Qubit \`q[${cIdx}]\``).join('\n')
+      : '  * No columns selected (Isolated classical processing)';
 
-    addMessage('system', `⚙️ **AUTOMAZIONE LOGICA IN BACKGROUND (PRE-ELABORAZIONE QUANTISTICA):**
-L'applicazione sta configurando autonomamente la preparazione quantistica del circuito secondo le indicazioni fornite:
-- **Trascrizione Automatica:** Trascrizione dei tuoi dati grezzi in sequenze di bit e successiva mappatura diretta dei singoli record sui rispettivi qubit d'ingresso.
-- **Feature Mapping Geometrico:** Conversione dei tuoi valori numerici (come i consumi o gli indicatori rilevati) in percentuali ad alta coerenza e angoli tridimensionali di rotazione quantistica per orientare in modo corretto e polarizzare i qubit sulla Sfera di Bloch.
-- **Generazione Porte di Entanglement:** Calcolo e applicazione mirata delle porte quantistiche di entanglement (porte CNOT) esclusivamente tra i qubit corrispondenti alle colonne da te scelte: **${selectedEntanglementCols.join(', ') || 'Nessuna'}**.
+    addMessage('system', `⚙️ **BACKGROUND LOGIC AUTOMATION (QUANTUM PRE-PROCESSING):**
+The application is automatically setting up quantum circuit preparation according to instructions:
+- **Automatic Transcription:** Transcribing raw data into bit sequences and mapping individual records directly to input qubits.
+- **Geometric Feature Mapping:** Converting numerical values into high-coherence percentages and 3D quantum rotation angles on the Bloch Sphere.
+- **Entanglement Gate Generation:** Computing and applying targeted quantum CNOT entanglement gates across qubits corresponding to selected columns: **${selectedEntanglementCols.join(', ') || 'None'}**.
 
-🔌 **PASSAGGIO DELLE DIRETTIVE AL MOTORE DI CALCOLO QUANTISTICO ESISTENTE:**
-Conformemente alle tue istruzioni, le colonne prescelte sono state mappate strutturalmente sui qubit del registro quantistico dell'applicazione:
+🔌 **PASSING DIRECTIVES TO THE QUANTUM ENGINE:**
+Structural mapping completed on the quantum register:
 ${mappedColumnsText}
 
-Questo insieme organizzato di istruzioni di entanglement è stato inviato con successo al motore di calcolo quantistico già esistente dell'applicazione per avviare l'elaborazione del circuito.`);
+These entanglement instructions have been sent to the quantum execution engine to process the circuit.`);
 
     setTimeout(() => {
-      const details = getScenarioDetails(selectedSectorLong || 'Finanza e Mercati', scenarioSelection || 'A');
-      const analysisText = `🔮 **Sintesi del Circuito Quantistico Completata!**
+      const details = getScenarioDetails(selectedSectorLong || 'Finance & Markets', scenarioSelection || 'A');
+      const analysisText = `🔮 **Quantum Circuit Synthesis Completed!**
 
-### 1. Analisi Strategica (Manageriale)
-L'applicazione del fenomeno dell'**Entanglement Misto di Tipo 3** sul tuo scenario di business (**${details.name}**) consente di correlare multifattorialmente le dinamiche critiche delle tue variabili d'interesse. 
-Nel calcolo combinatorio quantistico, questo legame sincrono forza i qubit a evolvere collettivamente, catturando interdipendenze non lineari invisibili agli algoritmi classici ordinari.
-- **Vantaggio Operativo reale:** Sincronizzazione istantanea delle metriche aziendali, offrendo una pre-risoluzione ad alta accuratezza degli scostamenti critici e consentendo di ottimizzare i margini per gli obiettivi precedentemente pianificati.
+### 1. Strategic Analysis (Managerial)
+Applying **Type 3 Mixed Entanglement** on your business scenario (**${details.name}**) correlates critical variables multi-factorially. 
+In quantum combinatorial computing, this synchronous link forces qubits to evolve collectively, capturing non-linear interdependencies invisible to classical algorithms.
+- **Operational Advantage:** Instantaneous synchronization of business metrics, providing high-accuracy resolution of critical variances and optimizing target margins.
 
-### 2. Codice Quantistico OpenQASM 2.0
-Tutti i vincoli quantitativi, inclusi il clipping protettivo delle grandezze fisiche per prevenire divergenze NaN, le porte di entanglement multi-nodo sui gruppi d'appartenenza correlati, e la distribuzione CRY parametrizzata per il comparatore di soglia al qubit target, sono stati tradotti nel flusso deterministico OpenQASM 2.0:
+### 2. OpenQASM 2.0 Quantum Code
+All constraints, including physical clipping, multi-node entanglement gates, and CRY distribution for the threshold comparator, have been translated into OpenQASM 2.0:
 
 [START_COMPOSER]
 ${qasmCircuitCode}
 [END_COMPOSER]
 
-### 3. Pulsante di Collegamento Hardware
-Per eseguire la simulazione in tempo reale e trasmettere il circuito alla griglia hardware di calcolo quantistica fisica di IBM Quantum Corporation, utilizza il connettore diretto:
+### 3. Hardware Connection Button
+To run real-time simulation and transmit the circuit to the physical quantum hardware grid at IBM Quantum Corporation, use the direct connector:
 
 [ACTION: RENDER_BUTTON_SEND_TO_IBM_Q]`;
 
@@ -2035,7 +2021,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
               </h1>
             </div>
             <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider font-mono">
-              Compilatore & Traduttore Universale di File Eterogenei in OpenQASM 2.0 per IBM CPU
+              Universal Compiler & Translator of Heterogeneous Files to OpenQASM 2.0 for IBM CPU
             </p>
           </div>
         </div>
@@ -2045,7 +2031,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
           onClick={handleReset}
           className="flex items-center gap-2 px-3.5 py-2 text-xs font-mono font-bold text-quantum-primary bg-quantum-primary/5 hover:bg-quantum-primary/10 border border-quantum-primary/20 rounded-xl cursor-pointer transition-all self-start sm:self-center"
         >
-          <RefreshCw className="w-3.5 h-3.5" /> REINIZIALIZZA SESSY
+          <RefreshCw className="w-3.5 h-3.5" /> REINITIALIZE SESSION
         </button>
       </div>
 
@@ -2060,7 +2046,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
             <div className="flex items-center gap-2 font-mono">
               <Terminal className="w-4 h-4 text-quantum-primary animate-pulse" />
               <span className="text-xs font-bold text-white uppercase tracking-wider">
-                Console Conversazionale Quantistica
+                Quantum Conversational Console
               </span>
             </div>
             <div className="flex items-center gap-1.5 font-mono text-[10px] text-gray-500">
@@ -2096,7 +2082,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                           className="p-1 px-2 rounded hover:bg-white/5 text-quantum-primary flex items-center gap-1 transition-colors cursor-pointer text-[10px] uppercase font-bold"
                         >
                           {isCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          {isCopied ? 'Copiato' : 'Copia'}
+                          {isCopied ? 'Copied' : 'Copy'}
                         </button>
                       </div>
                       <pre className="p-3.5 overflow-x-auto text-quantum-secondary select-all whitespace-pre max-h-[160px] scrollbar-hide leading-normal text-[11px]">
@@ -2105,7 +2091,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                       
                       {/* Send to IBM Q Trigger */}
                       <div className="p-3.5 bg-[#0a0f1d] border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px]">
-                        <span className="text-gray-400 uppercase tracking-wider text-[9px] font-bold">PREPARATO PER IBM QPU</span>
+                        <span className="text-gray-400 uppercase tracking-wider text-[9px] font-bold">PREPARED FOR IBM QPU</span>
                         <button
                           onClick={() => onSendToIbm(msg.code || '')}
                           className="px-4 py-2 bg-quantum-primary text-quantum-bg hover:bg-quantum-primary/80 font-black text-[11px] uppercase tracking-wider rounded-lg transition-all shadow-[0_0_12px_rgba(0,242,255,0.25)] hover:shadow-[0_0_18px_rgba(0,242,255,0.45)] duration-200 cursor-pointer flex items-center gap-1.5"
@@ -2134,17 +2120,17 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                   </div>
                   <div>
                     <h4 className="text-xs font-sans font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                      ⚠️ AVVISO INTEGRITÀ: NESSUN LEGAME DI ENTANGLEMENT TROVATO
+                      ⚠️ INTEGRITY WARNING: NO ENTANGLEMENT LINK FOUND
                     </h4>
                     <p className="text-xs text-gray-300 mt-1 leading-relaxed">
                       {warningReason === 'missing_column' ? (
-                        <span>La colonna per gestire le relazioni sincrone (<strong>Abbinamento</strong>, <strong>Legame</strong>, <strong>Connessione</strong> o <strong>Entanglement</strong>) non è stata identificata nella riga di intestazione del tuo file CSV.</span>
+                        <span>The column for handling synchronous relationships (<strong>Entanglement_Link</strong>, <strong>Link</strong>, <strong>Group</strong> or <strong>Connection</strong>) was not identified in your CSV header row.</span>
                       ) : (
-                        <span>La colonna delle relazioni è stata rilevata, ma tutti i record elaborati sono configurati su <strong>'LIBERO'</strong> o non possiedono nomi di gruppo duplicati coordinati.</span>
+                        <span>The relationship column was detected, but all processed records are set to <strong>'INDEPENDENT'</strong> or do not possess duplicate coordinated group names.</span>
                       )}
                     </p>
                     <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
-                      Senza entanglement, i qubit elaboreranno i dati in modalità unicamente autonoma, precludendo l'analisi multifattoriale distribuita inerente alla coerenza quantistica IBM.
+                      Without entanglement, qubits process data autonomously, precluding distributed multi-factor analysis inherent to IBM quantum coherence.
                     </p>
                   </div>
                 </div>
@@ -2154,13 +2140,13 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                     onClick={handleConfirmProceedWithoutEntanglement}
                     className="flex-1 px-4 py-2.5 bg-amber-500 text-[#090d18] hover:bg-amber-400 text-xs font-black rounded-lg transition-all shadow-[0_0_10px_rgba(245,158,11,0.25)] hover:shadow-[0_0_15px_rgba(245,158,11,0.45)] cursor-pointer text-center uppercase"
                   >
-                    🚀 Procedi Comunque Senza Legami
+                    🚀 Proceed Without Entanglement Links
                   </button>
                   <button
                     onClick={handleCancelEntanglementWarning}
                     className="flex-1 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs font-bold rounded-lg transition-all cursor-pointer text-center uppercase"
                   >
-                    ✏️ Correggi e Riassegna
+                    ✏️ Edit & Reassign
                   </button>
                 </div>
               </motion.div>
@@ -2178,11 +2164,11 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                   </div>
                   <div className="flex-1">
                     <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center justify-between gap-2">
-                      <span>🛰️ CONFIGURAZIONE MODELLO DI CALCOLO</span>
-                      <span className="text-[9px] bg-quantum-primary/15 text-quantum-primary px-2 py-0.5 rounded border border-quantum-primary/20 font-bold">PRONTO</span>
+                      <span>🛰️ COMPUTATION MODEL CONFIGURATION</span>
+                      <span className="text-[9px] bg-quantum-primary/15 text-quantum-primary px-2 py-0.5 rounded border border-quantum-primary/20 font-bold">READY</span>
                     </h4>
                     <p className="text-[11px] text-gray-300 mt-1 leading-relaxed">
-                      L'intervista di calibrazione aziendale è stata completata con successo. Ho preparato il set di dati di calibrazione campione e strutturato i processi interdipendenti coordinati simultaneamente nel backend.
+                      The corporate calibration interview has completed successfully. I have prepared sample calibration data and structured interdependent processes in the backend.
                     </p>
                   </div>
                 </div>
@@ -2190,22 +2176,22 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                 {/* Scenario details info card */}
                 <div className="bg-[#070b14]/90 border border-white/5 p-4 rounded-xl space-y-2">
                   <div className="flex items-center justify-between text-[11px] font-mono border-b border-white/5 pb-2">
-                    <span className="text-gray-400">Macro-area Aziendale:</span>
+                    <span className="text-gray-400">Corporate Macro-Area:</span>
                     <span className="text-white font-bold">{selectedSectorLong}</span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] font-mono border-b border-white/5 pb-2">
-                    <span className="text-gray-400">Scenario Selezionato:</span>
-                    <span className="text-quantum-secondary font-bold">Opzione {scenarioSelection || 'A'} - {selectedScenario?.name}</span>
+                    <span className="text-gray-400">Selected Scenario:</span>
+                    <span className="text-quantum-secondary font-bold">Option {scenarioSelection || 'A'} - {selectedScenario?.name}</span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-gray-400">Stato del Registro:</span>
-                    <span className="text-emerald-400 font-bold">Dati Campione Generati</span>
+                    <span className="text-gray-400">Register Status:</span>
+                    <span className="text-emerald-400 font-bold">Sample Data Generated</span>
                   </div>
                 </div>
 
                 <div className="p-4 bg-quantum-primary/5 border border-quantum-primary/15 rounded-xl text-left">
                   <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
-                    💡 **Inizia la Simulazione:** Scrivi **"CONFERMA"** nella chat di sinistra o fai clic sul pulsante in basso per sintetizzare il circuito di calcolo ed eseguire istantaneamente l'analisi predittiva quantistica nel backend.
+                    💡 **Start Simulation:** Type **"CONFIRM"** in the chat or click the button below to synthesize the computing circuit and run instant quantum predictive analysis in the backend.
                   </p>
                 </div>
 
@@ -2221,7 +2207,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                     if (lines.length > 0) {
                       const headers = lines[0].split(',');
                       const autoSelects = headers.filter(col => 
-                        ['abbinamento', 'legame', 'relazione', 'gruppo', 'accoppiamento', 'entanglement'].some(term => col.toLowerCase().includes(term))
+                        ['abbinamento', 'legame', 'relazione', 'gruppo', 'accoppiamento', 'entanglement', 'link'].some(term => col.toLowerCase().includes(term))
                       );
                       setSelectedEntanglementCols(autoSelects);
                     }
@@ -2229,7 +2215,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                   }}
                   className="w-full px-4 py-3 bg-quantum-primary text-quantum-bg hover:bg-quantum-primary/95 text-xs font-mono font-black rounded-xl transition-all shadow-[0_0_15px_rgba(0,242,255,0.25)] hover:shadow-[0_0_22px_rgba(0,242,255,0.45)] cursor-pointer text-center uppercase"
                 >
-                  🚀 CONFERMA DATI E AVVIA SIMULAZIONE
+                  🚀 CONFIRM DATA & START SIMULATION
                 </button>
               </motion.div>
             )}
@@ -2242,38 +2228,38 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
             {step === 1 && (
               <div className="flex flex-col gap-2 w-full">
                 <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block mb-1">
-                  📊 FASE 0: SELEZIONA UNA DELLE MACRO-AREE AZIENDALI PRINCIPALI:
+                  📊 PHASE 0: SELECT A MAIN CORPORATE MACRO-AREA:
                 </span>
                 <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-6 gap-2 w-full">
                   <button
                     onClick={() => handleSelectSector('Finanza')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    📊 1. Finanza
+                    📊 1. Finance
                   </button>
                   <button
                     onClick={() => handleSelectSector('Logistica')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    🚚 2. Logistica
+                    🚚 2. Logistics
                   </button>
                   <button
                     onClick={() => handleSelectSector('Chimica')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    🔬 3. Chimica
+                    🔬 3. Chemistry
                   </button>
                   <button
                     onClick={() => handleSelectSector('Manifatturiero')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    🏭 4. Fabbrica
+                    🏭 4. Factory
                   </button>
                   <button
                     onClick={() => handleSelectSector('Sanita')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    🧬 5. Sanità
+                    🧬 5. Healthcare
                   </button>
                   <button
                     onClick={() => handleSelectSector('Cybersecurity')}
@@ -2288,26 +2274,26 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
             {step === 2 && interviewSubstep === 0 && (
               <div className="flex flex-col gap-2 w-full animate-fade-in">
                 <span className="text-[10px] font-mono text-[#00f2ff] uppercase tracking-wider block mb-1 font-bold">
-                  💡 FASE 1: SCEGLI OPZIONE SCENARIO OPERATIVO:
+                  💡 PHASE 1: CHOOSE OPERATIONAL SCENARIO OPTION:
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
                   <button
                     onClick={() => handleChoiceOption('A')}
                     className="px-3 py-2 bg-[#0d1527] border border-quantum-primary/20 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
                   >
-                    🅰️ Opzione A [Misto/Entanglement]
+                    🅰️ Option A [Mixed/Entanglement]
                   </button>
                   <button
                     onClick={() => handleChoiceOption('B')}
                     className="px-3 py-2 bg-[#0d1527] border border-quantum-primary/20 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
                   >
-                    🅱️ Opzione B [Solo Angolo]
+                    🅱️ Option B [Angle Only]
                   </button>
                   <button
                     onClick={() => handleChoiceOption('C')}
                     className="px-3 py-2 bg-[#0d1527] border border-quantum-primary/20 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
                   >
-                    🆃 Opzione C [Solo Ampiezza]
+                    🆃 Option C [Amplitude Only]
                   </button>
                 </div>
               </div>
@@ -2316,27 +2302,27 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
             {step === 2 && interviewSubstep === 1 && selectedSector === 'Manifatturiero' && selectedScenario?.headers.includes('Volume_Rimanenze_Maglia') && (
               <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3.5 rounded-xl">
                 <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
-                  🎯 SPECIFICA DETTAGLIO INVENDUTO SULLO STOCK DI MAGLIA:
+                  🎯 SPECIFY UNSOLD INVENTORY DETAILS ON KNITWEAR STOCK:
                 </span>
                 <p className="text-[11px] text-slate-300 font-sans leading-relaxed">
-                  Per procedere con precisione, dichiara l'orizzonte temporale corretto dello stock (Stagionale o Annuale):
+                  To proceed accurately, declare the correct stock time horizon (Seasonal or Annual):
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1 w-full">
                   <button
                     onClick={() => {
-                      setInputText("1200 pezzi stagionali");
+                      setInputText("1200 seasonal pieces");
                     }}
                     className="px-3 py-2 bg-[#070b14] border border-quantum-primary/25 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg flex items-center justify-center gap-1.5"
                   >
-                    📦 Stock Stagionale (es. 1200 pezzi stagionali)
+                    📦 Seasonal Stock (e.g. 1200 seasonal pieces)
                   </button>
                   <button
                     onClick={() => {
-                      setInputText("3500 pezzi annuali");
+                      setInputText("3500 annual pieces");
                     }}
                     className="px-3 py-2 bg-[#070b14] border border-[#00f2ff]/25 hover:border-[#00f2ff] text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-[#00f2ff]/5 cursor-pointer text-center rounded-lg flex items-center justify-center gap-1.5"
                   >
-                    📅 Stock Annuale (es. 3500 pezzi annuali)
+                    📅 Annual Stock (e.g. 3500 annual pieces)
                   </button>
                 </div>
               </div>
@@ -2344,7 +2330,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
 
             {step === 3 && (
               <div className="flex items-center gap-2 ml-auto">
-                <span className="text-[10px] font-mono text-gray-500 uppercase">Soglia (Threshold):</span>
+                <span className="text-[10px] font-mono text-gray-500 uppercase">Threshold:</span>
                 <input
                   type="number"
                   step="0.01"
@@ -2368,9 +2354,9 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                 if (e.key === 'Enter') handleSendMessage();
               }}
               placeholder={
-                step === 1 ? "Scegli un settore finanza o logistica sopra per sbloccare l'intervista..." :
-                step === 2 ? "Rispondi alle domande indicate dall'assistente..." :
-                "Incolla o modifica qui i tuoi dati CSV a punto decimale..."
+                step === 1 ? "Choose a finance or logistics sector above to unlock the interview..." :
+                step === 2 ? "Answer the questions indicated by the assistant..." :
+                "Paste or edit your decimal-point CSV data here..."
               }
               className="flex-1 bg-[#090d18] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-quantum-primary transition-colors font-mono"
             />
@@ -2389,7 +2375,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
             <div className="bg-[#0b111e]/90 border border-quantum-primary/20 rounded-2xl p-5 flex flex-col flex-1 relative overflow-hidden backdrop-blur-md">
               <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3 shrink-0">
                 <h3 className="text-xs font-mono font-bold text-quantum-primary uppercase tracking-widest flex items-center gap-1.5">
-                  <Database className="w-4 h-4 text-quantum-secondary" /> Database Scenari ({QUANTUM_SCENARIOS.length} Target)
+                  <Database className="w-4 h-4 text-quantum-secondary" /> Scenario Database ({QUANTUM_SCENARIOS.length} Targets)
                 </h3>
                 <span className="text-[10px] font-mono text-quantum-secondary bg-quantum-secondary/10 px-2 py-0.5 rounded border border-quantum-secondary/15 uppercase font-bold">
                   BI CO-COMPILER
@@ -2405,7 +2391,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Cerca scenario o variabili..."
+                    placeholder="Search scenario or variables..."
                     className="w-full bg-[#070b14]/70 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-quantum-primary transition-all font-mono"
                   />
                 </div>
@@ -2413,32 +2399,32 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                 {/* Macroarea and Tech Buttons */}
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-mono text-gray-500 uppercase">Macroarea</label>
+                    <label className="text-[9px] font-mono text-gray-500 uppercase">Macro-Area</label>
                     <select
                       value={selectedMacroarea}
                       onChange={(e) => setSelectedMacroarea(e.target.value)}
                       className="bg-[#070b14]/75 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-gray-300 focus:outline-none focus:border-quantum-primary font-mono cursor-pointer"
                     >
-                      <option value="Tutte">Tutte le Macroaree</option>
-                      <option value="Finanza e Mercati">Finanza e Mercati</option>
-                      <option value="Logistica e Smart Cities">Logistica e Smart Cities</option>
-                      <option value="Chimica e Green Tech">Chimica e Green Tech</option>
-                      <option value="Manifattura e Abbigliamento">Manifattura e Abbigliamento</option>
-                      <option value="Sanità e Genomica">Sanità e Genomica</option>
+                      <option value="Tutte">All Macro-Areas</option>
+                      <option value="Finance & Markets">Finance & Markets</option>
+                      <option value="Logistics & Smart Cities">Logistics & Smart Cities</option>
+                      <option value="Chemistry & Green Tech">Chemistry & Green Tech</option>
+                      <option value="Maintenance, Manufacturing & Apparel">Manufacturing & Apparel</option>
+                      <option value="Healthcare & Genomics">Healthcare & Genomics</option>
                       <option value="Cybersecurity">Cybersecurity</option>
                     </select>
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-mono text-gray-500 uppercase">Tecnologia</label>
+                    <label className="text-[9px] font-mono text-gray-500 uppercase">Technology</label>
                     <select
                       value={selectedTechnology}
                       onChange={(e) => setSelectedTechnology(e.target.value)}
                       className="bg-[#070b14]/75 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-gray-300 focus:outline-none focus:border-quantum-primary font-mono cursor-pointer"
                     >
-                      <option value="Tutte">Tutte le Tecnologie</option>
-                      <option value="Computer Quantistico (QPU)">Computer Quantistico (QPU)</option>
-                      <option value="IA Classica / HPC">IA Classica / HPC</option>
+                      <option value="Tutte">All Technologies</option>
+                      <option value="Computer Quantistico (QPU)">Quantum Computer (QPU)</option>
+                      <option value="IA Classica / HPC">Classical AI / HPC</option>
                     </select>
                   </div>
                 </div>
@@ -2450,7 +2436,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                   const matchSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                                       s.targetVariables.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                       s.logicType.toLowerCase().includes(searchTerm.toLowerCase());
-                  const matchArea = selectedMacroarea === 'Tutte' || s.macroarea === selectedMacroarea;
+                  const matchArea = selectedMacroarea === 'Tutte' || s.macroarea === selectedMacroarea || (selectedMacroarea === 'Finance & Markets' && s.macroarea.includes('Finanza')) || (selectedMacroarea === 'Logistics & Smart Cities' && s.macroarea.includes('Logistica')) || (selectedMacroarea === 'Chemistry & Green Tech' && s.macroarea.includes('Chimica')) || (selectedMacroarea === 'Healthcare & Genomics' && s.macroarea.includes('Sanit'));
                   const matchTech = selectedTechnology === 'Tutte' || s.technology === selectedTechnology;
                   return matchSearch && matchArea && matchTech;
                 }).map((scenario) => (
@@ -2481,7 +2467,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                         Var: {scenario.targetVariables}
                       </span>
                       <span className="text-[9px] font-mono uppercase tracking-widest text-[#00f2ff] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 font-bold shrink-0">
-                        AVVIA <Send className="w-2.5 h-2.5" />
+                        START <Send className="w-2.5 h-2.5" />
                       </span>
                     </div>
                   </div>
@@ -2493,7 +2479,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
               {/* Mapping Reduction metadata widget */}
               <div className="bg-[#0b111e]/85 border border-white/5 rounded-2xl p-5 relative overflow-hidden">
                 <h3 className="text-xs font-mono font-bold text-quantum-primary uppercase tracking-widest mb-3.5 flex items-center gap-1.5">
-                  <Database className="w-4 h-4 text-quantum-secondary" /> Data Cleaning & Riduzione Colonne
+                  <Database className="w-4 h-4 text-quantum-secondary" /> Data Cleaning & Column Reduction
                 </h3>
                 
                 {mappingSummary ? (
@@ -2504,7 +2490,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                   <div className="flex flex-col items-center justify-center text-center py-6">
                     <Info className="w-8 h-8 text-white/15 mb-2.5 animate-pulse" />
                     <p className="text-xs text-gray-500 font-mono">
-                      In attesa dell'inserimento dei dati CSV per visualizzare l'estrazione delle colonne e l'hardware allocation.
+                      Awaiting CSV data input to display column extraction and hardware allocation.
                     </p>
                   </div>
                 )}
@@ -2515,22 +2501,22 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-4.5 h-4.5 text-quantum-primary" />
                   <h4 className="text-xs font-mono text-white font-bold uppercase tracking-wider">
-                    Formulazioni Fisiche Protette
+                    Protected Physical Formulations
                   </h4>
                 </div>
                 
                 <div className="space-y-3 font-mono text-[11px] text-gray-400">
                   <div className="flex items-start gap-2 border-b border-white/5 pb-2">
                     <span className="text-quantum-secondary font-bold shrink-0">A. Clip Sec:</span>
-                    <span>P_clipped = min(max(P, 0), 1) ➔ Protegge da dislivelli NaN su anomalie di stress elevati.</span>
+                    <span>P_clipped = min(max(P, 0), 1) ➔ Protects against NaN issues on high stress anomalies.</span>
                   </div>
                   <div className="flex items-start gap-2 border-b border-white/5 pb-2">
-                    <span className="text-quantum-secondary font-bold shrink-0">B. Rotazione:</span>
-                    <span>theta = 2 * arcsin(sqrt(P_clipped)) ➔ Rigoroso mapping dello sfasamento angolare.</span>
+                    <span className="text-quantum-secondary font-bold shrink-0">B. Rotation:</span>
+                    <span>theta = 2 * arcsin(sqrt(P_clipped)) ➔ Rigorous angular phase-shift mapping.</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-quantum-secondary font-bold shrink-0">C. Comparatore:</span>
-                    <span>theta = (2 * arcsin(sqrt(Soglia))) / N ➔ Distribuzione CRY equa per accumulo energia verso il qubit target.</span>
+                    <span className="text-quantum-secondary font-bold shrink-0">C. Comparator:</span>
+                    <span>theta = (2 * arcsin(sqrt(Threshold))) / N ➔ Equal CRY distribution for energy accumulation onto target qubit.</span>
                   </div>
                 </div>
               </div>
@@ -2539,11 +2525,11 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
               <div className="flex-1 bg-[#070b14] border border-white/5 rounded-2xl overflow-hidden flex flex-col font-mono">
                 <div className="p-4 bg-white/5 border-b border-white/5 flex items-center justify-between">
                   <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-quantum-secondary" /> Mappatura Registro QASM
+                    <Layers className="w-4 h-4 text-quantum-secondary" /> QASM Register Mapping
                   </span>
                   {qasmOutput && (
                     <span className="text-[10px] text-emerald-400 uppercase font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Generato
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Generated
                     </span>
                   )}
                 </div>
@@ -2552,7 +2538,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                   {qasmOutput ? qasmOutput : (
                     <div className="h-full flex flex-col items-center justify-center text-center text-gray-500 py-10">
                       <HelpCircle className="w-8 h-8 text-white/10 mb-2" />
-                      <span>Nessun circuito attivo. Esegui la configurazione a sinistra per generare codice OpenQASM 2.0.</span>
+                      <span>No active circuit. Run the configuration on the left to generate OpenQASM 2.0 code.</span>
                     </div>
                   )}
                 </div>
@@ -2563,7 +2549,7 @@ Per eseguire la simulazione in tempo reale e trasmettere il circuito alla grigli
                       onClick={() => onSendToIbm(qasmOutput)}
                       className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-quantum-primary hover:bg-quantum-primary/90 text-quantum-bg font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-[0_0_15px_rgba(0,242,255,0.25)] hover:shadow-[0_0_22px_rgba(0,242,255,0.45)] cursor-pointer duration-200"
                     >
-                      <Cpu className="w-4 h-4 fill-current animate-pulse" /> Trasmetti codice a IBM Q QPU 🚀
+                      <Cpu className="w-4 h-4 fill-current animate-pulse" /> Transmit code to IBM Q QPU 🚀
                     </button>
                   </div>
                 )}

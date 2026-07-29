@@ -66,12 +66,12 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
   }, []);
 
   const cyclingSectors = [
-    { name: "Banca", iconId: "Landmark", id: "finance" },
-    { name: "Assicurazioni", iconId: "ShieldCheck", id: "insurance" },
-    { name: "Logistica", iconId: "Truck", id: "logistics" },
-    { name: "Telecomunicazioni", iconId: "Rss", id: "telecom" },
-    { name: "Manifattura", iconId: "Factory", id: "manufacturing" },
-    { name: "Energia", iconId: "Zap", id: "energy" },
+    { name: "Banking", iconId: "Landmark", id: "finance" },
+    { name: "Insurance", iconId: "ShieldCheck", id: "insurance" },
+    { name: "Logistics", iconId: "Truck", id: "logistics" },
+    { name: "Telecommunications", iconId: "Rss", id: "telecom" },
+    { name: "Manufacturing", iconId: "Factory", id: "manufacturing" },
+    { name: "Energy", iconId: "Zap", id: "energy" },
   ];
 
   const currentCycling = cyclingSectors[sectorRotationIndex % cyclingSectors.length];
@@ -126,7 +126,7 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
           id: 'send_to_ibm' as SectorId,
           name: 'SEND TO IBM',
           icon: 'Terminal',
-          description: 'Hardware Gateway: Invia i tuoi circuiti direttamente ai processori quantistici IBM e monitora i job in tempo reale.',
+          description: 'Hardware Gateway: Send your circuits directly to IBM quantum processors and monitor jobs in real time.',
           focus: 'Quantum Hardware Integration',
           variablesLabel: 'Jobs/Qasm',
           stressEvent: 'Network Latency',

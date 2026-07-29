@@ -80,12 +80,12 @@ export default function ApiKeyModal({ isOpen, onClose, onKeySaved }: ApiKeyModal
                   Google AI Studio API Key
                   {hasExistingKey && (
                     <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-green-500/20 border border-green-500/40 text-green-400 rounded-full flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" /> ATTIVA
+                      <ShieldCheck className="w-3 h-3" /> ACTIVE
                     </span>
                   )}
                 </h3>
                 <p className="text-xs text-gray-400">
-                  Configura la chiave API per attivare le funzioni avanzate di intelligenza quantistica.
+                  Configure your API Key to enable advanced quantum intelligence features.
                 </p>
               </div>
             </div>
@@ -101,7 +101,7 @@ export default function ApiKeyModal({ isOpen, onClose, onKeySaved }: ApiKeyModal
                     rel="noopener noreferrer"
                     className="text-[11px] text-quantum-primary hover:underline flex items-center gap-1 font-sans capitalize"
                   >
-                    Ottieni chiave gratis <ExternalLink className="w-3 h-3" />
+                    Get free key <ExternalLink className="w-3 h-3" />
                   </a>
                 </label>
 
@@ -127,7 +127,7 @@ export default function ApiKeyModal({ isOpen, onClose, onKeySaved }: ApiKeyModal
               {savedSuccess && (
                 <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-xs flex items-center gap-2 font-mono">
                   <Check className="w-4 h-4 shrink-0" />
-                  Chiave API salvata con successo nel localStorage!
+                  API Key saved successfully in localStorage!
                 </div>
               )}
 
@@ -140,11 +140,11 @@ export default function ApiKeyModal({ isOpen, onClose, onKeySaved }: ApiKeyModal
                 >
                   {savedSuccess ? (
                     <>
-                      <Check className="w-4 h-4" /> Salvato
+                      <Check className="w-4 h-4" /> Saved
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4" /> Salva Chiave
+                      <Sparkles className="w-4 h-4" /> Save Key
                     </>
                   )}
                 </button>
@@ -155,14 +155,14 @@ export default function ApiKeyModal({ isOpen, onClose, onKeySaved }: ApiKeyModal
                     onClick={handleRemove}
                     className="w-full sm:w-auto py-3 px-4 border border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold uppercase tracking-wider text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Trash2 className="w-4 h-4" /> Rimuovi
+                    <Trash2 className="w-4 h-4" /> Remove
                   </button>
                 )}
               </div>
             </form>
 
             <div className="mt-6 pt-4 border-t border-white/5 text-[11px] text-gray-500 leading-relaxed">
-              💡 La tua API Key viene memorizzata esclusivamente nel <code className="text-gray-400">localStorage</code> del tuo browser e non viene inviata a nessun server esterno diverso dalle API ufficiali Google AI Studio.
+              💡 Your API Key is stored exclusively in your browser's <code className="text-gray-400">localStorage</code> and is never sent to any external server other than official Google AI Studio APIs.
             </div>
           </motion.div>
         </div>

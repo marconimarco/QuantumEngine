@@ -69,10 +69,10 @@ export default function OptimizeDenoise() {
     } catch (error: any) {
       console.error(error);
       if (error?.message === 'API_KEY_MISSING' || !getStoredApiKey()) {
-        setErrorMsg("Google AI Studio API Key non configurata. Inserisci una chiave API per utilizzare l'ottimizzazione.");
+        setErrorMsg("Google AI Studio API Key not configured. Please enter an API key to use optimization.");
         setIsKeyModalOpen(true);
       } else {
-        setErrorMsg("Errore durante l'ottimizzazione del codice. Verifica la tua API Key o riprova.");
+        setErrorMsg("Error optimizing code. Please check your API Key or try again.");
       }
     } finally {
       setIsProcessing(false);
@@ -186,7 +186,7 @@ export default function OptimizeDenoise() {
             onClick={() => setIsKeyModalOpen(true)}
             className="px-3 py-1.5 bg-amber-400 text-black font-bold uppercase text-[10px] rounded-lg hover:bg-amber-300 transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
           >
-            <Key className="w-3.5 h-3.5" /> Imposta Key
+            <Key className="w-3.5 h-3.5" /> Set Key
           </button>
         </div>
       )}

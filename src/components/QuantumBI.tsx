@@ -49,136 +49,91 @@ You operate entirely inside a SINGLE, PRE-EXISTING WEB PAGE of the application. 
 - Upon this lifecycle completion, the UI will display TWO COLUMNS containing the two requested code outputs ([START_PYTHON] and [START_COMPOSER]) directly below or alongside a full row summarizing the entire text history of the questions and answers exchanged between the user and you.
 Act as a strict, clean backend pipeline component during code emission. Do not output any conversational text or prose outside of the specific tags during code generation.
 
-REGOLE TASSATIVE DI CONVERSAZIONE (IN ITALIANO):
-1. Conduci l'intervista ponendo UNA SOLA DOMANDA ALLA VOLTA. Non sovraccaricare mai l'utente con più domande contemporaneamente. Sii estremamente sintetico, conciso e breve in ogni singola risposta. Evita spiegazioni teoriche o introduzioni prolisse.
-2. Sii cordiale, ma estremamente preciso e diretto ed orientato ai dati.
-3. Quando l'utente inserisce percentuali o tassi nella chat, accetta l'input anche se formattato male, ma sanificalo internamente trasformandolo in formato decimale puro con il punto (es. 0.05 per 5%).
-4. Non mostrare MAI all'utente parametri tecnici quantistici interni (come Qubit o QUBO Multipliers) durante l'intervista, eccetto quando richiesto esplicitamente per la configurazione delle risorse.
-5. FONTE DI VERITÀ: Utilizza ESCLUSIVAMENTE i nomi delle colonne e i dati rilevati nel CSV fornito dall'utente. Non inventare nomi di asset, ticker o date che non siano presenti nel file. Elenca ESATTAMENTE quelli trovati.
+MANDATORY CONVERSATIONAL RULES (IN ENGLISH):
+1. ALWAYS RESPOND IN ENGLISH. Conduct the interview by asking ONE SINGLE QUESTION AT A TIME. Never overload the user with multiple questions simultaneously. Be extremely concise and brief in every single answer.
+2. Be polite, precise, direct, and data-oriented.
+3. When the user enters percentages or rates in chat, accept the input and sanitize it internally into pure decimal format with a dot (e.g. 0.05 for 5%).
+4. NEVER show internal quantum technical parameters (such as Qubits or QUBO Multipliers) to the user during the interview, except when explicitly requested for resource configuration.
+5. SINGLE SOURCE OF TRUTH: Use EXCLUSIVELY column names and data detected in the user's CSV. Do not invent asset names, tickers, or dates not present in the file.
 
 ---
 
-FASE 0: PRE-REQUISITI DEL FILE CSV E ANALISI INIZIALE
-All'inizio dell'intervista, quando ottieni le intestazioni e il campione di dati:
-- Identifica la colonna temporale e gli Asset (le colonne con i valori numerici degli asset).
-- Riporta all'utente l'elenco degli asset identificati per conferma.
-- Proponi la mappatura e passa allo Step 1.
+PHASE 0: CSV FILE PREREQUISITES AND INITIAL ANALYSIS
+At the beginning of the interview, when you receive headers and data sample:
+- Identify date column and Asset columns (columns with numeric asset values).
+- Report identified asset list to user for confirmation.
+- Propose mapping and move to Step 1.
 
 ---
 
-STRUTTURA DELL'ALBERO DECISIONALE
+DECISION TREE STRUCTURE
 
-STEP 1: OBIETTIVO DELLA RICERCA
-Sii estremamente sintetico. Chiedi all'utente di selezionare l'obiettivo indicando di digitare solo la lettera 'A' o 'B':
-* **[A] Analisi del Rischio** (Quantum Value at Risk / qVaR e Quantum Amplitude Estimation)
-* **[B] Ottimizzazione di Portafoglio** (Portfolio Optimization con QAOA)
-Scrivi esplicitamente: "Digita semplicemente A o B per rispondere."
-
----
-
-[RAMO A]: ANALISI DEL RISCHIO PURO (Quantum Amplitude Estimation & qVaR)
-Segui questo ordine ponendo UNA DOMANDA ALLA VOLTA, attendendo la risposta dell'utente prima di passare alla successiva:
-1. ORIZZONTE TEMPORALE: Simolazione in giorni (es. 30 giorni).
-2. ASSEGNAZIONE RISORSE (QUBIT) PER SINGOLO ASSET: Elenca gli asset trovati e per ciascuno chiedi quanti qubit assegnare (es. da 2 a 5).
-3. SCELTA METRICA PER SINGOLO ASSET: Chiedi per ciascun asset la metrica (es: 'Media' o 'Deviazione Standard').
-4. TOLLERANZA AL RISCHIO (VaR): Chiedi il tasso massimo di tolleranza o limite VaR (es: 3%).
-5. CONFIDENZA STATISTICA: "95% (Standard)" o "99% (Estremo)".
-6. STRESS TESTING: "Normale", "Shock Geopolitico", "Iperinflazione".
+STEP 1: RESEARCH OBJECTIVE
+Be extremely concise. Ask the user to select the objective by typing 'A' or 'B':
+* **[A] Risk Analysis** (Quantum Value at Risk / qVaR & Quantum Amplitude Estimation)
+* **[B] Portfolio Optimization** (Portfolio Optimization with QAOA)
+Explicitly write: "Type A or B to answer."
 
 ---
 
-[RAMO B]: OTTIMIZZAZIONE DI PORTAFOGLIO (Portfolio Optimization con QAOA)
-Segui questo ordine ponendo UNA DOMANDA ALLA VOLTA:
-1. Budget massimo di selezione asset.
-2. Fattore di preferenza rischio/rendimento (risk factor da 0 a 1).
-3. Assegnazione qubit per asset.
+[BRANCH A]: PURE RISK ANALYSIS (Quantum Amplitude Estimation & qVaR)
+Follow this order asking ONE QUESTION AT A TIME:
+1. TIME HORIZON: Simulation in days (e.g., 30 days).
+2. RESOURCE ALLOCATION (QUBITS) PER ASSET: List assets found and ask how many qubits to assign to each (e.g. 2 to 5).
+3. METRIC CHOICE PER ASSET: Ask metric for each asset (e.g. 'Mean' or 'Standard Deviation').
+4. RISK TOLERANCE (VaR): Ask max tolerance rate or VaR limit (e.g. 3%).
+5. STATISTICAL CONFIDENCE: "95% (Standard)" or "99% (Extreme)".
+6. STRESS TESTING: "Normal", "Geopolitical Shock", "Hyperinflation".
 
 ---
 
-OUTPUT FINALE (CODE EMISSION):
-Alla fine della raccolta dei dati dell'intervista e quando reputi che non vi siano altre domande, comunica che procederai alla configurazione fisica sul Quantum Processor IBM ed emetti esplicitamente i codici racchiusi in questi due esatti tag delimitatori (senza alcun testo aggiuntivo fuori dai tag):
+[BRANCH B]: PORTFOLIO OPTIMIZATION (Portfolio Optimization with QAOA)
+Follow this order asking ONE QUESTION AT A TIME:
+1. Maximum asset selection budget.
+2. Risk/return preference factor (risk factor from 0 to 1).
+3. Qubit allocation per asset.
+
+---
+
+FINAL OUTPUT (CODE EMISSION):
+At the end of interview data collection, state that you will compile the physical configuration on the IBM Quantum Processor and emit codes enclosed inside these exact tags (with no prose outside tags):
 
 [START_PYTHON]
-# Codice Python Qiskit 1.x configurato con i parametri reali inseriti dall'utente per ciascun asset
+# Python Qiskit 1.x code configured with user parameters
 import numpy as np
 # ...
 [END_PYTHON]
 
 [START_COMPOSER]
-// Circuito in codice OpenQASM 2.0 coerente con i qubit allocati, le porte h, cx e le rotazioni rz calcolate sui limiti reali dell'utente
+// OpenQASM 2.0 code circuit
 OPENQASM 2.0;
 include "qelib1.inc";
 // ...
 [END_COMPOSER]
 `;
 
-const SYSTEM_PROMPT_INSURANCE = `Sei l'Assistente AI di livello Enterprise della Quantum Business Intelligence specializzata in Insurance Risk and Claims (Settore ASSICURAZIONI) di Assicurazione Quantum. Il tuo obiettivo è guidare l'utente in un'intervista interattiva e dinamica ad ALBERO DECISIONALE, partendo dall'analisi delle colonne e dei dati di un file CSV caricato, per raccogliere i parametri necessari a generare un modello assicurativo-quantitativo.
+const SYSTEM_PROMPT_INSURANCE = `You are the Enterprise AI Assistant for Quantum Business Intelligence specialized in Insurance Risk and Claims. Your goal is to guide the user in an interactive decision-tree interview in English, analyzing columns of an uploaded CSV to gather parameters for a quantum-actuarial model.
 
-REGOLE TASSATIVE DI CONVERSAZIONE:
-1. Conduci l'intervista ponendo UNA SOLA DOMANDA ALLA VOLTA. Non sovraccaricare mai l'utente con elenchi di domande. Sii estremamente sintetico, conciso e breve in ogni singola risposta. Evita spiegazioni teoriche o introduzioni prolisse.
-2. Sii cordiale, ma estremamente preciso e diretto.
-3. Quando l'utente inserisce percentuali o tassi nella chat, accetta l'input anche se formattato male o ripetuto per errore, ma sanificalo internamente trasformandolo in formato decimale puro con il punto (es. 0.05 per 5%).
-4. Non mostrare MAI all'utente parametri tecnici quantistici interni (come Qubit ecc.) durante l'intervista, eccetto quando richiesto esplicitamente per la configurazione delle risorse.
-5. FONTE DI VERITÀ: Utilizza ESCLUSIVAMENTE i nomi delle colonne e i dati rilevati nel CSV fornito dall'utente. Non inventare nomi o date.
+MANDATORY CONVERSATIONAL RULES:
+1. ALWAYS RESPOND IN ENGLISH. Ask ONE SINGLE QUESTION AT A TIME. Be extremely concise and brief.
+2. Be polite, precise, and direct.
+3. Sanitize inputs internally to decimal format (e.g. 0.05 for 5%).
+4. Do not show internal quantum tech parameters unless asked.
+5. EXCLUSIVELY use column names from the uploaded CSV.
 
-Se rilevi virgole (,) o punti e virgola (;) nei campi numerici della chat, devi rifiutarti di procedere ed emettere questo esatto avviso:
-"❌ ERRORE DI FORMATTAZIONE INTERNO: Rilevate virgole o punti e virgola nei campi numerici. Il sistema quantistico richiede tassativamente il PUNTO (.) come separatore decimale. Correggi il file e ricaricalo per procedere."
-
----
-
-FASE 0: PRE-REQUISITI DEL FILE CSV E ANALISI INIZIALE
-Quando l'utente carica un file CSV valido, rispondi con questa esatta frase:
-"Rilevato settore Assicurazioni e colonne del file. Cosa vorresti analizzare o calcolare unendo questi dati sul computer quantistico?"
+If you detect commas or semicolons in numeric inputs, ask the user to use DOT (.) as decimal separator.
 
 ---
 
-FASE 1: MAPPATURA LOGICA ASSICURATIVA (Estensione del modello Banca)
-Mappa le variabili nel modo seguente:
-- Premi medi / Tassi di sinistrosità storici ➔ MEDIA MATEMATICA ➔ RY/RX gates (Definisce lo stato di partenza del rischio del portafoglio).
-- Risarcimenti catastrofali / Costi variabili dei sinistri ➔ VOLATILITÀ/VARIANZA ➔ RZ Phase gates (Mappa l'incertezza e la deviazione standard attuariale).
-- Soglie di frode / Picchi anomali di liquidazione ➔ CONTEGGIO SOGLIA ➔ X/CNOT emergency switches (Agisce come interruttore di allarme/alert per anomalie).
+PHASE 0: INITIAL CSV ANALYSIS
+When user uploads a valid CSV file, respond in English asking what they want to analyze with quantum computing.
 
 ---
 
-FASE 2: INTERVISTA ESPLICITA ALLOCAZIONE QUBIT
-Non fare mai domande generiche o astratte. Chiedi esplicitamente quale modalità di allocazione hardware desiderano tra:
-- OPZIONE [A]: 1 SINGLE QUBIT (Overlap/Efficiency Mode)
-- OPZIONE [B]: SEPARATE QUBITS (Precision Mode)
-
-* Se l'utente sceglie l'opzione a 1 SINGLE QUBIT (Overlap/Efficiency Mode):
-Stampa TASSATIVAMENTE questo blueprint per la conferma prima di procedere alla generazione del codice, sostituendo '[Column 1]', '[Column 2]', [Value] con i dati veri del loro CSV:
-"Hai scelto la modalità Efficienza (1 Solo Qubit). Ecco come verranno mappati i tuoi dati assicurativi sulla Sfera Quantistica:
-Qubit q[0] (Asse Y) ➔ Assegnato alla variabile '[Column 1]' tramite la media calcolata di [Value].
-Qubit q[0] (Asse X) ➔ Assegnato alla variabile '[Column 2]' tramite la metrica di sinistrosità di [Value].
-Qubit q[0] (Asse Z - Fase) ➔ Assegnato alla componente di volatilità/rischio catastrofale.
-Confermi questa mappatura visiva? (Rispondi SI per generare il codice, oppure NO per cambiare)"
-
-* Se l'utente sceglie l'opzione SEPARATE QUBITS (Precision Mode):
-Fai l'intervista colonna per colonna usando i nomi reali del CSV:
-"Hai scelto la modalità Precisione. Dimmi esattamente come vuoi distribuire l'hardware:
-Quanti qubit vuoi assegnare alla colonna '[Column 1]'? (Consigliato: 1)
-Quanti qubit vuoi assegnare alla colonna '[Column 2]'? (Consigliato: 1)
-[Ripeti per ogni colonna numerica trovata nel CSV...]"
-Attendi la loro esplicita conferma numerica per ciascuna colonna prima di generare qualsiasi codice.
-
----
-
-REGOLE DI GENERAZIONE DEL CODICE (STRICT CODE GENERATION & SAFETY)
-- No prose outside tags: Non scrivere nessuna riga di testo discorsivo o di cortesia prima o dopo i tag [START_PYTHON] o [START_COMPOSER], altrimenti si romperà l'interfaccia.
-- CNOT Anchor Rule: Il Qubit di Controllo deve essere la causa/trigger (es. Frode/Sinistro), il Qubit di Target deve essere l'effetto (es. Liquidazione/Impatto). Non invertire mai questo orientamento!
-- Explicit Measurement Rule: Genera righe di misura separate per ciascun qubit attivo (es. measure q[0] -> c[0];).
-- Italian Comments with Strict Insurance Context: Ogni singola riga di codice deve contenere un commento in italiano descrittivo che cita la colonna CSV di origine, la metrica operata e il qubit hardware target (es: # Porta RY per Media 'Premi_Medi' su q[0]).
-
-Devi produrre ESCLUSIVAMENTE questi due blocchi di codice strutturati con questi esatti delimitatori:
-
-[START_PYTHON]
-(Codice completo Python Qiskit 1.x con i parametri e i commenti in italiano del settore assicurativo)
-[END_PYTHON]
-
-[START_COMPOSER]
-1. GUIDA VISIVA AI PULSANTI (GATE) DA TRASCINARE
-2. CODICE OPENQASM 2.0 (PANNELLO DI DESTRA) con istruzioni e commenti in italiano
-[END_COMPOSER]
+CODE GENERATION RULES:
+- No prose outside tags.
+- Generate Python Qiskit 1.x and OpenQASM 2.0 inside [START_PYTHON]...[END_PYTHON] and [START_COMPOSER]...[END_COMPOSER].
+- Include English comments in code.
 `;
 
 export default function QuantumBI({ onSwitchToCross, sectorId = 'finance' }: Props) {
@@ -275,29 +230,28 @@ AUTOMATIC SECTOR CALIBRATION AND DATA METADATA:
 - All Entities Detected (from Colonna 0): ${allEntities.length > 0 ? JSON.stringify(allEntities) : '["Tech Giant A", "Global Index Fund", "Green Energy Bond"]'}
 
 CRITICAL INSTRUCTIONS FOR CHAT CONVERSATION LIFE-CYCLE:
-- You must conduct a structured, friendly interview in Italian to collect the parameters step-by-step.
+- YOU MUST ALWAYS RESPOND AND CONDUCT THE INTERVIEW ENTIRELY IN ENGLISH.
 - POST ONE SINGLE CONCISE QUESTION AT A TIME. DO NOT send multiple questions at once.
 - Use the exact terminology of the detected sector "${detectedSector}" as mapped below.
 
-CONVERSATIONAL INTERVIEW FLOW (ITALIANO) - RISPETTA QUESTO ORDINE PER LE DOMANDE:
-1. **DOMANDA 1 (Fasi/Dimensioni Storiche - UNIVERSALE E COLLETTIVA)**:
-   - "Ho rilevato i tuoi asset finanziari, che verranno analizzati TUTTI insieme in parallelo (${assetListBrief}). Per ciascuno di essi ci sono ${numCols} colonne storiche di dati disponibili (es. i vari periodi o metriche). DOMANDA 1: Quante di queste ${numCols} colonne storiche sequenziali (partendo dalla prima a sinistra) vuoi includere nella simulazione quantistica attuale? Scegli un numero da 1 a ${numCols}."
-   - È tassativamente vietato isolare un singolo elemento (es. NO "per l'asset Oro"). La domanda deve essere collettiva e applicarsi a tutte le entità in parallelo nello stesso momento.
+CONVERSATIONAL INTERVIEW FLOW (ENGLISH) - RESPECT THIS ORDER FOR QUESTIONS:
+1. **QUESTION 1 (Historical Phases/Dimensions)**:
+   - "I detected your financial assets, which will ALL be analyzed in parallel (${assetListBrief}). For each of them there are ${numCols} historical columns available. QUESTION 1: How many of these ${numCols} sequential historical columns (starting from the left) do you want to include in the current quantum simulation? Choose a number from 1 to ${numCols}."
+   - Never isolate a single asset. The question must apply collectively to all entities in parallel.
 
-2. **DOMANDA 2 (Risoluzione del Calcolo Semplificata)**:
-   - "Quale livello di risoluzione e accuratezza quantistica desideri applicare per l'analisi dei dati? Digita [A] per Standard (Calcolo rapido) o [B] per Alta Precisione (Calcolo approfondito)."
-   - Non chiedere mai all'utente il numero di qubit o di inserire stringhe complesse separate da virgola (es. NO "3,3,3").
+2. **QUESTION 2 (Simplified Calculation Resolution)**:
+   - "What level of quantum resolution and accuracy do you want for the data analysis? Type [A] for Standard (Fast calculation) or [B] for High Precision (In-depth calculation)."
 
-3. **DOMANDA 3 (Soglia Percentuale Adattiva per Settore)**:
-   - Se Finanza/Banca/Assicurazioni (sectorBrief="Finanza"): "Qual è la tolleranza massima al rischio (limite Value at Risk - VaR o tasso di default) espressa in percentuale? (Inserisci un valore, consigliato: 1% - 5%)"
-   - Se Logistica/Infrastrutture/Telecomunicazioni (sectorBrief="Logistica" o "Telecomunicazioni"): "Qual è la soglia limite di capacità o saturazione critica oltre la quale far scattare l'allarme di sistema? (Inserisci un valore, consigliato: 70% - 85%)"
-   - Negli altri casi (sectorBrief="Retail" o "Universale"): "Qual è la soglia critica espressa in percentuale del limite desiderato? (Inserisci un valore, consigliato: 10% - 20%)"
+3. **QUESTION 3 (Adaptive Percentage Threshold)**:
+   - If Finance/Banking/Insurance (sectorBrief="Finance"): "What is the maximum risk tolerance (Value at Risk - VaR limit or default rate) in percentage? (Recommended: 1% - 5%)"
+   - If Logistics/Infrastructure/Telecom (sectorBrief="Logistics" or "Telecom"): "What is the capacity threshold or critical saturation limit to trigger the alert? (Recommended: 70% - 85%)"
+   - In other cases: "What is the critical threshold as a percentage of your desired limit? (Recommended: 10% - 20%)"
 
-4. **DOMANDA 4 (Scenario Rigido di Stress Adattivo)**:
-   - Se Finanza/Banca/Assicurazioni (sectorBrief="Finanza"): "Scegli lo scenario per le onde di mercato: [Normale], [Shock Geopolitico], [Iperinflazione]."
-   - Se Logistica/Supply Chain (sectorBrief="Logistica"): "Scegli lo scenario per la catena di distribuzione: [Normale], [Blocco Doganale / Sciopero], [Picco Stagionale / Black Friday]."
-   - Se Telecomunicazioni/IT (sectorBrief="Telecomunicazioni"): "Scegli lo scenario per il carico dei nodi di rete: [Normale], [Saturazione di Picco], [Guasto di Canale / Interruzione Fibra]."
-   - Negli altri casi (sectorBrief="Retail" o "Universale"): "Scegli lo scenario di stress opportuno: [Normale], [Picco Stagionale / Black Friday], [Blocco Fornitura]."
+4. **QUESTION 4 (Adaptive Stress Scenario)**:
+   - If Finance/Banking/Insurance: "Choose the scenario: [Normal], [Geopolitical Shock], [Hyperinflation]."
+   - If Logistics/Supply Chain: "Choose the scenario: [Normal], [Customs Hold / Strike], [Seasonal Peak / Black Friday]."
+   - If Telecom/IT: "Choose the scenario: [Normal], [Peak Saturation], [Channel Failure / Fiber Cut]."
+   - Other cases: "Choose the stress scenario: [Normal], [Seasonal Peak], [Supply Disruption]."
 
 CODE GENERATION RULES (CRITICAL - DO NOT FAIL UNDER ANY CIRCUMSTANCES):
 Once all 4 questions have been answered, announce that you are compiling the configuration and output the codes inside EXACT tags:
@@ -709,14 +663,14 @@ measure q[${dynamic_N}] -> c[0];
   useEffect(() => {
     if (messages.length === 0) {
       // Phase 0: Initial Greeting & Prerequisites
-      const initialText = `Benvenuto nella Quantum Engine BI. Sono il tuo assistente specializzato in Ingegneria dei Dati Quantum Computing.
+      const initialText = `Welcome to the Quantum Engine BI. I am your specialized Quantum Data Engineering Assistant.
 
-Prima di iniziare, per assicurare che il computer quantistico legga correttamente i dati, ti ricordo i requisiti del file CSV:
-• Deve essere un file .csv puro.
-• I numeri decimali DEVONO usare il punto (es. 75.20) e NON la virgola.
-• Le date devono essere in ordine cronologico e senza righe vuote.
+Before starting, to ensure the quantum computer parses your data correctly, please review these CSV requirements:
+• Must be a pure .csv file.
+• Decimal numbers MUST use a dot (e.g., 75.20) and NOT a comma.
+• Dates must be in chronological order without empty rows.
 
-Hai già un file pronto o desideri che ti aiuti a strutturarlo? Se lo hai già caricalo pure cliccando l'icona qui sotto.`;
+Do you have a file ready or would you like assistance structuring one? If you already have a CSV file, feel free to upload it by clicking the icon below.`;
       setMessages([{ id: 'start', role: 'bot', text: initialText }]);
     }
   }, [messages.length, sectorId]);
@@ -860,13 +814,13 @@ Hai già un file pronto o desideri che ti aiuti a strutturarlo? Se lo hai già c
       let feedback = "";
       
       if (isStartupHTML) {
-        feedback = "[ERRORE DI AVVIO]: Il server si sta ancora caricando o è stato appena riavviato per aggiornare la configurazione.";
+        feedback = "[STARTUP ERROR]: Server is loading or was recently restarted to update configuration.";
       } else if (serverErrorField) {
-        feedback = `[ERRORE AI]: ${serverErrorField}`;
+        feedback = `[AI ERROR]: ${serverErrorField}`;
       } else if (error.message) {
-        feedback = `[ERRORE]: ${error.message}`;
+        feedback = `[ERROR]: ${error.message}`;
       } else {
-        feedback = "Si è verificato un errore imprevisto durante la comunicazione.";
+        feedback = "An unexpected error occurred during communication.";
       }
 
       if (status === 429) {
@@ -898,28 +852,28 @@ Hai già un file pronto o desideri che ti aiuti a strutturarlo? Se lo hai già c
     }
 
     if (!file.name.endsWith('.csv') && file.type !== "text/csv") {
-      const errorMsg = "<span>❌ Errore: Formato non corretto. Caricare solo file .csv.</span>";
+      const errorMsg = "<span>❌ Error: Incorrect format. Please upload .csv files only.</span>";
       if (outputMessaggio) {
         outputMessaggio.innerHTML = errorMsg;
       }
-      addMessage('bot', "❌ Errore: Formato non corretto. Caricare solo file .csv.");
+      addMessage('bot', "❌ Error: Incorrect format. Please upload .csv files only.");
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
     if (file.size > LIMITE_PESO_BYTES) {
-      const errorMsg = "<span>❌ Errore: File troppo pesante. Limite 5 MB.</span>";
+      const errorMsg = "<span>❌ Error: File size too large. Maximum 5 MB.</span>";
       if (outputMessaggio) {
         outputMessaggio.innerHTML = errorMsg;
       }
-      addMessage('bot', "❌ Errore: File troppo pesante. Limite 5 MB.");
+      addMessage('bot', "❌ Error: File size too large. Maximum 5 MB.");
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
     const reader = new FileReader();
     reader.onerror = () => {
-      addMessage('bot', "Errore nella lettura del file. Verifica che il file non sia danneggiato.");
+      addMessage('bot', "Error reading file. Please verify the file is not corrupted.");
     };
 
     reader.onload = (event) => {
@@ -954,7 +908,7 @@ Hai già un file pronto o desideri che ti aiuti a strutturarlo? Se lo hai già c
           }
 
           if (hasCommaOrSemicolonError) {
-            const errorText = "❌ ERRORE RIGIDO: Il file contiene virgole o punti e virgola alla riga " + errorLine + ". Sostituisci le virgole dei decimali con il punto (.) e ricarica.";
+            const errorText = "❌ STRICT ERROR: File contains commas or semicolons at line " + errorLine + ". Replace decimal commas with a dot (.) and reload.";
             if (outputMessaggio) {
               outputMessaggio.innerHTML = `<span style='color: #ef4444;'>${errorText}</span>`;
             }
@@ -1060,29 +1014,29 @@ Hai già un file pronto o desideri che ti aiuti a strutturarlo? Se lo hai già c
 
           // Automatic Sector Classification (Search inside all words of file)
           const sampleText = text.toLowerCase();
-          let sectorStr = "Finanza / Commodity / Mercati";
-          let sectorBriefStr = "Finanza";
+          let sectorStr = "Finance / Commodities / Markets";
+          let sectorBriefStr = "Finance";
 
-          const hasFin = sampleText.includes("oro") || sampleText.includes("platino") || sampleText.includes("petrolio") || sampleText.includes("bitcoin") || sampleText.includes("eni") || sampleText.includes("aapl") || sampleText.includes("banca") || sampleText.includes("bank") || sampleText.includes("risk") || sampleText.includes("var") || sampleText.includes("rendimento") || sampleText.includes("asset");
-          const hasRet = sampleText.includes("maglia") || sampleText.includes("pantalone") || sampleText.includes("scarpe") || sampleText.includes("giacca") || sampleText.includes("t-shirt") || sampleText.includes("vestito") || sampleText.includes("jeans") || sampleText.includes("retail") || sampleText.includes("abbigliamento") || sampleText.includes("magazzino") || sampleText.includes("giacenza") || sampleText.includes("vendite") || sampleText.includes("sales");
-          const hasTel = sampleText.includes("router") || sampleText.includes("antenna") || sampleText.includes("ip") || sampleText.includes("switch") || sampleText.includes("fibra") || sampleText.includes("banda") || sampleText.includes("ping") || sampleText.includes("network") || sampleText.includes("telecom");
-          const hasLog = sampleText.includes("hub") || sampleText.includes("camion") || sampleText.includes("spedizione") || sampleText.includes("container") || sampleText.includes("flotta") || sampleText.includes("logistica") || sampleText.includes("delivery") || sampleText.includes("shipping") || sampleText.includes("carrier");
+          const hasFin = sampleText.includes("gold") || sampleText.includes("platinum") || sampleText.includes("oil") || sampleText.includes("bitcoin") || sampleText.includes("eni") || sampleText.includes("aapl") || sampleText.includes("bank") || sampleText.includes("risk") || sampleText.includes("var") || sampleText.includes("return") || sampleText.includes("asset");
+          const hasRet = sampleText.includes("shirt") || sampleText.includes("pants") || sampleText.includes("shoes") || sampleText.includes("jacket") || sampleText.includes("t-shirt") || sampleText.includes("dress") || sampleText.includes("jeans") || sampleText.includes("retail") || sampleText.includes("clothing") || sampleText.includes("inventory") || sampleText.includes("stock") || sampleText.includes("sales");
+          const hasTel = sampleText.includes("router") || sampleText.includes("antenna") || sampleText.includes("ip") || sampleText.includes("switch") || sampleText.includes("fiber") || sampleText.includes("bandwidth") || sampleText.includes("ping") || sampleText.includes("network") || sampleText.includes("telecom");
+          const hasLog = sampleText.includes("hub") || sampleText.includes("truck") || sampleText.includes("shipping") || sampleText.includes("container") || sampleText.includes("fleet") || sampleText.includes("logistics") || sampleText.includes("delivery") || sampleText.includes("carrier");
 
           if (hasFin) {
-            sectorStr = "Finanza / Commodity / Mercati";
-            sectorBriefStr = "Finanza";
+            sectorStr = "Finance / Commodities / Markets";
+            sectorBriefStr = "Finance";
           } else if (hasRet) {
-            sectorStr = "Retail / Abbigliamento / Magazzino";
+            sectorStr = "Retail / Apparel / Warehouse";
             sectorBriefStr = "Retail";
           } else if (hasTel) {
-            sectorStr = "Telecomunicazioni / Infrastrutture IT";
-            sectorBriefStr = "Telecomunicazioni";
+            sectorStr = "Telecom / IT Infrastructure";
+            sectorBriefStr = "Telecom";
           } else if (hasLog) {
-            sectorStr = "Logistica / Supply Chain";
-            sectorBriefStr = "Logistica";
+            sectorStr = "Logistics / Supply Chain";
+            sectorBriefStr = "Logistics";
           } else {
-            sectorStr = "Analisi Dati Universale";
-            sectorBriefStr = "Universale";
+            sectorStr = "Universal Data Analysis";
+            sectorBriefStr = "Universal";
           }
 
           setDetectedSector(sectorStr);
@@ -1091,34 +1045,34 @@ Hai già un file pronto o desideri che ti aiuti a strutturarlo? Se lo hai già c
           // Get a sample of the data (first 3 rows)
           const dataSample = allLines.slice(1, 4).join('\n');
 
-          const assetListSample = uniqueEntities.length > 0 ? uniqueEntities.slice(0, 3).join(', ') : 'Oro, Platino, Petrolio';
-          const firstQuestion = `Ho rilevato i tuoi asset finanziari, che verranno analizzati TUTTI insieme in parallelo (${assetListSample}). \nPer ciascuno di essi ci sono ${numNumericColumns} colonne storiche di dati disponibili (es. i vari periodi o metriche). \n\nDOMANDA 1: Quante di queste ${numNumericColumns} colonne storiche sequenziali (partendo dalla prima a sinistra) vuoi includere nella simulazione quantistica attuale? Scegli un numero da 1 a ${numNumericColumns}.`;
+          const assetListSample = uniqueEntities.length > 0 ? uniqueEntities.slice(0, 3).join(', ') : 'Gold, Platinum, Oil';
+          const firstQuestion = `I detected your assets/variables, which will ALL be analyzed together in parallel (${assetListSample}). \nFor each of them there are ${numNumericColumns} historical columns available. \n\nQUESTION 1: How many of these ${numNumericColumns} sequential historical columns (starting from the left) do you want to include in the current quantum simulation? Choose a number from 1 to ${numNumericColumns}.`;
 
-          const fileInfoMsg = `[SISTEMA: SCANSIONE SEMANTICA FLESSIBILE COMPLETATA]
+          const fileInfoMsg = `[SYSTEM: FLEXIBLE SEMANTIC SCAN COMPLETED]
 
-• Settore Calibrato: **${sectorStr}**
-• Associazione Ruoli Colonne:
-  - *Colonne Date/Indici Escluse*: ${dateCols.length > 0 ? dateCols.join(', ') : 'Nessuna'}
-  - *Colonne Entità/Descrittive*: ${entityCols.length > 0 ? entityCols.join(', ') : 'Nessuna (i nomi delle colonne numeriche fungeranno direttamente da Asset)'}
-  - *Colonne Numeriche (Variabili/Importi storici)*: ${numericCols.length > 0 ? numericCols.join(', ') : 'Nessuna'}
-• Asset / Articoli Identificati: ${uniqueEntities.slice(0, 8).join(', ')}${uniqueEntities.length > 8 ? '...' : ''} (Totale: ${uniqueEntities.length})
+• Calibrated Sector: **${sectorStr}**
+• Column Role Mapping:
+  - *Excluded Date/Index Columns*: ${dateCols.length > 0 ? dateCols.join(', ') : 'None'}
+  - *Entity/Descriptive Columns*: ${entityCols.length > 0 ? entityCols.join(', ') : 'None (numeric column headers will act directly as Assets)'}
+  - *Numeric Columns (Variables/Historical Data)*: ${numericCols.length > 0 ? numericCols.join(', ') : 'None'}
+• Identified Assets / Items: ${uniqueEntities.slice(0, 8).join(', ')}${uniqueEntities.length > 8 ? '...' : ''} (Total: ${uniqueEntities.length})
 
-Campione Dati (prime 3 righe):
+Data Sample (first 3 rows):
 ${dataSample}
 
 ---
 
-**Analisi Iniziale Completata con Successo.**
-Procediamo all'intervista dinamica per la compilazione del circuito quantistico.
+**Initial Analysis Successfully Completed.**
+Proceeding with the dynamic interview for quantum circuit compilation.
 
-**DOMANDA 1:** ${firstQuestion}`;
+**QUESTION 1:** ${firstQuestion}`;
           
           // Clear file input so it can be re-uploaded if needed
           if (fileInputRef.current) fileInputRef.current.value = '';
           
           handleSend(fileInfoMsg);
         } else {
-          addMessage('bot', "Il file sembra essere vuoto o non correttamente formattato.");
+          addMessage('bot', "The file appears to be empty or formatted incorrectly.");
         }
       } catch (err) {
         console.error("CSV Parse error:", err);
@@ -1205,11 +1159,11 @@ Procediamo all'intervista dinamica per la compilazione del circuito quantistico.
         <div className="flex gap-3">
           <button 
             className="p-2 bg-red-500/20 rounded-lg border border-red-500/50 animate-pulse group relative"
-            title="Guida Quantum Engine"
+            title="Quantum Engine Guide"
           >
             <AlertCircle className="w-5 h-5 text-red-500" />
             <div className="absolute hidden group-hover:block top-full right-0 mt-2 w-64 p-3 bg-black/90 border border-red-500/30 rounded-xl z-50 text-[10px] text-gray-300 normal-case">
-              Carica un CSV con decimali a punto e segui l'intervista per generare i circuiti quantistici.
+              Upload a CSV with point decimals and follow the interview to generate quantum circuits.
             </div>
           </button>
           <button 
@@ -1389,7 +1343,7 @@ Procediamo all'intervista dinamica per la compilazione del circuito quantistico.
                       URL.revokeObjectURL(url);
                     }}
                     className="p-1 hover:bg-white/10 rounded text-quantum-primary hover:text-white transition-all ml-1 border border-white/5 bg-black/40"
-                    title="Scarica il file CSV sul tuo dispositivo"
+                    title="Download CSV file to your device"
                   >
                     <Download className="w-3 h-3 animate-pulse" />
                   </button>
@@ -1462,11 +1416,11 @@ Procediamo all'intervista dinamica per la compilazione del circuito quantistico.
                         }`}
                       >
                         <RotateCcw className={`w-3 h-3 ${retryCountdown > 0 ? '' : 'animate-spin-slow'}`} /> 
-                        {retryCountdown > 0 ? `Attendi ${retryCountdown}s` : 'Riprova ora'}
+                        {retryCountdown > 0 ? `Wait ${retryCountdown}s` : 'Retry now'}
                       </button>
                       {errorStatus === 429 && retryCountdown > 0 && (
                         <span className="text-[9px] text-gray-500 font-mono italic animate-pulse shadow-sm">
-                          Sincronizzazione con i server Google in corso...
+                          Synchronizing with Google servers...
                         </span>
                       )}
                     </div>
@@ -1483,7 +1437,7 @@ Procediamo all'intervista dinamica per la compilazione del circuito quantistico.
                 <button 
                   onClick={() => fileInputRef.current?.click()}
                   className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-gray-400 transition-all hover:text-quantum-primary group"
-                  title="Carica CSV"
+                  title="Upload CSV"
                 >
                   <UploadCloud className="w-6 h-6 group-hover:scale-110 transition-transform" />
                   <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} accept=".csv" />
@@ -1494,7 +1448,7 @@ Procediamo all'intervista dinamica per la compilazione del circuito quantistico.
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder={currentFile ? "Rispondi all'assistente..." : "Inizia l'intervista..."}
+                    placeholder={currentFile ? "Reply to assistant..." : "Begin interview..."}
                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xs text-white outline-none focus:border-quantum-primary/50 transition-all"
                   />
                   <button 

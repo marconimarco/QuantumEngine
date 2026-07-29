@@ -34,7 +34,7 @@ interface Props {
 
 export default function IBMQuantumInterface({ onBack, initialCode }: Props) {
   const { t } = useTranslation();
-  const [circuitCode, setCircuitCode] = useState<string>(initialCode || `// Esempio Circuito Quantistico (OpenQASM 2.0)
+  const [circuitCode, setCircuitCode] = useState<string>(initialCode || `// Quantum Circuit Example (OpenQASM 2.0)
 OPENQASM 2.0;
 include "qelib1.inc";
 
@@ -117,7 +117,7 @@ h q[0];
 cx q[0],q[1];
 
 measure q -> c;`);
-      addLog("Modello Bell State caricato con successo.", "info");
+      addLog("Bell State template loaded successfully.", "info");
     } else if (type === 'qasm') {
       setCircuitCode(`// Quantum Fourier Transform (QFT) 3 Qubits
 OPENQASM 2.0;
@@ -134,7 +134,7 @@ cu1(pi/2) q[0],q[1];
 h q[0];
 
 measure q -> c;`);
-      addLog("Modello Fourier Transform caricato con successo.", "info");
+      addLog("Fourier Transform template loaded successfully.", "info");
     } else if (type === 'json') {
       setCircuitCode(`{
   "circuit": "portfolio_optimization",
@@ -146,7 +146,7 @@ measure q -> c;`);
     "expected_returns": [0.005, 0.002, 0.001]
   }
 }`);
-      addLog("Modello JSON di Ottimizzazione caricato con successo.", "info");
+      addLog("Optimization JSON template loaded successfully.", "info");
     }
   };
 
@@ -155,7 +155,7 @@ measure q -> c;`);
     if (!pqcRxData) return;
 
     setIsDeciphering(true);
-    addLog(">>> [PQC DECIPHER GATE] Avvio decapsulazione della chiave ed elaborazione della risposta...", 'system');
+    addLog(">>> [PQC DECIPHER GATE] Starting key decapsulation and response processing...", 'system');
 
     try {
       const keyToUse = customUnlockKey.trim() || pqcRxData.unlockKey;
@@ -172,7 +172,7 @@ measure q -> c;`);
 
       if (!res.ok) {
         const errJson = await res.json();
-        throw new Error(errJson.error || "Errore di decifratura PQC");
+        throw new Error(errJson.error || "PQC Decryption Error");
       }
 
       const data = await res.json();
@@ -181,11 +181,11 @@ measure q -> c;`);
       setPqcDecryptedResults(parsedContent);
       setFinalResults(parsedContent.measurementCounts);
       
-      addLog("Decapsulazione ML-KEM-768 completata con successo!", "success");
-      addLog(`Integrity Verified: I risultati telemetrici del Job ${parsedContent.jobId} sono stati sbloccati.`, "success");
+      addLog("ML-KEM-768 decapsulation completed successfully!", "success");
+      addLog(`Integrity Verified: Telemetric results for Job ${parsedContent.jobId} unlocked.`, "success");
     } catch (err: any) {
       console.error("Decipher failed:", err);
-      addLog(`Errore di decifratura PQC: ${err.message}`, "error");
+      addLog(`PQC Decryption Error: ${err.message}`, "error");
     } finally {
       setIsDeciphering(false);
     }
@@ -193,11 +193,11 @@ measure q -> c;`);
 
   const executeSend = async () => {
     if (!circuitCode.trim()) {
-      addLog("Errore: Il codice del circuito è vuoto.", "error");
+      addLog("Error: Circuit code is empty.", "error");
       return;
     }
     if (!apiToken.trim()) {
-      addLog("Errore: Registrazione Token API IBM Quantum mancante.", "error");
+      addLog("Error: IBM Quantum API Token missing.", "error");
       return;
     }
 
@@ -210,9 +210,9 @@ measure q -> c;`);
     setPqcRxData(null);
     setPqcDecryptedResults(null);
 
-    addLog(`>>> [SYS] INIZIALIZZAZIONE HANDSHAKE HARDWARE IBM...`, 'system');
-    addLog(`Analisi formattazione codice quantistico caricato... OK`, 'info');
-    addLog(`Identificato schema di circuito con lunghezza ${circuitCode.length} caratteri.`, 'info');
+    addLog(`>>> [SYS] INITIALIZING IBM HARDWARE HANDSHAKE...`, 'system');
+    addLog(`Analyzing loaded quantum code format... OK`, 'info');
+    addLog(`Identified circuit schema with length ${circuitCode.length} characters.`, 'info');
 
     let currentEncryptedPayload = '';
     let currentEncapsulatedKey = '';
@@ -220,7 +220,7 @@ measure q -> c;`);
 
     // Step 1: PQC Encryption of circuit code before transmission if enabled
     if (usePqc) {
-      addLog(`[PQC SHIELD] Avvio Cifratura Quantistica ML-KEM-768 (NIST FIPS 203) per l'invio sicuro...`, 'system');
+      addLog(`[PQC SHIELD] Starting ML-KEM-768 Quantum Encryption (NIST FIPS 203) for secure transmission...`, 'system');
       try {
         const encRes = await fetch('/api/pqc/encrypt', {
           method: 'POST',
@@ -241,16 +241,16 @@ measure q -> c;`);
             algorithm: encData.algorithm || "ML-KEM-768 (Kyber) + AES-256-GCM"
           });
 
-          addLog(`[PQC SHIELD] Codice del circuito cifrato in pacchetto .vault PQC con successo.`, 'success');
+          addLog(`[PQC SHIELD] Circuit code encrypted into PQC .vault package successfully.`, 'success');
           addLog(`[PQC SHIELD] Key Encapsulation (HEX): ${encData.encapsulatedKey.substring(0, 32)}...`, 'info');
           addLog(`[PQC SHIELD] Unlock Key (Secret): ${encData.unlockKey.substring(0, 24)}...`, 'info');
         }
       } catch (pqcErr) {
-        addLog(`Avviso: Impossibile completare la cifratura PQC lato client. Prosecuzione tramite proxy sicuro.`, 'warn');
+        addLog(`Warning: Unable to complete client-side PQC encryption. Proceeding via secure proxy.`, 'warn');
       }
     }
 
-    addLog(`Tentativo di chiamata HTTP POST sincrona immediata all'endpoint ufficiale IBM (https://ibm.com)...`, 'info');
+    addLog(`Attempting immediate direct synchronous HTTP POST call to official IBM endpoint (https://ibm.com)...`, 'info');
 
     try {
       // 1. Direct call to https://ibm.com as requested
@@ -275,16 +275,16 @@ measure q -> c;`);
 
       clearTimeout(timeoutId);
 
-      addLog(`Chiamata diretta a ibm.com completata con stato HTTP: ${response.status}`, 'success');
+      addLog(`Direct call to ibm.com completed with HTTP status: ${response.status}`, 'success');
     } catch (err: any) {
       console.warn("Direct browser post to ibm.com blocked/intercepted (expected CORS behavior of browsers):", err);
-      addLog(`[CORS DETECTOR] La chiamata POST diretta via browser a https://ibm.com è stata intercettata per regole di origine del browser (CORS).`, 'warn');
-      addLog(`Inoltro sicuro tramite Quantum Proxy server-side abilitato in AI Studio...`, 'info');
+      addLog(`[CORS DETECTOR] Direct browser POST call to https://ibm.com was intercepted due to browser same-origin policy (CORS).`, 'warn');
+      addLog(`Forwarding via AI Studio server-side Quantum Proxy...`, 'info');
     }
 
     // 2. Express Proxy submission
     try {
-      addLog(`Inoltro della richiesta al Gateway Quantistico Criptato (/api/ibm-quantum/submit)...`, 'info');
+      addLog(`Forwarding request to Encrypted Quantum Gateway (/api/ibm-quantum/submit)...`, 'info');
       
       const serverResponse = await fetch('/api/ibm-quantum/submit', {
         method: 'POST',
@@ -302,20 +302,20 @@ measure q -> c;`);
 
       if (serverResponse.ok) {
         const serverData = await serverResponse.json();
-        addLog(`Risposta server proxy ricevuta con successo.`, 'success');
+        addLog(`Proxy server response received successfully.`, 'success');
         if (serverData.jobId) {
           setJobId(serverData.jobId);
-          addLog(`Job ID registrato dal gateway interno: ${serverData.jobId}`, 'success');
+          addLog(`Job ID registered by internal gateway: ${serverData.jobId}`, 'success');
         }
         if (serverData.encryptedResults) {
           setPqcRxData(serverData.encryptedResults);
           setCustomUnlockKey(serverData.encryptedResults.unlockKey);
-          addLog(`[RICEZIONE CRIPTATA PQC] Ricevuto pacchetto di telemetry quantistica cifrato da IBM Cloud!`, 'system');
+          addLog(`[PQC RECEIPT] Encrypted quantum telemetry package received from IBM Cloud!`, 'system');
         }
       }
     } catch (proxyErr) {
       // Offline fallback
-      addLog("Gateway proxy non disponibile nell'ambiente corrente. Avvio della pipeline quantistica integrata.", "warn");
+      addLog("Proxy gateway not available in current environment. Launching integrated quantum pipeline.", "warn");
     }
 
     // 3. Complete Polling Simulation representing real physical IBM hardware (eg. ibm_brisbane)
@@ -323,8 +323,8 @@ measure q -> c;`);
     if (!jobId) setJobId(generatedJobId);
     setJobStatus('SUBMITTING');
     
-    addLog(`>>> [IBM GATEWAY] Generato ID di elaborazione sicuro: ${generatedJobId}`, 'success');
-    addLog(`Compilazione del circuito OpenQASM in impulsi a microonde (PQC Transpilation)...`, 'info');
+    addLog(`>>> [IBM GATEWAY] Generated secure Job ID: ${generatedJobId}`, 'success');
+    addLog(`Compiling OpenQASM circuit into microwave pulses (PQC Transpilation)...`, 'info');
     
     setPollingActive(true);
   };
@@ -339,23 +339,23 @@ measure q -> c;`);
       
       if (step === 1) {
         setJobStatus('QUEUED');
-        addLog(`[IBM DEVICE] Stato Job: IN CODA (QUEUED). Posizione in coda di calcolo: #7`, 'warn');
-        addLog(`Calibrando i qubit reali (Temperatura del criostato: 15 mK = -273.13 °C)... OK`, 'info');
+        addLog(`[IBM DEVICE] Job Status: QUEUED. Position in queue: #7`, 'warn');
+        addLog(`Calibrating physical qubits (Cryostat temperature: 15 mK = -273.13 °C)... OK`, 'info');
       } else if (step === 2) {
         setJobStatus('RUNNING');
-        addLog(`[IBM DEVICE] Stato Job: IN ESECUZIONE (RUNNING) sul computer quantistico reale.`, 'system');
-        addLog(`Misurazione in corso: Acquisizione dei 1024 shots (ripetizioni del circuito quantistico)...`, 'info');
-        addLog(`Applicazione mitigazione d'errore (Dynamical Decoupling)... OK`, 'success');
+        addLog(`[IBM DEVICE] Job Status: RUNNING on real quantum hardware.`, 'system');
+        addLog(`Measuring: Acquiring 1024 shots (quantum circuit executions)...`, 'info');
+        addLog(`Applying error mitigation (Dynamical Decoupling)... OK`, 'success');
       } else if (step === 3) {
         setJobStatus('COMPLETED');
-        addLog(`[IBM DEVICE] Stato Job: COMPLETATO (COMPLETED) con successo!`, 'success');
+        addLog(`[IBM DEVICE] Job Status: COMPLETED successfully!`, 'success');
         
         if (usePqc) {
-          addLog(`[RICEZIONE CRIPTATA PQC] Download del registro telemetrico cifrato con ML-KEM-768...`, 'system');
-          addLog(`[RICEZIONE CRIPTATA PQC] I dati della misurazione sono stati protetti durante la trasmissione di ritorno.`, 'warn');
-          addLog(`[RICEZIONE CRIPTATA PQC] Clicca su "Decapsula e Decifra Risultati" per accedere alle frequenze misurate.`, 'info');
+          addLog(`[PQC RECEIPT] Downloading encrypted telemetry log with ML-KEM-768...`, 'system');
+          addLog(`[PQC RECEIPT] Measurement data protected during return transmission.`, 'warn');
+          addLog(`[PQC RECEIPT] Click "Decapsulate and Decipher Results" to unlock measured frequencies.`, 'info');
         } else {
-          addLog(`Scaricamento dei registri di misurazione classica da IBM Cloud...`, 'info');
+          addLog(`Downloading classical measurement registers from IBM Cloud...`, 'info');
           
           // Bell or general distribution
           const isBell = circuitCode.includes('h q[0]') && circuitCode.includes('cx');
@@ -378,7 +378,7 @@ measure q -> c;`);
           }
 
           setFinalResults(results);
-          addLog(`Risultati elaborati! Probabilità calcolate con successo sulla base di 1024 shots.`, 'success');
+          addLog(`Results processed! Probabilities calculated successfully based on 1024 shots.`, 'success');
         }
         
         setIsLoading(false);
@@ -399,7 +399,7 @@ measure q -> c;`);
           className="flex items-center gap-2 text-gray-400 hover:text-quantum-primary transition-colors py-1 group"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-mono text-xs tracking-widest uppercase">Indietro alla Dashboard</span>
+          <span className="font-mono text-xs tracking-widest uppercase">Back to Dashboard</span>
         </button>
         <div className="flex items-center gap-2 px-3 py-1 bg-quantum-primary/10 border border-quantum-primary/30 rounded-full">
           <Cpu className="w-3.5 h-3.5 text-quantum-primary animate-pulse" />
@@ -410,10 +410,10 @@ measure q -> c;`);
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-4xl font-display font-black tracking-tight text-white uppercase mb-2">
-            Interfaccia <span className="quantum-gradient-text">IBM Quantum</span>
+            <span className="quantum-gradient-text">IBM Quantum</span> Interface
           </h1>
           <p className="text-xs text-gray-400 font-mono tracking-wide max-w-3xl leading-relaxed">
-            Trasmissione e ricezione protetta di codici e informazioni di calcolo quantistico tramite crittografia Post-Quantistica PQC (NIST ML-KEM-768 / Kyber) sui criostati superconduttori reali di IBM.
+            Secure transmission and reception of quantum code and computation data via Post-Quantum Cryptography (NIST ML-KEM-768 / Kyber) on real IBM superconducting cryostats.
           </p>
         </div>
 
@@ -425,7 +425,7 @@ measure q -> c;`);
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-black uppercase text-white tracking-wider">Cifratura PQC</span>
+                <span className="font-mono text-xs font-black uppercase text-white tracking-wider">PQC Encryption</span>
                 <span className={`text-[8px] font-mono px-2 py-0.5 rounded uppercase font-bold ${usePqc ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-gray-800 text-gray-400'}`}>
                   {usePqc ? 'NIST FIPS 203' : 'OFF'}
                 </span>
@@ -454,7 +454,7 @@ measure q -> c;`);
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xs font-black uppercase tracking-widest text-white font-mono flex items-center gap-2">
                 <Key className="w-4 h-4 text-quantum-primary" />
-                Chiave API / Token IBM Quantum
+                API Key / IBM Quantum Token
               </h3>
               <a 
                 href="https://quantum.ibm.com/" 
@@ -462,7 +462,7 @@ measure q -> c;`);
                 rel="noreferrer" 
                 className="text-[9px] font-mono text-gray-500 hover:text-quantum-primary transition-colors flex items-center gap-1"
               >
-                Ottieni Token <ExternalLink className="w-2.5 h-2.5" />
+                Get Token <ExternalLink className="w-2.5 h-2.5" />
               </a>
             </div>
             
@@ -471,7 +471,7 @@ measure q -> c;`);
                 type="password"
                 value={apiToken}
                 onChange={(e) => setApiToken(e.target.value)}
-                placeholder="Incolla il token (es. usr_4398f828a1c97f...)"
+                placeholder="Paste token (e.g. usr_4398f828a1c97f...)"
                 className="w-full bg-quantum-bg border border-white/10 rounded-xl px-4 py-3 text-xs text-quantum-primary font-mono placeholder-gray-600 focus:border-quantum-primary focus:outline-none transition-all"
               />
               <div className="absolute right-3 top-3 pointer-events-none opacity-30">
@@ -479,7 +479,7 @@ measure q -> c;`);
               </div>
             </div>
             <p className="text-[10px] text-gray-500 font-mono mt-2 leading-relaxed">
-              * Nota: La chiave verrà integrata negli header OAuth per bypassare le restrizioni della sandbox. Se non ne possiedi una, l'applicazione simulerà l'esecuzione sul backend quantistico virtualizzato.
+              * Note: The key will be integrated into OAuth headers to bypass sandbox constraints. If you do not provide one, the application will simulate execution on virtualized quantum hardware.
             </p>
           </div>
 
@@ -487,7 +487,7 @@ measure q -> c;`);
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xs font-black uppercase tracking-widest text-white font-mono flex items-center gap-2">
                 <TerminalIcon className="w-4 h-4 text-quantum-primary" />
-                Codice Quantistico (OpenQASM 2.0 / JSON)
+                Quantum Code (OpenQASM 2.0 / JSON)
               </h3>
               
               <div className="flex gap-2">
@@ -515,7 +515,7 @@ measure q -> c;`);
             <textarea 
               value={circuitCode}
               onChange={(e) => setCircuitCode(e.target.value)}
-              placeholder="// Scrivi o incolla il tuo circuito quantistico in OpenQASM o JSON..."
+              placeholder="// Write or paste your quantum circuit in OpenQASM or JSON..."
               className="flex-1 w-full bg-quantum-bg border border-white/10 rounded-xl p-4 text-xs font-mono text-white leading-relaxed focus:border-quantum-primary focus:outline-none focus:ring-1 focus:ring-quantum-primary/20 resize-none"
             />
 
@@ -541,7 +541,7 @@ measure q -> c;`);
                 ) : (
                   <Play className="w-4 h-4 text-quantum-primary group-hover:text-quantum-bg fill-current" />
                 )}
-                {usePqc ? 'Invio Criptato PQC a IBM Q' : 'Invia Codice a IBM Q'}
+                {usePqc ? 'PQC Encrypted Send to IBM Q' : 'Send Code to IBM Q'}
               </button>
             </div>
           </div>
@@ -553,7 +553,7 @@ measure q -> c;`);
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-quantum-primary" />
                   <h3 className="text-xs font-black uppercase tracking-widest text-white font-mono">
-                    Dettagli Invio Criptato PQC (Pacchetto Inviato)
+                    PQC Encrypted Submission Details (Sent Vault)
                   </h3>
                 </div>
                 <button 
@@ -561,13 +561,13 @@ measure q -> c;`);
                   className="text-[10px] font-mono text-quantum-primary hover:underline flex items-center gap-1"
                 >
                   {showTxDetails ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  {showTxDetails ? 'Nascondi Vault' : 'Ispeziona Vault Cifrato'}
+                  {showTxDetails ? 'Hide Vault' : 'Inspect Encrypted Vault'}
                 </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] font-mono">
                 <div className="bg-black/50 p-3 rounded-xl border border-white/5">
-                  <span className="text-gray-500 block uppercase">Algoritmo di Cifratura</span>
+                  <span className="text-gray-500 block uppercase">Encryption Algorithm</span>
                   <span className="text-quantum-primary font-bold">{pqcTxData.algorithm}</span>
                 </div>
                 <div className="bg-black/50 p-3 rounded-xl border border-white/5">
@@ -583,7 +583,7 @@ measure q -> c;`);
                   className="space-y-3 font-mono text-[10px] pt-2 border-t border-white/10"
                 >
                   <div>
-                    <span className="text-gray-400 uppercase block mb-1">Payload Cifrato .vault (Base64)</span>
+                    <span className="text-gray-400 uppercase block mb-1">Encrypted Payload .vault (Base64)</span>
                     <div className="bg-black/70 p-3 rounded-xl text-gray-300 break-all max-h-24 overflow-y-auto border border-white/5">
                       {pqcTxData.encryptedPayload}
                     </div>
@@ -598,7 +598,7 @@ measure q -> c;`);
                       <button 
                         onClick={() => copyToClipboard(pqcTxData.unlockKey, 'tx_sk')}
                         className="absolute right-2 top-2 p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white"
-                        title="Copia Chiave"
+                        title="Copy Key"
                       >
                         {copiedType === 'tx_sk' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                       </button>
@@ -619,7 +619,7 @@ measure q -> c;`);
                 <span className="w-2 h-2 rounded-full bg-red-500" />
                 <span className="w-2 h-2 rounded-full bg-yellow-500" />
                 <span className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-[10px] font-mono text-gray-400 ml-2 uppercase">TERMINALE LOG DI TRASMISSIONE</span>
+                <span className="text-[10px] font-mono text-gray-400 ml-2 uppercase">TRANSMISSION LOG TERMINAL</span>
               </div>
               <span className="text-[9px] font-mono text-quantum-primary/80 uppercase">
                 {jobStatus || 'IDLE'}
@@ -630,7 +630,7 @@ measure q -> c;`);
               {logs.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-gray-600 gap-2 opacity-50">
                   <TerminalIcon className="w-10 h-10 text-gray-600" />
-                  <p className="uppercase tracking-widest text-[9px]">In attesa di sottomissione...</p>
+                  <p className="uppercase tracking-widest text-[9px]">Awaiting submission...</p>
                 </div>
               ) : (
                 logs.map((log, index) => (
@@ -656,21 +656,21 @@ measure q -> c;`);
           <div className="quantum-card bg-black/40 border-white/10 p-5">
             <h3 className="text-xs font-black uppercase tracking-widest text-white font-mono flex items-center gap-2 mb-4">
               <Clock className="w-4 h-4 text-quantum-primary" />
-              Stato dei Registri e Risultati
+              Register Status & Results
             </h3>
 
             <div className="space-y-4 font-mono">
               <div className="grid grid-cols-2 gap-3 text-[10px] bg-white/5 p-3 rounded-lg border border-white/5">
                 <div>
-                  <p className="text-gray-500 uppercase">JOB ID GENERATO</p>
+                  <p className="text-gray-500 uppercase">GENERATED JOB ID</p>
                   <p className="text-quantum-primary font-bold overflow-hidden text-ellipsis whitespace-nowrap mt-0.5">
                     {jobId || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 uppercase">CODA DI CALCOLO</p>
+                  <p className="text-gray-500 uppercase">CALCULATION QUEUE</p>
                   <p className="text-white mt-0.5 font-bold">
-                    {jobStatus === 'QUEUED' ? 'QUEUE_POSITION #7' : jobStatus || 'INATTIVO'}
+                    {jobStatus === 'QUEUED' ? 'QUEUE_POSITION #7' : jobStatus || 'INACTIVE'}
                   </p>
                 </div>
               </div>
@@ -682,7 +682,7 @@ measure q -> c;`);
                     <div className="flex items-center gap-2">
                       <Lock className="w-4 h-4 text-amber-400 animate-pulse" />
                       <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">
-                        Risposta IBM Criptata (PQC Protected)
+                        Encrypted IBM Response (PQC Protected)
                       </span>
                     </div>
                     <span className="text-[8px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded uppercase">
@@ -691,7 +691,7 @@ measure q -> c;`);
                   </div>
 
                   <p className="text-[9px] text-gray-300 leading-relaxed">
-                    I risultati del calcolo inviati dai criostati IBM sono protetti con cifratura quantistica ML-KEM-768. Decapsula la chiave per visualizzare l'istogramma.
+                    Computation results from IBM cryostats are protected with ML-KEM-768 quantum encryption. Decapsulate key to view histogram.
                   </p>
 
                   <div className="space-y-2">
@@ -699,7 +699,7 @@ measure q -> c;`);
                       type="password"
                       value={customUnlockKey}
                       onChange={(e) => setCustomUnlockKey(e.target.value)}
-                      placeholder="Chiave di sblocco PQC (es. HEX PrivateKey...)"
+                      placeholder="PQC Unlock Key (e.g. HEX PrivateKey...)"
                       className="w-full bg-black/60 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-quantum-primary font-mono placeholder-gray-600 focus:border-quantum-primary focus:outline-none"
                     />
 
@@ -709,7 +709,7 @@ measure q -> c;`);
                       className="w-full py-2.5 bg-quantum-primary text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-quantum-secondary hover:text-white transition-all flex items-center justify-center gap-2"
                     >
                       {isDeciphering ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4" />}
-                      Decapsula e Decifra Risultati PQC
+                      Decapsulate & Decipher PQC Results
                     </button>
                   </div>
                 </div>
@@ -718,7 +718,7 @@ measure q -> c;`);
               {finalResults ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-gray-400 uppercase">MISURA DEGLI STATI (1024 SHOTS)</span>
+                    <span className="text-[10px] text-gray-400 uppercase">STATE MEASUREMENT (1024 SHOTS)</span>
                     {pqcDecryptedResults ? (
                       <span className="text-[9px] text-green-400 font-bold flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/30">
                         <ShieldCheck className="w-3 h-3" /> PQC VERIFIED (100%)
@@ -753,7 +753,7 @@ measure q -> c;`);
               ) : !pqcRxData && (
                 <div className="border border-white/5 rounded-lg p-6 bg-white/5 flex flex-col items-center justify-center text-center opacity-40 min-h-[140px]">
                   <HelpCircle className="w-8 h-8 text-gray-500 mb-2" />
-                  <p className="text-[10px] text-gray-400 uppercase">I risultati delle frequenze quantistiche verranno visualizzati qui al termine dell'elaborazione remota.</p>
+                  <p className="text-[10px] text-gray-400 uppercase">Quantum frequency results will be displayed here upon remote processing completion.</p>
                 </div>
               )}
             </div>

@@ -11,7 +11,7 @@ import { Cpu, Terminal, ArrowLeft, Layers, HelpCircle, Key, ShieldCheck, AlertCi
 import { getStoredApiKey } from './services/apiKeyService';
 
 export default function App() {
-  const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('it');
+  const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('en');
 
   return (
     <TranslationProvider language={currentLanguage}>
@@ -85,12 +85,12 @@ function AppContent({ currentLanguage, setCurrentLanguage }: { currentLanguage: 
       {!hasApiKey && (
         <div className="relative z-50 bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 text-center text-xs text-amber-200 flex items-center justify-center gap-2 font-mono">
           <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>Chiave API Google AI Studio non trovata. Per utilizzare le funzionalità AI, inserisci la tua API Key.</span>
+          <span>Google AI Studio API Key not found. Please enter your API Key to enable AI features.</span>
           <button
             onClick={() => setIsApiKeyModalOpen(true)}
             className="px-2.5 py-0.5 bg-amber-400 text-black font-bold uppercase text-[10px] rounded hover:bg-amber-300 transition-colors ml-2 cursor-pointer"
           >
-            Inserisci Key
+            Enter Key
           </button>
         </div>
       )}
