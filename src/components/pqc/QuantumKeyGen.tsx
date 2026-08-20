@@ -12,8 +12,10 @@ import {
   Database
 } from 'lucide-react';
 import axios from 'axios';
+import { useTranslation } from '../../lib/TranslationContext';
 
 export default function QuantumKeyGen() {
+  const { t } = useTranslation();
   const [isGenerating, setIsGenerating] = useState(false);
   const [keys, setKeys] = useState<{
     publicKey: string;
@@ -54,10 +56,10 @@ export default function QuantumKeyGen() {
           <Key className="w-6 h-6 sm:w-8 sm:h-8 text-quantum-primary" />
         </div>
         <h2 className="text-xl sm:text-4xl font-display font-black text-white uppercase tracking-tighter">
-          NIST <span className="text-quantum-primary">Key Generator</span>
+          NIST <span className="text-quantum-primary">{t('keygen_badge')}</span>
         </h2>
         <p className="text-[9px] sm:text-xs text-gray-500 font-mono uppercase tracking-[0.15em] sm:tracking-[0.2em] max-w-lg mx-auto leading-relaxed">
-          Instantaneous generation of quantum-resistant asymmetric key pairs based on ML-KEM-768 standard.
+          {t('keygen_desc')}
         </p>
       </div>
 
@@ -70,7 +72,7 @@ export default function QuantumKeyGen() {
           <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl sm:rounded-2xl" />
           <div className="flex items-center justify-center gap-2 sm:gap-3">
             {isGenerating ? <RefreshCcw className="w-4 h-4 sm:w-5 h-5 animate-spin" /> : <Cpu className="w-4 h-4 sm:w-5 h-5" />}
-            {isGenerating ? 'Computing Entropy...' : 'Generate NIST Pairs'}
+            {isGenerating ? t('keygen_btn_computing') : t('keygen_btn_generate')}
           </div>
         </button>
       </div>
@@ -89,7 +91,7 @@ export default function QuantumKeyGen() {
                   <div className="w-8 h-8 rounded-lg bg-quantum-primary/10 border border-quantum-primary/20 flex items-center justify-center">
                     <Database className="w-4 h-4 text-quantum-primary" />
                   </div>
-                  <h3 className="text-white font-display font-bold uppercase tracking-widest text-[10px]">Public Key (NIST)</h3>
+                  <h3 className="text-white font-display font-bold uppercase tracking-widest text-[10px]">{t('keygen_public_key_title')}</h3>
                 </div>
                 <span className="text-[8px] font-mono text-gray-500 bg-white/5 px-2 py-0.5 rounded border border-white/5 uppercase">1184 Bytes</span>
               </div>
@@ -121,7 +123,7 @@ export default function QuantumKeyGen() {
                   <div className="w-8 h-8 rounded-lg bg-quantum-secondary/10 border border-quantum-secondary/20 flex items-center justify-center">
                     <ShieldAlert className="w-4 h-4 text-quantum-secondary" />
                   </div>
-                  <h3 className="text-white font-display font-bold uppercase tracking-widest text-[10px]">Private Key (Secret)</h3>
+                  <h3 className="text-white font-display font-bold uppercase tracking-widest text-[10px]">{t('keygen_private_key_title')}</h3>
                 </div>
                 <span className="text-[8px] font-mono text-gray-500 bg-white/5 px-2 py-0.5 rounded border border-white/5 uppercase">2400 Bytes</span>
               </div>
@@ -153,22 +155,22 @@ export default function QuantumKeyGen() {
         <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-start gap-4">
           <Fingerprint className="w-5 h-5 text-quantum-primary shrink-0" />
           <div>
-            <h4 className="text-[10px] font-bold text-white uppercase mb-1">Entropy Injection</h4>
-            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">Physical qubits are used to generate unpredictable seeds of pure randomness.</p>
+            <h4 className="text-[10px] font-bold text-white uppercase mb-1">{t('keygen_entropy_title')}</h4>
+            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">{t('keygen_entropy_desc')}</p>
           </div>
         </div>
         <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-start gap-4">
           <Layers className="w-5 h-5 text-quantum-primary shrink-0" />
           <div>
-            <h4 className="text-[10px] font-bold text-white uppercase mb-1">Lattice Algorithm</h4>
-            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">Based on matrix calculations that even future quantum computers cannot invert.</p>
+            <h4 className="text-[10px] font-bold text-white uppercase mb-1">{t('keygen_lattice_title')}</h4>
+            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">{t('keygen_lattice_desc')}</p>
           </div>
         </div>
         <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-start gap-4">
           <RefreshCcw className="w-5 h-5 text-quantum-primary shrink-0" />
           <div>
-            <h4 className="text-[10px] font-bold text-white uppercase mb-1">Automatic Flush</h4>
-            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">Every generated key is immediately wiped from the backend volatile memory.</p>
+            <h4 className="text-[10px] font-bold text-white uppercase mb-1">{t('keygen_flush_title')}</h4>
+            <p className="text-[9px] text-gray-500 leading-relaxed font-mono uppercase">{t('keygen_flush_desc')}</p>
           </div>
         </div>
       </div>

@@ -15,16 +15,16 @@ export interface Sector {
 export type LanguageCode = 'it' | 'en' | 'zh' | 'ja' | 'ko' | 'de' | 'fr' | 'es' | 'ru' | 'uk';
 
 export const LANGUAGES: Array<{ code: LanguageCode; label: string }> = [
-  { code: 'en', label: 'English' },
-  { code: 'it', label: 'Italian' },
-  { code: 'zh', label: 'Chinese' },
-  { code: 'ja', label: 'Japanese' },
-  { code: 'ko', label: 'Korean' },
-  { code: 'de', label: 'German' },
-  { code: 'fr', label: 'French' },
-  { code: 'es', label: 'Spanish' },
-  { code: 'ru', label: 'Russian' },
-  { code: 'uk', label: 'Ukrainian' },
+  { code: 'en', label: 'English (EN)' },
+  { code: 'it', label: 'Italiano (IT)' },
+  { code: 'zh', label: '中文 (ZH)' },
+  { code: 'ja', label: '日本語 (JA)' },
+  { code: 'ko', label: '한국어 (KO)' },
+  { code: 'de', label: 'Deutsch (DE)' },
+  { code: 'fr', label: 'Français (FR)' },
+  { code: 'es', label: 'Español (ES)' },
+  { code: 'ru', label: 'Русский (RU)' },
+  { code: 'uk', label: 'Українська (UK)' },
 ];
 
 export interface DeepInsight {

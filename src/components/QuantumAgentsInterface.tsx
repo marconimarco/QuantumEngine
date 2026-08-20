@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { QUANTUM_SCENARIOS, QuantumScenario } from '../data/scenarios';
 import axios from 'axios';
+import { useTranslation } from '../lib/TranslationContext';
 
 interface Props {
   onBack?: () => void;
@@ -41,6 +42,7 @@ interface Message {
 }
 
 export default function QuantumAgentsInterface({ onBack, onSendToIbm }: Props) {
+  const { t } = useTranslation();
   // Conversational active state machine
   const [step, setStep] = useState<number>(1);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -1070,25 +1072,23 @@ DESKTOP_CLIENT,0.01,0.20,0.02,0.10,INDEPENDENT`
     }
   }
 
-  const welcomeText = `Welcome to the enterprise quantum compilation and entanglement system. To narrow down the scope and formulate specific questions, select your main macro-area of interest:
-📊 1. Finance & Markets
-🚚 2. Logistics & Smart Cities
-🔬 3. Chemistry & Green Tech
-🏭 4. Maintenance, Manufacturing & Apparel
-🧬 5. Healthcare & Genomics
-🛡️ 6. Cybersecurity`;
-
   // Initialize welcome
   useEffect(() => {
     setMessages([
       {
         id: 'welcome',
         sender: 'system',
-        text: welcomeText,
+        text: `${t('agents_welcome_text') || 'Welcome to the enterprise quantum compilation and entanglement system. To narrow down the scope and formulate specific questions, select your main macro-area of interest:'}
+📊 ${t('agents_sec_finance') || '1. Finance & Markets'}
+🚚 ${t('agents_sec_logistics') || '2. Logistics & Smart Cities'}
+🔬 ${t('agents_sec_chemistry') || '3. Chemistry & Green Tech'}
+🏭 ${t('agents_sec_factory') || '4. Maintenance, Manufacturing & Apparel'}
+🧬 ${t('agents_sec_healthcare') || '5. Healthcare & Genomics'}
+🛡️ ${t('agents_sec_cybersec') || '6. Cybersecurity'}`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
-  }, []);
+  }, [t]);
 
   // Auto scroll chat
   useEffect(() => {
@@ -1987,7 +1987,13 @@ To run real-time simulation and transmit the circuit to the physical quantum har
       {
         id: 'new-session',
         sender: 'system',
-        text: welcomeText,
+        text: `${t('agents_welcome_text') || 'Welcome to the enterprise quantum compilation and entanglement system. To narrow down the scope and formulate specific questions, select your main macro-area of interest:'}
+📊 ${t('agents_sec_finance') || '1. Finance & Markets'}
+🚚 ${t('agents_sec_logistics') || '2. Logistics & Smart Cities'}
+🔬 ${t('agents_sec_chemistry') || '3. Chemistry & Green Tech'}
+🏭 ${t('agents_sec_factory') || '4. Maintenance, Manufacturing & Apparel'}
+🧬 ${t('agents_sec_healthcare') || '5. Healthcare & Genomics'}
+🛡️ ${t('agents_sec_cybersec') || '6. Cybersecurity'}`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -2017,11 +2023,11 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                 <Cpu className="w-4 h-4" />
               </span>
               <h1 className="text-xl sm:text-2xl font-bold font-sans tracking-tight text-white uppercase flex items-center gap-2">
-                QUANTUM ENGINE BI <span className="text-xs text-quantum-secondary font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5">AGENTIC ORCHESTRATOR</span>
+                {t('agents_title') || 'QUANTUM ENGINE BI'} <span className="text-xs text-quantum-secondary font-mono bg-white/5 px-2 py-0.5 rounded border border-white/5">{t('agents_orchestrator') || 'AGENTIC ORCHESTRATOR'}</span>
               </h1>
             </div>
             <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider font-mono">
-              Universal Compiler & Translator of Heterogeneous Files to OpenQASM 2.0 for IBM CPU
+              {t('agents_subtitle') || 'Universal Compiler & Translator of Heterogeneous Files to OpenQASM 2.0 for IBM CPU'}
             </p>
           </div>
         </div>
@@ -2031,7 +2037,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
           onClick={handleReset}
           className="flex items-center gap-2 px-3.5 py-2 text-xs font-mono font-bold text-quantum-primary bg-quantum-primary/5 hover:bg-quantum-primary/10 border border-quantum-primary/20 rounded-xl cursor-pointer transition-all self-start sm:self-center"
         >
-          <RefreshCw className="w-3.5 h-3.5" /> REINITIALIZE SESSION
+          <RefreshCw className="w-3.5 h-3.5" /> {t('agents_reinit_session') || 'REINITIALIZE SESSION'}
         </button>
       </div>
 
@@ -2046,11 +2052,11 @@ To run real-time simulation and transmit the circuit to the physical quantum har
             <div className="flex items-center gap-2 font-mono">
               <Terminal className="w-4 h-4 text-quantum-primary animate-pulse" />
               <span className="text-xs font-bold text-white uppercase tracking-wider">
-                Quantum Conversational Console
+                {t('agents_console_title') || 'Quantum Conversational Console'}
               </span>
             </div>
             <div className="flex items-center gap-1.5 font-mono text-[10px] text-gray-500">
-              STATUS <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" /> ENG_LIVE
+              STATUS <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" /> {t('agents_status_eng_live') || 'ENG_LIVE'}
             </div>
           </div>
 
@@ -2062,7 +2068,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                 className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
               >
                 <div className={`flex items-center gap-1.5 text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-1`}>
-                  {msg.sender === 'system' ? '🤖 Quantum Compiler' : '👤 Business user'}
+                  {msg.sender === 'system' ? (t('agents_quantum_compiler') || '🤖 Quantum Compiler') : (t('agents_business_user') || '👤 Business user')}
                 </div>
                 
                 <div className={`p-4 rounded-2xl max-w-[90%] leading-relaxed ${
@@ -2076,13 +2082,13 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                   {msg.isComposerCode && msg.code && (
                     <div className="mt-4 bg-[#070b14] border border-white/10 rounded-xl overflow-hidden font-mono text-xs shadow-lg">
                       <div className="p-3 bg-white/5 border-b border-white/5 flex items-center justify-between text-gray-400">
-                        <span>OPENQASM 2.0 SCOPE</span>
+                        <span>{t('agents_openqasm_scope') || 'OPENQASM 2.0 SCOPE'}</span>
                         <button
                           onClick={() => copyCode(msg.code || '')}
                           className="p-1 px-2 rounded hover:bg-white/5 text-quantum-primary flex items-center gap-1 transition-colors cursor-pointer text-[10px] uppercase font-bold"
                         >
                           {isCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          {isCopied ? 'Copied' : 'Copy'}
+                          {isCopied ? (t('ibm_copied') || 'Copied') : (t('ibm_copy') || 'Copy')}
                         </button>
                       </div>
                       <pre className="p-3.5 overflow-x-auto text-quantum-secondary select-all whitespace-pre max-h-[160px] scrollbar-hide leading-normal text-[11px]">
@@ -2091,12 +2097,12 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                       
                       {/* Send to IBM Q Trigger */}
                       <div className="p-3.5 bg-[#0a0f1d] border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px]">
-                        <span className="text-gray-400 uppercase tracking-wider text-[9px] font-bold">PREPARED FOR IBM QPU</span>
+                        <span className="text-gray-400 uppercase tracking-wider text-[9px] font-bold">{t('agents_prepared_ibm') || 'PREPARED FOR IBM QPU'}</span>
                         <button
                           onClick={() => onSendToIbm(msg.code || '')}
                           className="px-4 py-2 bg-quantum-primary text-quantum-bg hover:bg-quantum-primary/80 font-black text-[11px] uppercase tracking-wider rounded-lg transition-all shadow-[0_0_12px_rgba(0,242,255,0.25)] hover:shadow-[0_0_18px_rgba(0,242,255,0.45)] duration-200 cursor-pointer flex items-center gap-1.5"
                         >
-                          <Cpu className="w-3.5 h-3.5 fill-current animate-pulse" /> Send to IBM Q 🚀
+                          <Cpu className="w-3.5 h-3.5 fill-current animate-pulse" /> {t('agents_send_to_ibm_btn') || 'Send to IBM Q 🚀'}
                         </button>
                       </div>
                     </div>
@@ -2120,7 +2126,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                   </div>
                   <div>
                     <h4 className="text-xs font-sans font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                      ⚠️ INTEGRITY WARNING: NO ENTANGLEMENT LINK FOUND
+                      {t('agents_integrity_warning') || '⚠️ INTEGRITY WARNING: NO ENTANGLEMENT LINK FOUND'}
                     </h4>
                     <p className="text-xs text-gray-300 mt-1 leading-relaxed">
                       {warningReason === 'missing_column' ? (
@@ -2140,13 +2146,13 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                     onClick={handleConfirmProceedWithoutEntanglement}
                     className="flex-1 px-4 py-2.5 bg-amber-500 text-[#090d18] hover:bg-amber-400 text-xs font-black rounded-lg transition-all shadow-[0_0_10px_rgba(245,158,11,0.25)] hover:shadow-[0_0_15px_rgba(245,158,11,0.45)] cursor-pointer text-center uppercase"
                   >
-                    🚀 Proceed Without Entanglement Links
+                    {t('agents_proceed_without_entanglement') || '🚀 Proceed Without Entanglement Links'}
                   </button>
                   <button
                     onClick={handleCancelEntanglementWarning}
                     className="flex-1 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs font-bold rounded-lg transition-all cursor-pointer text-center uppercase"
                   >
-                    ✏️ Edit & Reassign
+                    {t('agents_edit_reassign') || '✏️ Edit & Reassign'}
                   </button>
                 </div>
               </motion.div>
@@ -2164,8 +2170,8 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                   </div>
                   <div className="flex-1">
                     <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center justify-between gap-2">
-                      <span>🛰️ COMPUTATION MODEL CONFIGURATION</span>
-                      <span className="text-[9px] bg-quantum-primary/15 text-quantum-primary px-2 py-0.5 rounded border border-quantum-primary/20 font-bold">READY</span>
+                      <span>{t('agents_model_config') || '🛰️ COMPUTATION MODEL CONFIGURATION'}</span>
+                      <span className="text-[9px] bg-quantum-primary/15 text-quantum-primary px-2 py-0.5 rounded border border-quantum-primary/20 font-bold">{t('agents_model_ready') || 'READY'}</span>
                     </h4>
                     <p className="text-[11px] text-gray-300 mt-1 leading-relaxed">
                       The corporate calibration interview has completed successfully. I have prepared sample calibration data and structured interdependent processes in the backend.
@@ -2176,16 +2182,16 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                 {/* Scenario details info card */}
                 <div className="bg-[#070b14]/90 border border-white/5 p-4 rounded-xl space-y-2">
                   <div className="flex items-center justify-between text-[11px] font-mono border-b border-white/5 pb-2">
-                    <span className="text-gray-400">Corporate Macro-Area:</span>
+                    <span className="text-gray-400">{t('agents_macroarea_label') || 'Corporate Macro-Area:'}</span>
                     <span className="text-white font-bold">{selectedSectorLong}</span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] font-mono border-b border-white/5 pb-2">
-                    <span className="text-gray-400">Selected Scenario:</span>
+                    <span className="text-gray-400">{t('agents_scenario_label') || 'Selected Scenario:'}</span>
                     <span className="text-quantum-secondary font-bold">Option {scenarioSelection || 'A'} - {selectedScenario?.name}</span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-gray-400">Register Status:</span>
-                    <span className="text-emerald-400 font-bold">Sample Data Generated</span>
+                    <span className="text-gray-400">{t('agents_register_status_label') || 'Register Status:'}</span>
+                    <span className="text-emerald-400 font-bold">{t('agents_sample_data_generated') || 'Sample Data Generated'}</span>
                   </div>
                 </div>
 
@@ -2215,7 +2221,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                   }}
                   className="w-full px-4 py-3 bg-quantum-primary text-quantum-bg hover:bg-quantum-primary/95 text-xs font-mono font-black rounded-xl transition-all shadow-[0_0_15px_rgba(0,242,255,0.25)] hover:shadow-[0_0_22px_rgba(0,242,255,0.45)] cursor-pointer text-center uppercase"
                 >
-                  🚀 CONFIRM DATA & START SIMULATION
+                  {t('agents_confirm_and_start_btn') || '🚀 CONFIRM DATA & START SIMULATION'}
                 </button>
               </motion.div>
             )}
@@ -2228,44 +2234,44 @@ To run real-time simulation and transmit the circuit to the physical quantum har
             {step === 1 && (
               <div className="flex flex-col gap-2 w-full">
                 <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block mb-1">
-                  📊 PHASE 0: SELECT A MAIN CORPORATE MACRO-AREA:
+                  {t('agents_phase0_select') || '📊 PHASE 0: SELECT A MAIN CORPORATE MACRO-AREA:'}
                 </span>
                 <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-6 gap-2 w-full">
                   <button
                     onClick={() => handleSelectSector('Finanza')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    📊 1. Finance
+                    {t('agents_sec_finance') || '📊 1. Finance'}
                   </button>
                   <button
                     onClick={() => handleSelectSector('Logistica')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    🚚 2. Logistics
+                    {t('agents_sec_logistics') || '🚚 2. Logistics'}
                   </button>
                   <button
                     onClick={() => handleSelectSector('Chimica')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    🔬 3. Chemistry
+                    {t('agents_sec_chemistry') || '🔬 3. Chemistry'}
                   </button>
                   <button
                     onClick={() => handleSelectSector('Manifatturiero')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    🏭 4. Factory
+                    {t('agents_sec_factory') || '🏭 4. Factory'}
                   </button>
                   <button
                     onClick={() => handleSelectSector('Sanita')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    🧬 5. Healthcare
+                    {t('agents_sec_healthcare') || '🧬 5. Healthcare'}
                   </button>
                   <button
                     onClick={() => handleSelectSector('Cybersecurity')}
                     className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
                   >
-                    🛡️ 6. Cybersec
+                    {t('agents_sec_cybersec') || '🛡️ 6. Cybersec'}
                   </button>
                 </div>
               </div>
@@ -2274,26 +2280,26 @@ To run real-time simulation and transmit the circuit to the physical quantum har
             {step === 2 && interviewSubstep === 0 && (
               <div className="flex flex-col gap-2 w-full animate-fade-in">
                 <span className="text-[10px] font-mono text-[#00f2ff] uppercase tracking-wider block mb-1 font-bold">
-                  💡 PHASE 1: CHOOSE OPERATIONAL SCENARIO OPTION:
+                  {t('agents_phase1_choose') || '💡 PHASE 1: CHOOSE OPERATIONAL SCENARIO OPTION:'}
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
                   <button
                     onClick={() => handleChoiceOption('A')}
                     className="px-3 py-2 bg-[#0d1527] border border-quantum-primary/20 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
                   >
-                    🅰️ Option A [Mixed/Entanglement]
+                    {t('agents_opt_a') || '🅰️ Option A [Mixed/Entanglement]'}
                   </button>
                   <button
                     onClick={() => handleChoiceOption('B')}
                     className="px-3 py-2 bg-[#0d1527] border border-quantum-primary/20 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
                   >
-                    🅱️ Option B [Angle Only]
+                    {t('agents_opt_b') || '🅱️ Option B [Angle Only]'}
                   </button>
                   <button
                     onClick={() => handleChoiceOption('C')}
                     className="px-3 py-2 bg-[#0d1527] border border-quantum-primary/20 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
                   >
-                    🆃 Option C [Amplitude Only]
+                    {t('agents_opt_c') || '🆃 Option C [Amplitude Only]'}
                   </button>
                 </div>
               </div>
@@ -2330,7 +2336,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
 
             {step === 3 && (
               <div className="flex items-center gap-2 ml-auto">
-                <span className="text-[10px] font-mono text-gray-500 uppercase">Threshold:</span>
+                <span className="text-[10px] font-mono text-gray-500 uppercase">{t('agents_threshold') || 'Threshold:'}</span>
                 <input
                   type="number"
                   step="0.01"
@@ -2354,9 +2360,9 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                 if (e.key === 'Enter') handleSendMessage();
               }}
               placeholder={
-                step === 1 ? "Choose a finance or logistics sector above to unlock the interview..." :
-                step === 2 ? "Answer the questions indicated by the assistant..." :
-                "Paste or edit your decimal-point CSV data here..."
+                step === 1 ? (t('agents_placeholder_step1') || "Choose a finance or logistics sector above to unlock the interview...") :
+                step === 2 ? (t('agents_placeholder_step2') || "Answer the questions indicated by the assistant...") :
+                (t('agents_placeholder_step3') || "Paste or edit your decimal-point CSV data here...")
               }
               className="flex-1 bg-[#090d18] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-quantum-primary transition-colors font-mono"
             />
@@ -2375,10 +2381,10 @@ To run real-time simulation and transmit the circuit to the physical quantum har
             <div className="bg-[#0b111e]/90 border border-quantum-primary/20 rounded-2xl p-5 flex flex-col flex-1 relative overflow-hidden backdrop-blur-md">
               <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3 shrink-0">
                 <h3 className="text-xs font-mono font-bold text-quantum-primary uppercase tracking-widest flex items-center gap-1.5">
-                  <Database className="w-4 h-4 text-quantum-secondary" /> Scenario Database ({QUANTUM_SCENARIOS.length} Targets)
+                  <Database className="w-4 h-4 text-quantum-secondary" /> {t('agents_db_title') || 'Scenario Database'} ({QUANTUM_SCENARIOS.length} {t('agents_db_targets') || 'Targets'})
                 </h3>
                 <span className="text-[10px] font-mono text-quantum-secondary bg-quantum-secondary/10 px-2 py-0.5 rounded border border-quantum-secondary/15 uppercase font-bold">
-                  BI CO-COMPILER
+                  {t('agents_bi_cocompiler') || 'BI CO-COMPILER'}
                 </span>
               </div>
 
@@ -2391,7 +2397,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search scenario or variables..."
+                    placeholder={t('agents_search_placeholder') || 'Search scenario or variables...'}
                     className="w-full bg-[#070b14]/70 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-quantum-primary transition-all font-mono"
                   />
                 </div>
@@ -2399,13 +2405,13 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                 {/* Macroarea and Tech Buttons */}
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-mono text-gray-500 uppercase">Macro-Area</label>
+                    <label className="text-[9px] font-mono text-gray-500 uppercase">{t('agents_macroarea') || 'Macro-Area'}</label>
                     <select
                       value={selectedMacroarea}
                       onChange={(e) => setSelectedMacroarea(e.target.value)}
                       className="bg-[#070b14]/75 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-gray-300 focus:outline-none focus:border-quantum-primary font-mono cursor-pointer"
                     >
-                      <option value="Tutte">All Macro-Areas</option>
+                      <option value="Tutte">{t('agents_all_macroareas') || 'All Macro-Areas'}</option>
                       <option value="Finance & Markets">Finance & Markets</option>
                       <option value="Logistics & Smart Cities">Logistics & Smart Cities</option>
                       <option value="Chemistry & Green Tech">Chemistry & Green Tech</option>
@@ -2416,15 +2422,15 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-mono text-gray-500 uppercase">Technology</label>
+                    <label className="text-[9px] font-mono text-gray-500 uppercase">{t('agents_technology') || 'Technology'}</label>
                     <select
                       value={selectedTechnology}
                       onChange={(e) => setSelectedTechnology(e.target.value)}
                       className="bg-[#070b14]/75 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-gray-300 focus:outline-none focus:border-quantum-primary font-mono cursor-pointer"
                     >
-                      <option value="Tutte">All Technologies</option>
-                      <option value="Computer Quantistico (QPU)">Quantum Computer (QPU)</option>
-                      <option value="IA Classica / HPC">Classical AI / HPC</option>
+                      <option value="Tutte">{t('agents_all_technologies') || 'All Technologies'}</option>
+                      <option value="Computer Quantistico (QPU)">{t('agents_tech_qpu') || 'Quantum Computer (QPU)'}</option>
+                      <option value="IA Classica / HPC">{t('agents_tech_hpc') || 'Classical AI / HPC'}</option>
                     </select>
                   </div>
                 </div>
@@ -2479,7 +2485,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
               {/* Mapping Reduction metadata widget */}
               <div className="bg-[#0b111e]/85 border border-white/5 rounded-2xl p-5 relative overflow-hidden">
                 <h3 className="text-xs font-mono font-bold text-quantum-primary uppercase tracking-widest mb-3.5 flex items-center gap-1.5">
-                  <Database className="w-4 h-4 text-quantum-secondary" /> Data Cleaning & Column Reduction
+                  <Database className="w-4 h-4 text-quantum-secondary" /> {t('agents_data_cleaning_title') || 'Data Cleaning & Column Reduction'}
                 </h3>
                 
                 {mappingSummary ? (
@@ -2490,7 +2496,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                   <div className="flex flex-col items-center justify-center text-center py-6">
                     <Info className="w-8 h-8 text-white/15 mb-2.5 animate-pulse" />
                     <p className="text-xs text-gray-500 font-mono">
-                      Awaiting CSV data input to display column extraction and hardware allocation.
+                      {t('agents_awaiting_csv') || 'Awaiting CSV data input to display column extraction and hardware allocation.'}
                     </p>
                   </div>
                 )}
@@ -2501,7 +2507,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-4.5 h-4.5 text-quantum-primary" />
                   <h4 className="text-xs font-mono text-white font-bold uppercase tracking-wider">
-                    Protected Physical Formulations
+                    {t('agents_protected_formulations') || 'Protected Physical Formulations'}
                   </h4>
                 </div>
                 
@@ -2525,11 +2531,11 @@ To run real-time simulation and transmit the circuit to the physical quantum har
               <div className="flex-1 bg-[#070b14] border border-white/5 rounded-2xl overflow-hidden flex flex-col font-mono">
                 <div className="p-4 bg-white/5 border-b border-white/5 flex items-center justify-between">
                   <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-quantum-secondary" /> QASM Register Mapping
+                    <Layers className="w-4 h-4 text-quantum-secondary" /> {t('agents_qasm_mapping_title') || 'QASM Register Mapping'}
                   </span>
                   {qasmOutput && (
                     <span className="text-[10px] text-emerald-400 uppercase font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Generated
+                      <CheckCircle2 className="w-3.5 h-3.5" /> {t('agents_generated_status') || 'Generated'}
                     </span>
                   )}
                 </div>
@@ -2538,7 +2544,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                   {qasmOutput ? qasmOutput : (
                     <div className="h-full flex flex-col items-center justify-center text-center text-gray-500 py-10">
                       <HelpCircle className="w-8 h-8 text-white/10 mb-2" />
-                      <span>No active circuit. Run the configuration on the left to generate OpenQASM 2.0 code.</span>
+                      <span>{t('agents_no_active_circuit') || 'No active circuit. Run the configuration on the left to generate OpenQASM 2.0 code.'}</span>
                     </div>
                   )}
                 </div>
@@ -2549,7 +2555,7 @@ To run real-time simulation and transmit the circuit to the physical quantum har
                       onClick={() => onSendToIbm(qasmOutput)}
                       className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-quantum-primary hover:bg-quantum-primary/90 text-quantum-bg font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-[0_0_15px_rgba(0,242,255,0.25)] hover:shadow-[0_0_22px_rgba(0,242,255,0.45)] cursor-pointer duration-200"
                     >
-                      <Cpu className="w-4 h-4 fill-current animate-pulse" /> Transmit code to IBM Q QPU 🚀
+                      <Cpu className="w-4 h-4 fill-current animate-pulse" /> {t('agents_transmit_ibm_qpu') || 'Transmit code to IBM Q QPU 🚀'}
                     </button>
                   </div>
                 )}

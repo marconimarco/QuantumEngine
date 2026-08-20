@@ -399,21 +399,21 @@ measure q -> c;`);
           className="flex items-center gap-2 text-gray-400 hover:text-quantum-primary transition-colors py-1 group"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-mono text-xs tracking-widest uppercase">Back to Dashboard</span>
+          <span className="font-mono text-xs tracking-widest uppercase">{t('ibm_back_to_dashboard')}</span>
         </button>
         <div className="flex items-center gap-2 px-3 py-1 bg-quantum-primary/10 border border-quantum-primary/30 rounded-full">
           <Cpu className="w-3.5 h-3.5 text-quantum-primary animate-pulse" />
-          <span className="font-mono text-[9px] uppercase tracking-widest text-quantum-primary">SYSTEM STATUS: READY</span>
+          <span className="font-mono text-[9px] uppercase tracking-widest text-quantum-primary">{t('ibm_system_status_ready')}</span>
         </div>
       </nav>
 
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-4xl font-display font-black tracking-tight text-white uppercase mb-2">
-            <span className="quantum-gradient-text">IBM Quantum</span> Interface
+            <span className="quantum-gradient-text">IBM Quantum</span> {t('ibm_title')}
           </h1>
           <p className="text-xs text-gray-400 font-mono tracking-wide max-w-3xl leading-relaxed">
-            Secure transmission and reception of quantum code and computation data via Post-Quantum Cryptography (NIST ML-KEM-768 / Kyber) on real IBM superconducting cryostats.
+            {t('ibm_subtitle')}
           </p>
         </div>
 
@@ -425,12 +425,12 @@ measure q -> c;`);
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-black uppercase text-white tracking-wider">PQC Encryption</span>
+                <span className="font-mono text-xs font-black uppercase text-white tracking-wider">{t('ibm_pqc_encryption')}</span>
                 <span className={`text-[8px] font-mono px-2 py-0.5 rounded uppercase font-bold ${usePqc ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-gray-800 text-gray-400'}`}>
-                  {usePqc ? 'NIST FIPS 203' : 'OFF'}
+                  {usePqc ? t('ibm_nist_fips') : 'OFF'}
                 </span>
               </div>
-              <p className="text-[9px] font-mono text-gray-400">ML-KEM-768 + AES-256-GCM</p>
+              <p className="text-[9px] font-mono text-gray-400">{t('ibm_ml_kem_aes')}</p>
             </div>
           </div>
 
@@ -454,7 +454,7 @@ measure q -> c;`);
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xs font-black uppercase tracking-widest text-white font-mono flex items-center gap-2">
                 <Key className="w-4 h-4 text-quantum-primary" />
-                API Key / IBM Quantum Token
+                {t('ibm_api_key_token')}
               </h3>
               <a 
                 href="https://quantum.ibm.com/" 
@@ -462,7 +462,7 @@ measure q -> c;`);
                 rel="noreferrer" 
                 className="text-[9px] font-mono text-gray-500 hover:text-quantum-primary transition-colors flex items-center gap-1"
               >
-                Get Token <ExternalLink className="w-2.5 h-2.5" />
+                {t('ibm_get_token')} <ExternalLink className="w-2.5 h-2.5" />
               </a>
             </div>
             
@@ -471,7 +471,7 @@ measure q -> c;`);
                 type="password"
                 value={apiToken}
                 onChange={(e) => setApiToken(e.target.value)}
-                placeholder="Paste token (e.g. usr_4398f828a1c97f...)"
+                placeholder={t('ibm_paste_token_placeholder')}
                 className="w-full bg-quantum-bg border border-white/10 rounded-xl px-4 py-3 text-xs text-quantum-primary font-mono placeholder-gray-600 focus:border-quantum-primary focus:outline-none transition-all"
               />
               <div className="absolute right-3 top-3 pointer-events-none opacity-30">
@@ -479,7 +479,7 @@ measure q -> c;`);
               </div>
             </div>
             <p className="text-[10px] text-gray-500 font-mono mt-2 leading-relaxed">
-              * Note: The key will be integrated into OAuth headers to bypass sandbox constraints. If you do not provide one, the application will simulate execution on virtualized quantum hardware.
+              {t('ibm_token_note')}
             </p>
           </div>
 
@@ -487,7 +487,7 @@ measure q -> c;`);
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xs font-black uppercase tracking-widest text-white font-mono flex items-center gap-2">
                 <TerminalIcon className="w-4 h-4 text-quantum-primary" />
-                Quantum Code (OpenQASM 2.0 / JSON)
+                {t('ibm_quantum_code_title')}
               </h3>
               
               <div className="flex gap-2">
@@ -495,19 +495,19 @@ measure q -> c;`);
                   onClick={() => loadTemplate('bell')} 
                   className="px-2 py-1 bg-white/5 hover:bg-white/15 border border-white/10 text-[9px] font-mono rounded text-gray-300 hover:text-white transition-colors"
                 >
-                  Bell State
+                  {t('ibm_bell_state')}
                 </button>
                 <button 
                   onClick={() => loadTemplate('qasm')} 
                   className="px-2 py-1 bg-white/5 hover:bg-white/15 border border-white/10 text-[9px] font-mono rounded text-gray-300 hover:text-white transition-colors"
                 >
-                  QFT 3 Qubits
+                  {t('ibm_qft_3qubits')}
                 </button>
                 <button 
                   onClick={() => loadTemplate('json')} 
                   className="px-2 py-1 bg-white/5 hover:bg-white/15 border border-white/10 text-[9px] font-mono rounded text-gray-300 hover:text-white transition-colors"
                 >
-                  JSON Opt
+                  {t('ibm_json_opt')}
                 </button>
               </div>
             </div>
@@ -515,18 +515,18 @@ measure q -> c;`);
             <textarea 
               value={circuitCode}
               onChange={(e) => setCircuitCode(e.target.value)}
-              placeholder="// Write or paste your quantum circuit in OpenQASM or JSON..."
+              placeholder={t('ibm_code_placeholder')}
               className="flex-1 w-full bg-quantum-bg border border-white/10 rounded-xl p-4 text-xs font-mono text-white leading-relaxed focus:border-quantum-primary focus:outline-none focus:ring-1 focus:ring-quantum-primary/20 resize-none"
             />
 
             <div className="mt-4 pt-4 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-mono text-gray-500 uppercase">
-                  Tag Circuit: {circuitCode.includes('OPENQASM') ? 'OPENQASM 2.0' : 'JSON SCHEMA'}
+                  {t('ibm_tag_circuit')} {circuitCode.includes('OPENQASM') ? 'OPENQASM 2.0' : 'JSON SCHEMA'}
                 </span>
                 {usePqc && (
                   <span className="text-[9px] font-mono text-quantum-primary bg-quantum-primary/10 border border-quantum-primary/20 px-2 py-0.5 rounded flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3" /> PQC TRANSMISSION ACTIVE
+                    <ShieldCheck className="w-3 h-3" /> {t('ibm_pqc_transmission_active')}
                   </span>
                 )}
               </div>
@@ -541,7 +541,7 @@ measure q -> c;`);
                 ) : (
                   <Play className="w-4 h-4 text-quantum-primary group-hover:text-quantum-bg fill-current" />
                 )}
-                {usePqc ? 'PQC Encrypted Send to IBM Q' : 'Send Code to IBM Q'}
+                {usePqc ? t('ibm_send_encrypted_btn') : t('ibm_send_code_btn')}
               </button>
             </div>
           </div>
@@ -553,7 +553,7 @@ measure q -> c;`);
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-quantum-primary" />
                   <h3 className="text-xs font-black uppercase tracking-widest text-white font-mono">
-                    PQC Encrypted Submission Details (Sent Vault)
+                    {t('ibm_pqc_details_title')}
                   </h3>
                 </div>
                 <button 
@@ -561,17 +561,17 @@ measure q -> c;`);
                   className="text-[10px] font-mono text-quantum-primary hover:underline flex items-center gap-1"
                 >
                   {showTxDetails ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  {showTxDetails ? 'Hide Vault' : 'Inspect Encrypted Vault'}
+                  {showTxDetails ? t('ibm_hide_vault') : t('ibm_inspect_vault')}
                 </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] font-mono">
                 <div className="bg-black/50 p-3 rounded-xl border border-white/5">
-                  <span className="text-gray-500 block uppercase">Encryption Algorithm</span>
+                  <span className="text-gray-500 block uppercase">{t('ibm_encryption_algorithm')}</span>
                   <span className="text-quantum-primary font-bold">{pqcTxData.algorithm}</span>
                 </div>
                 <div className="bg-black/50 p-3 rounded-xl border border-white/5">
-                  <span className="text-gray-500 block uppercase">Encapsulated Key (Hex)</span>
+                  <span className="text-gray-500 block uppercase">{t('ibm_encapsulated_key_hex')}</span>
                   <span className="text-white font-bold truncate block">{pqcTxData.encapsulatedKey.substring(0, 28)}...</span>
                 </div>
               </div>
@@ -583,14 +583,14 @@ measure q -> c;`);
                   className="space-y-3 font-mono text-[10px] pt-2 border-t border-white/10"
                 >
                   <div>
-                    <span className="text-gray-400 uppercase block mb-1">Encrypted Payload .vault (Base64)</span>
+                    <span className="text-gray-400 uppercase block mb-1">{t('ibm_encrypted_payload_vault')}</span>
                     <div className="bg-black/70 p-3 rounded-xl text-gray-300 break-all max-h-24 overflow-y-auto border border-white/5">
                       {pqcTxData.encryptedPayload}
                     </div>
                   </div>
 
                   <div>
-                    <span className="text-gray-400 uppercase block mb-1">Unlock Private Key (Secret)</span>
+                    <span className="text-gray-400 uppercase block mb-1">{t('ibm_unlock_private_key')}</span>
                     <div className="relative">
                       <div className="bg-black/70 p-3 rounded-xl text-quantum-secondary break-all border border-white/5 pr-10">
                         {pqcTxData.unlockKey}
@@ -619,7 +619,7 @@ measure q -> c;`);
                 <span className="w-2 h-2 rounded-full bg-red-500" />
                 <span className="w-2 h-2 rounded-full bg-yellow-500" />
                 <span className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-[10px] font-mono text-gray-400 ml-2 uppercase">TRANSMISSION LOG TERMINAL</span>
+                <span className="text-[10px] font-mono text-gray-400 ml-2 uppercase">{t('ibm_transmission_terminal')}</span>
               </div>
               <span className="text-[9px] font-mono text-quantum-primary/80 uppercase">
                 {jobStatus || 'IDLE'}
@@ -630,7 +630,7 @@ measure q -> c;`);
               {logs.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-gray-600 gap-2 opacity-50">
                   <TerminalIcon className="w-10 h-10 text-gray-600" />
-                  <p className="uppercase tracking-widest text-[9px]">Awaiting submission...</p>
+                  <p className="uppercase tracking-widest text-[9px]">{t('ibm_awaiting_submission')}</p>
                 </div>
               ) : (
                 logs.map((log, index) => (
@@ -656,21 +656,21 @@ measure q -> c;`);
           <div className="quantum-card bg-black/40 border-white/10 p-5">
             <h3 className="text-xs font-black uppercase tracking-widest text-white font-mono flex items-center gap-2 mb-4">
               <Clock className="w-4 h-4 text-quantum-primary" />
-              Register Status & Results
+              {t('ibm_register_status_results')}
             </h3>
 
             <div className="space-y-4 font-mono">
               <div className="grid grid-cols-2 gap-3 text-[10px] bg-white/5 p-3 rounded-lg border border-white/5">
                 <div>
-                  <p className="text-gray-500 uppercase">GENERATED JOB ID</p>
+                  <p className="text-gray-500 uppercase">{t('ibm_generated_job_id')}</p>
                   <p className="text-quantum-primary font-bold overflow-hidden text-ellipsis whitespace-nowrap mt-0.5">
                     {jobId || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 uppercase">CALCULATION QUEUE</p>
+                  <p className="text-gray-500 uppercase">{t('ibm_calculation_queue')}</p>
                   <p className="text-white mt-0.5 font-bold">
-                    {jobStatus === 'QUEUED' ? 'QUEUE_POSITION #7' : jobStatus || 'INACTIVE'}
+                    {jobStatus === 'QUEUED' ? 'QUEUE_POSITION #7' : jobStatus || t('ibm_queue_inactive')}
                   </p>
                 </div>
               </div>
@@ -682,16 +682,16 @@ measure q -> c;`);
                     <div className="flex items-center gap-2">
                       <Lock className="w-4 h-4 text-amber-400 animate-pulse" />
                       <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">
-                        Encrypted IBM Response (PQC Protected)
+                        {t('ibm_encrypted_response_title')}
                       </span>
                     </div>
                     <span className="text-[8px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded uppercase">
-                      LOCKED
+                      {t('ibm_locked')}
                     </span>
                   </div>
 
                   <p className="text-[9px] text-gray-300 leading-relaxed">
-                    Computation results from IBM cryostats are protected with ML-KEM-768 quantum encryption. Decapsulate key to view histogram.
+                    {t('ibm_encrypted_response_desc')}
                   </p>
 
                   <div className="space-y-2">
@@ -699,7 +699,7 @@ measure q -> c;`);
                       type="password"
                       value={customUnlockKey}
                       onChange={(e) => setCustomUnlockKey(e.target.value)}
-                      placeholder="PQC Unlock Key (e.g. HEX PrivateKey...)"
+                      placeholder={t('ibm_unlock_key_placeholder')}
                       className="w-full bg-black/60 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-quantum-primary font-mono placeholder-gray-600 focus:border-quantum-primary focus:outline-none"
                     />
 
@@ -709,7 +709,7 @@ measure q -> c;`);
                       className="w-full py-2.5 bg-quantum-primary text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-quantum-secondary hover:text-white transition-all flex items-center justify-center gap-2"
                     >
                       {isDeciphering ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4" />}
-                      Decapsulate & Decipher PQC Results
+                      {t('ibm_decapsulate_btn')}
                     </button>
                   </div>
                 </div>
@@ -718,13 +718,13 @@ measure q -> c;`);
               {finalResults ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-gray-400 uppercase">STATE MEASUREMENT (1024 SHOTS)</span>
+                    <span className="text-[10px] text-gray-400 uppercase">{t('ibm_state_measurement')}</span>
                     {pqcDecryptedResults ? (
                       <span className="text-[9px] text-green-400 font-bold flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/30">
-                        <ShieldCheck className="w-3 h-3" /> PQC VERIFIED (100%)
+                        <ShieldCheck className="w-3 h-3" /> {t('ibm_pqc_verified')}
                       </span>
                     ) : (
-                      <span className="text-[9px] text-quantum-primary font-bold">IBM SYSTEM MEASURED</span>
+                      <span className="text-[9px] text-quantum-primary font-bold">{t('ibm_system_measured')}</span>
                     )}
                   </div>
                   
@@ -753,7 +753,7 @@ measure q -> c;`);
               ) : !pqcRxData && (
                 <div className="border border-white/5 rounded-lg p-6 bg-white/5 flex flex-col items-center justify-center text-center opacity-40 min-h-[140px]">
                   <HelpCircle className="w-8 h-8 text-gray-500 mb-2" />
-                  <p className="text-[10px] text-gray-400 uppercase">Quantum frequency results will be displayed here upon remote processing completion.</p>
+                  <p className="text-[10px] text-gray-400 uppercase">{t('ibm_waiting_results_desc')}</p>
                 </div>
               )}
             </div>

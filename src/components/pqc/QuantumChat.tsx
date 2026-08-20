@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { io, Socket } from 'socket.io-client';
+import { useTranslation } from '../../lib/TranslationContext';
 
 interface Message {
   id: string;
@@ -32,6 +33,7 @@ interface Message {
 }
 
 export default function QuantumChat() {
+  const { t } = useTranslation();
   const [view, setView] = useState<'lobby' | 'chat'>('lobby');
   const [roomId, setRoomId] = useState<string | null>(null);
   const [roomPublicKey, setRoomPublicKey] = useState<string | null>(null);
@@ -170,10 +172,10 @@ export default function QuantumChat() {
           </div>
           <div className="space-y-2">
             <h2 className="text-3xl sm:text-5xl font-display font-black text-white uppercase tracking-tighter leading-none">
-              Quantum <span className="text-quantum-primary drop-shadow-[0_0_10px_rgba(0,242,255,0.5)]">Safe Chat</span>
+              Quantum <span className="text-quantum-primary drop-shadow-[0_0_10px_rgba(0,242,255,0.5)]">{t('chat_title')}</span>
             </h2>
             <p className="text-[10px] sm:text-[11px] text-gray-500 font-mono uppercase tracking-[0.3em] max-w-md mx-auto leading-relaxed">
-              Standard NIST FIPS 203 • Lattice-Based Cryptography
+              {t('chat_subtitle')}
             </p>
           </div>
         </div>
@@ -189,8 +191,8 @@ export default function QuantumChat() {
                 <Plus className="w-8 h-8 text-quantum-primary" />
               </div>
               <div>
-                <h3 className="text-white font-display font-bold uppercase tracking-[0.15em] text-sm">New Session</h3>
-                <p className="text-[10px] text-gray-400 uppercase mt-1.5 tracking-wider">Start private ML-KEM-768 room</p>
+                <h3 className="text-white font-display font-bold uppercase tracking-[0.15em] text-sm">{t('chat_new_session')}</h3>
+                <p className="text-[10px] text-gray-400 uppercase mt-1.5 tracking-wider">{t('chat_new_session_desc')}</p>
               </div>
             </div>
             <ChevronRight className="w-6 h-6 text-gray-700 group-hover:text-quantum-primary group-hover:translate-x-1 transition-all" />
@@ -203,15 +205,15 @@ export default function QuantumChat() {
                 <KeyIcon className="w-8 h-8 text-gray-500" />
               </div>
               <div>
-                <h3 className="text-white font-display font-bold uppercase tracking-[0.15em] text-sm">Quick Access</h3>
-                <p className="text-[10px] text-gray-400 uppercase mt-1.5 tracking-wider">Enter invitation code</p>
+                <h3 className="text-white font-display font-bold uppercase tracking-[0.15em] text-sm">{t('chat_quick_access')}</h3>
+                <p className="text-[10px] text-gray-400 uppercase mt-1.5 tracking-wider">{t('chat_enter_invite')}</p>
               </div>
             </div>
             
             <div className="flex gap-3 relative z-10">
               <input 
                 type="text"
-                placeholder="6-DIGIT CODE"
+                placeholder={t('chat_code_placeholder')}
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 className="flex-1 bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-sm text-white uppercase tracking-[0.4em] font-mono focus:ring-2 focus:ring-quantum-primary/50 outline-none transition-all placeholder:text-gray-700"
@@ -221,7 +223,7 @@ export default function QuantumChat() {
                 disabled={!joinCode || isJoining}
                 className="px-8 bg-quantum-primary text-black text-[11px] font-black uppercase rounded-2xl hover:bg-quantum-secondary hover:text-white transition-all disabled:opacity-30 flex items-center justify-center shadow-[0_0_20px_rgba(0,242,255,0.2)]"
               >
-                {isJoining ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Enter'}
+                {isJoining ? <Loader2 className="w-5 h-5 animate-spin" /> : t('chat_enter_btn')}
               </button>
             </div>
           </div>
@@ -252,14 +254,14 @@ export default function QuantumChat() {
             </div>
             <div>
               <div className="flex items-center gap-2 sm:gap-3">
-                <h3 className="text-white font-display font-black uppercase tracking-[0.2em] text-[11px] sm:text-[13px]">Secure Session</h3>
+                <h3 className="text-white font-display font-black uppercase tracking-[0.2em] text-[11px] sm:text-[13px]">{t('chat_secure_session')}</h3>
                 <span className="px-1.5 py-0.5 bg-quantum-primary/15 text-quantum-primary text-[8px] sm:text-[10px] font-mono font-bold rounded-md sm:rounded-lg border border-quantum-primary/20 tracking-widest">#{roomId}</span>
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex -space-x-1.5 sm:-space-x-2">
                   {[1, 2].map(i => <div key={i} className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white/10 border border-black/50 flex items-center justify-center"><User className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-500" /></div>)}
                 </div>
-                <span className="text-[8px] sm:text-[9px] font-mono text-gray-500 uppercase tracking-[0.1em] sm:tracking-[0.2em]">ML-KEM-768 ESTABLISHED</span>
+                <span className="text-[8px] sm:text-[9px] font-mono text-gray-500 uppercase tracking-[0.1em] sm:tracking-[0.2em]">{t('chat_established_tag')}</span>
               </div>
             </div>
           </div>
@@ -272,13 +274,13 @@ export default function QuantumChat() {
                   <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-[7px] sm:text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-0.5">Generated Invitation</p>
+                  <p className="text-[7px] sm:text-[8px] font-mono text-gray-500 uppercase tracking-widest mb-0.5">{t('chat_generated_invite')}</p>
                   <p className="text-[11px] sm:text-[13px] font-mono text-white font-black tracking-[0.2em]">{inviteCode}</p>
                 </div>
                 <button 
                   onClick={() => { navigator.clipboard.writeText(inviteCode); }}
                   className="ml-auto sm:ml-2 p-1.5 sm:p-2 hover:bg-white/5 rounded-lg sm:rounded-xl transition-all text-quantum-primary"
-                  title="Copy Code"
+                  title={t('chat_copy_code')}
                 >
                   <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
@@ -289,7 +291,7 @@ export default function QuantumChat() {
                 <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
                 <input 
                   type="email" 
-                  placeholder="Email invite..."
+                  placeholder={t('chat_email_placeholder')}
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   className="w-full bg-black/40 border border-white/5 rounded-lg sm:rounded-xl py-2 sm:py-3.5 pl-9 sm:pl-11 pr-3 text-[10px] sm:text-[11px] text-white outline-none focus:border-quantum-primary/40 transition-all placeholder:text-gray-700"
@@ -300,7 +302,7 @@ export default function QuantumChat() {
                 disabled={!inviteEmail || isInviting}
                 className="h-10 sm:h-12 px-4 sm:px-6 bg-white/5 hover:bg-quantum-primary hover:text-black text-white text-[9px] sm:text-[11px] font-black uppercase rounded-lg sm:rounded-xl transition-all border border-white/10 disabled:opacity-30 shrink-0"
               >
-                {isInviting ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Invite'}
+                {isInviting ? <Loader2 className="w-3 h-3 animate-spin" /> : t('chat_invite_btn')}
               </button>
             </div>
           )}
@@ -334,7 +336,7 @@ export default function QuantumChat() {
                   <div className="mb-4 p-4 bg-black/60 border border-white/5 rounded-2xl flex items-center gap-4 overflow-hidden w-full">
                     <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                       <div className="flex items-center gap-3">
-                        <span className="text-[8px] font-mono text-quantum-primary uppercase tracking-[0.2em] font-black italic whitespace-nowrap">Encapsulated_AES_Key</span>
+                        <span className="text-[8px] font-mono text-quantum-primary uppercase tracking-[0.2em] font-black italic whitespace-nowrap">{t('chat_encapsulated_key')}</span>
                         <div className="h-[1px] flex-1 bg-quantum-primary/20" />
                       </div>
                       <span className="text-[9px] font-mono text-quantum-primary/40 break-all leading-tight italic line-clamp-1 group-hover:line-clamp-none transition-all">
@@ -353,7 +355,7 @@ export default function QuantumChat() {
                   <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)] animate-pulse" />
-                      <span className="text-[8px] font-mono text-green-500/80 uppercase font-black tracking-widest leading-none">NIST COMPLIANT (FIPS 203)</span>
+                      <span className="text-[8px] font-mono text-green-500/80 uppercase font-black tracking-widest leading-none">{t('chat_nist_compliant')}</span>
                     </div>
                     <Zap className="w-3.5 h-3.5 text-quantum-primary/40" />
                   </div>
@@ -383,7 +385,7 @@ export default function QuantumChat() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Secure command..."
+            placeholder={t('chat_secure_command')}
             className="w-full bg-white/[0.03] border border-white/10 rounded-2xl sm:rounded-[1.5rem] py-4 sm:py-6 pl-11 sm:pl-16 pr-20 sm:pr-24 text-xs sm:text-base text-white placeholder:text-gray-700 focus:ring-2 focus:ring-quantum-primary/40 shadow-inner outline-none transition-all backdrop-blur-md"
           />
           <button 
@@ -397,7 +399,7 @@ export default function QuantumChat() {
         <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-14">
           <div className="flex items-center gap-2 sm:gap-3 group">
              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-quantum-primary animate-pulse group-hover:scale-150 transition-transform" />
-             <span className="text-[8px] sm:text-[10px] font-mono text-gray-600 uppercase font-black tracking-[0.2em]">Signal: Secure</span>
+             <span className="text-[8px] sm:text-[10px] font-mono text-gray-600 uppercase font-black tracking-[0.2em]">{t('chat_signal_secure')}</span>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
              <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-700" />
@@ -405,7 +407,7 @@ export default function QuantumChat() {
           </div>
           <div className="flex items-center gap-2 sm:gap-3 hidden xs:flex">
              <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-700" />
-             <span className="text-[8px] sm:text-[10px] font-mono text-gray-600 uppercase font-black tracking-[0.2em]">Lattice-Enabled</span>
+             <span className="text-[8px] sm:text-[10px] font-mono text-gray-600 uppercase font-black tracking-[0.2em]">{t('chat_lattice_enabled')}</span>
           </div>
         </div>
       </div>

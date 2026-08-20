@@ -124,9 +124,9 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
         ...mainSectors,
         {
           id: 'send_to_ibm' as SectorId,
-          name: 'SEND TO IBM',
+          name: t('s_send_to_ibm_name'),
           icon: 'Terminal',
-          description: 'Hardware Gateway: Send your circuits directly to IBM quantum processors and monitor jobs in real time.',
+          description: t('s_send_to_ibm_desc'),
           focus: 'Quantum Hardware Integration',
           variablesLabel: 'Jobs/Qasm',
           stressEvent: 'Network Latency',
@@ -276,7 +276,7 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
                           <span className={`text-[6px] min-[400px]:text-[8px] md:text-xs font-mono font-bold uppercase tracking-tighter sm:tracking-widest bg-black/60 px-1 py-0.5 md:py-1 rounded border border-white/5 backdrop-blur-sm transition-colors whitespace-nowrap overflow-hidden ${
                             sector.id === 'translator' ? 'text-quantum-secondary border-quantum-secondary/30' : sector.id === 'send_to_ibm' ? 'text-cyan-400 border-cyan-500/30' : sector.id === 'pqc_group' ? 'text-emerald-400 border-emerald-500/30' : sector.id === 'realq' ? 'text-red-500 border-red-500/30' : sector.id === 'mitigation' ? 'text-amber-500 border-amber-500/30' : 'text-white group-hover:text-quantum-primary'
                           }`}>
-                            {sector.id === 'send_to_ibm' ? 'SEND TO IBM' : t(`s_${sector.id}_name`)}
+                            {t(`s_${sector.id}_name`)}
                           </span>
                         </motion.div>
                       </motion.button>
@@ -292,7 +292,7 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onOpenAgents?.()}
                   className="w-full h-full bg-black/95 border-2 border-quantum-primary hover:border-quantum-primary rounded-full flex flex-col items-center justify-center cursor-pointer shadow-[0_0_35px_rgba(0,242,255,0.25)] relative overflow-hidden backdrop-blur-xl group/hub"
-                  title={language === 'it' ? "Accedi a Quantum AI Agents" : "Access Quantum AI Agents"}
+                  title={t('ai_agents')}
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-quantum-primary/10 to-transparent pointer-events-none animate-pulse" />
                   
@@ -300,10 +300,10 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
                     <div className="flex flex-col items-center justify-center">
                       <Cpu className="w-8 h-8 sm:w-10 sm:h-10 text-quantum-primary filter drop-shadow-[0_0_12px_rgba(0,242,255,0.6)] group-hover/hub:scale-110 transition-transform duration-300 animate-pulse" />
                       <span className="text-[10px] sm:text-[11px] md:text-xs font-display font-black uppercase tracking-widest text-white mt-1.5 group-hover/hub:text-quantum-primary transition-colors max-w-[125px]">
-                        {language === 'it' ? 'AGENTS AI' : 'AI AGENTS'}
+                        {t('ai_agents')}
                       </span>
                       <span className="text-[5px] sm:text-[7px] font-mono text-quantum-primary/60 uppercase tracking-widest mt-0.5 scale-90">
-                        {language === 'it' ? 'APRI INTERFACCIA' : 'LAUNCH GATEWAY'}
+                        {t('launch_gateway')}
                       </span>
                     </div>
                   </div>

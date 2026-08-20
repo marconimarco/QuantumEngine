@@ -11,7 +11,7 @@ const TranslationContext = createContext<TranslationContextType | undefined>(und
 
 export function TranslationProvider({ language, children }: { language: LanguageCode; children: ReactNode }) {
   const t = (key: string, variables?: Record<string, string | number>) => {
-    let text = translations[language][key] || key;
+    let text = translations[language]?.[key] || translations['it']?.[key] || translations['en']?.[key] || key;
     
     if (variables) {
       Object.entries(variables).forEach(([vKey, vVal]) => {

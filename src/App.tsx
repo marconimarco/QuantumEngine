@@ -17,7 +17,23 @@ import { getStoredApiKey } from './services/apiKeyService';
 import { getCurrentSession, logoutUser, CurrentUserSession } from './services/authService';
 
 export default function App() {
-  const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>(() => {
+    try {
+      const saved = localStorage.getItem('quantum_language');
+      if (saved && ['it', 'en', 'zh', 'ja', 'ko', 'de', 'fr', 'es', 'ru', 'uk'].includes(saved)) {
+        return saved as LanguageCode;
+      }
+    } catch {}
+    return 'it';
+  });
+
+  const handleLanguageChange = (lang: LanguageCode) => {
+    setCurrentLanguage(lang);
+    try {
+      localStorage.setItem('quantum_language', lang);
+    } catch {}
+  };
+
   const [currentUser, setCurrentUser] = useState<CurrentUserSession | null>(() => {
     return getCurrentSession();
   });
@@ -50,7 +66,7 @@ export default function App() {
     <TranslationProvider language={currentLanguage}>
       <AppContent 
         currentLanguage={currentLanguage} 
-        setCurrentLanguage={setCurrentLanguage} 
+        setCurrentLanguage={handleLanguageChange} 
         currentUser={currentUser}
         onLogout={() => {
           logoutUser();
@@ -109,7 +125,7 @@ function AppContent({
     if (id === 'quantum_code') {
       // "Write Q Code" triggers our advanced Quantum AI Agents system directly!
       setIsAgentsOpen(true);
-    } else if (id === 'send_to_ibm') {
+    } else if (id === 'send_to_ibm' || id === 'realq') {
       setIsIbmInterfaceOpen(true);
     } else {
       setSelectedSectorId(id);
@@ -186,7 +202,7 @@ function AppContent({
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-quantum-primary animate-pulse shrink-0" />
           <span className="font-display font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[11px] sm:text-sm bg-gradient-to-r from-white via-gray-300 to-quantum-primary bg-clip-text text-transparent">
-            Quantum Systems
+            {t('quantum_systems')}
           </span>
         </div>
 
@@ -200,8 +216,8 @@ function AppContent({
               title="Apri pannello di controllo e gestione utenti"
             >
               <Users className="w-3.5 h-3.5 shrink-0" />
-              <span className="font-bold hidden md:inline">Gestione Utenti</span>
-              <span className="font-bold md:hidden">Users</span>
+              <span className="font-bold hidden md:inline">{t('user_management')}</span>
+              <span className="font-bold md:hidden">{t('user_management')}</span>
             </button>
           )}
 
@@ -214,8 +230,8 @@ function AppContent({
               title="Visualizza e modifica il General Disclaimer (88 Articoli)"
             >
               <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="font-bold hidden sm:inline">Disclaimer</span>
-              <span className="font-bold sm:hidden">Legal</span>
+              <span className="font-bold hidden sm:inline">{t('disclaimer')}</span>
+              <span className="font-bold sm:hidden">{t('disclaimer')}</span>
             </button>
           )}
 
@@ -226,7 +242,7 @@ function AppContent({
             title="Configura Google AI Studio API Key"
           >
             <Key className="w-3.5 h-3.5 text-quantum-primary shrink-0" />
-            <span className="hidden lg:inline">API Key</span>
+            <span className="hidden lg:inline">{t('api_key')}</span>
             {hasApiKey ? (
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
             ) : (
@@ -242,14 +258,14 @@ function AppContent({
               <User className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
             )}
             <span className="text-white font-bold max-w-[80px] sm:max-w-[120px] truncate">
-              {currentUser.name.split(' ')[0]}
+              {currentUser.username === 'admin' ? t('role_chief_officer') : currentUser.name.split(' ')[0]}
             </span>
             <span className={`px-1 py-0.2 text-[8px] sm:text-[9px] uppercase font-bold rounded ${
               currentUser.role === 'admin' 
                 ? 'bg-quantum-primary/20 text-quantum-primary border border-quantum-primary/40' 
                 : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
             }`}>
-              {currentUser.role}
+              {currentUser.role === 'admin' ? t('role_admin') : t('role_user')}
             </span>
           </div>
 
@@ -267,7 +283,7 @@ function AppContent({
             title="Sign out of session"
           >
             <LogOut className="w-3.5 h-3.5 text-red-400 shrink-0" />
-            <span>Logout</span>
+            <span>{t('logout')}</span>
           </button>
         </div>
       </header>
@@ -320,7 +336,7 @@ function AppContent({
             title="View and edit Privacy Policy (SPARK QUANTUM ENGINE)"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-quantum-primary group-hover:scale-110 transition-transform" />
-            <span className="border-b border-quantum-primary/40 group-hover:border-white font-bold">Privacy Policy</span>
+            <span className="border-b border-quantum-primary/40 group-hover:border-white font-bold">{t('privacy_policy')}</span>
           </button>
 
           {/* Quick mobile logout shortcut in footer */}
@@ -331,7 +347,7 @@ function AppContent({
             title="Sign out of session"
           >
             <LogOut className="w-3 h-3 text-red-400" />
-            <span className="font-bold">Logout</span>
+            <span className="font-bold">{t('logout')}</span>
           </button>
         </div>
         <div className="text-[7px] sm:text-[10px] text-quantum-primary font-mono uppercase tracking-[0.2em] sm:tracking-[0.3em] animate-pulse">
