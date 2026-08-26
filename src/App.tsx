@@ -7,6 +7,7 @@ import QuantumAgentsInterface from './components/QuantumAgentsInterface';
 import ApiKeyModal from './components/ApiKeyModal';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 import DisclaimerModal from './components/DisclaimerModal';
+import HelpModal from './components/HelpModal';
 import LoginScreen from './components/LoginScreen';
 import AdminUserManagementModal from './components/AdminUserManagementModal';
 import FirstLoginAgreementModal from './components/FirstLoginAgreementModal';
@@ -108,6 +109,9 @@ function AppContent({
   // Privacy Policy modal state
   const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState(false);
 
+  // Help modal state
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+
   // Disclaimer modal state
   const [isDisclaimerModalOpen, setIsDisclaimerModalOpen] = useState(false);
 
@@ -125,8 +129,10 @@ function AppContent({
     if (id === 'quantum_code') {
       // "Write Q Code" triggers our advanced Quantum AI Agents system directly!
       setIsAgentsOpen(true);
-    } else if (id === 'send_to_ibm' || id === 'realq') {
+    } else if (id === 'send_to_ibm') {
       setIsIbmInterfaceOpen(true);
+    } else if (id === 'realq') {
+      setIsHelpModalOpen(true);
     } else {
       setSelectedSectorId(id);
     }
@@ -164,6 +170,18 @@ function AppContent({
       <PrivacyPolicyModal
         isOpen={isPrivacyPolicyOpen}
         onClose={() => setIsPrivacyPolicyOpen(false)}
+        canEdit={currentUser.role === 'admin'}
+        canDownload={currentUser.role === 'admin'}
+      />
+
+      {/* Help Modal */}
+      <HelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        currentUser={currentUser}
+        onNavigateToSection={(sectionId) => {
+          handleSelectSector(sectionId as SectorId);
+        }}
       />
 
       {/* Disclaimer Modal (Modifiable by Admin) */}
@@ -239,7 +257,7 @@ function AppContent({
           <button
             onClick={() => setIsApiKeyModalOpen(true)}
             className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] sm:text-xs font-mono transition-all cursor-pointer"
-            title="Configura Google AI Studio API Key"
+            title="Configura Google API Key"
           >
             <Key className="w-3.5 h-3.5 text-quantum-primary shrink-0" />
             <span className="hidden lg:inline">{t('api_key')}</span>
@@ -314,6 +332,7 @@ function AppContent({
             sector={selectedSector} 
             onBack={handleBackFromDashboard}
             onSectorChange={handleSelectSector}
+            onOpenHelp={() => setIsHelpModalOpen(true)}
           />
         ) : (
           <SectorSelector 
@@ -322,6 +341,7 @@ function AppContent({
             onSubMenuToggle={setIsSubMenuVisible}
             onOpenAgents={() => setIsAgentsOpen(true)}
             onOpenIbm={() => setIsIbmInterfaceOpen(true)}
+            onOpenHelp={() => setIsHelpModalOpen(true)}
           />
         )}
       </main>

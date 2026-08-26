@@ -268,9 +268,10 @@ interface Props {
   sector: Sector;
   onBack: () => void;
   onSectorChange?: (id: SectorId) => void;
+  onOpenHelp?: () => void;
 }
 
-export default function QuantumDashboard({ sector, onBack, onSectorChange }: Props) {
+export default function QuantumDashboard({ sector, onBack, onSectorChange, onOpenHelp }: Props) {
   const { t, language } = useTranslation();
   const [mode, setMode] = useState<'File-Driven' | 'Manual' | 'Special' | null>(sector.isSpecial ? 'Special' : 'Manual');
   const [fileAssets, setFileAssets] = useState<string[]>([]);
@@ -624,16 +625,15 @@ export default function QuantumDashboard({ sector, onBack, onSectorChange }: Pro
           <span className="font-mono text-[10px] sm:text-sm tracking-widest uppercase">{t('back')}</span>
         </button>
         <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 bg-black/20 sm:bg-transparent p-2 sm:p-0 rounded-lg border border-white/5 sm:border-none">
-          {onSectorChange && sector.id !== 'realq' && (
-            <button 
-              onClick={() => onSectorChange('realq')}
-              className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors py-1 group"
-              title={t('realq')}
-            >
-              <HelpCircle className="w-4 h-4 sm:w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="font-mono text-[10px] sm:text-xs tracking-widest uppercase hidden md:inline">{t('realq')}</span>
-            </button>
-          )}
+          <button 
+            id="dashboard-help-btn"
+            onClick={() => onOpenHelp ? onOpenHelp() : (onSectorChange ? onSectorChange('realq') : null)}
+            className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors py-1 group cursor-pointer"
+            title="Help Center & Guide"
+          >
+            <HelpCircle className="w-4 h-4 sm:w-5 h-5 group-hover:scale-110 transition-transform" />
+            <span className="font-mono text-[10px] sm:text-xs tracking-widest uppercase hidden md:inline">HELP</span>
+          </button>
           {activeJobId && (
             <motion.div 
               initial={{ scale: 0 }} 

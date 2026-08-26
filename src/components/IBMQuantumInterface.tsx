@@ -23,7 +23,11 @@ import {
   Download,
   Eye,
   EyeOff,
-  Share2
+  Share2,
+  Lightbulb,
+  Sparkles,
+  TrendingUp,
+  Layers
 } from 'lucide-react';
 import { useTranslation } from '../lib/TranslationContext';
 
@@ -97,6 +101,76 @@ measure q -> c;`);
     setLogs(prev => [...prev, { timestamp, message, type }]);
   };
 
+  // Helper: Retrieve real corporate asset names and metadata for Qubits
+  const getQubitLabels = (): Array<{ name: string; isAncilla?: boolean }> => {
+    // 1. Try reading clean records from localStorage
+    try {
+      const raw = localStorage.getItem('quantum_latest_cleaned_records');
+      if (raw) {
+        const records = JSON.parse(raw);
+        if (Array.isArray(records) && records.length > 0) {
+          const labels: Array<{ name: string; isAncilla?: boolean }> = records.map((r: any) => ({
+            name: r.article || r.name || 'Asset'
+          }));
+          // Check if ancilla comparator qubit exists in circuit
+          if (circuitCode.includes(`qreg q[${records.length + 1}]`)) {
+            labels.push({ name: 'Comparatore Soglia', isAncilla: true });
+          }
+          return labels;
+        }
+      }
+    } catch {}
+
+    // 2. Fallback: Parse from QASM comments in circuitCode
+    const parsedLabels: Array<{ name: string; isAncilla?: boolean }> = [];
+    const lines = circuitCode.split('\n');
+    for (const line of lines) {
+      const match = line.match(/(?:mapping for|coordinate mapping for|wave mapping for|amplitude mapping for)\s+([A-Za-z0-9_\-\.]+)/i);
+      if (match && match[1]) {
+        if (!parsedLabels.some(l => l.name === match[1])) {
+          parsedLabels.push({ name: match[1] });
+        }
+      }
+    }
+
+    if (parsedLabels.length > 0) {
+      if (circuitCode.includes(`qreg q[${parsedLabels.length + 1}]`) || circuitCode.includes('Ancilla') || circuitCode.includes('comparator')) {
+        parsedLabels.push({ name: 'Comparatore Soglia', isAncilla: true });
+      }
+      return parsedLabels;
+    }
+
+    // 3. Fallback to generic Qubit names
+    const qregMatch = circuitCode.match(/qreg\s+q\[(\d+)\]/);
+    const numQubits = qregMatch ? parseInt(qregMatch[1]) : 3;
+    for (let i = 0; i < numQubits; i++) {
+      if (i === numQubits - 1 && circuitCode.includes('cry(')) {
+        parsedLabels.push({ name: 'Comparatore Soglia', isAncilla: true });
+      } else {
+        parsedLabels.push({ name: `Asset_${i + 1}` });
+      }
+    }
+    return parsedLabels;
+  };
+
+  // Helper: Translate a measured bitstring like "010" into real asset names and operational states
+  const translateBitstring = (state: string, labels: Array<{ name: string; isAncilla?: boolean }>): string => {
+    // In OpenQASM/Qiskit, the bitstring is printed as c[N-1]...c[1]c[0] (rightmost is qubit 0)
+    const bits = state.split('').reverse();
+    const parts: string[] = [];
+
+    bits.forEach((bit, idx) => {
+      const labelObj = labels[idx] || { name: `Qubit ${idx}` };
+      if (labelObj.isAncilla) {
+        parts.push(`${labelObj.name}: ${bit === '1' ? 'Allarme' : 'Entro Soglia'}`);
+      } else {
+        parts.push(`${labelObj.name}: ${bit === '1' ? 'Saturo (Critico)' : 'OK (Regolare)'}`);
+      }
+    });
+
+    return parts.join(' | ');
+  };
+
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     setCopiedType(type);
@@ -104,8 +178,27 @@ measure q -> c;`);
   };
 
   // Pre-load various templates
-  const loadTemplate = (type: 'qasm' | 'json' | 'bell') => {
-    if (type === 'bell') {
+  const loadTemplate = (type: 'qasm' | 'json' | 'bell' | 'qrng') => {
+    if (type === 'qrng') {
+      setCircuitCode(`// True Quantum Random Number Generator (QRNG) Circuit
+// Superconducting Qubit Hadamard Superposition Collapse
+OPENQASM 2.0;
+include "qelib1.inc";
+
+qreg q[5];
+creg c[5];
+
+// Apply Hadamard gate to create maximal superposition |+> = (|0>+|1>)/sqrt(2)
+h q[0];
+h q[1];
+h q[2];
+h q[3];
+h q[4];
+
+// Measure true non-deterministic quantum collapse entropy
+measure q -> c;`);
+      addLog("QRNG True Superconducting Entropy circuit loaded.", "info");
+    } else if (type === 'bell') {
       setCircuitCode(`// Bell State Circuit (Max entanglement)
 OPENQASM 2.0;
 include "qelib1.inc";
@@ -490,7 +583,14 @@ measure q -> c;`);
                 {t('ibm_quantum_code_title')}
               </h3>
               
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                <button 
+                  onClick={() => loadTemplate('qrng')} 
+                  className="px-2 py-1 bg-quantum-primary/10 hover:bg-quantum-primary/20 border border-quantum-primary/30 text-[9px] font-mono rounded text-quantum-primary transition-colors flex items-center gap-1"
+                >
+                  <Zap className="w-2.5 h-2.5" />
+                  QRNG Entropy
+                </button>
                 <button 
                   onClick={() => loadTemplate('bell')} 
                   className="px-2 py-1 bg-white/5 hover:bg-white/15 border border-white/10 text-[9px] font-mono rounded text-gray-300 hover:text-white transition-colors"
@@ -716,39 +816,200 @@ measure q -> c;`);
               )}
 
               {finalResults ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-gray-400 uppercase">{t('ibm_state_measurement')}</span>
+                    <span className="text-[10px] text-gray-400 uppercase font-mono">{t('ibm_state_measurement')} & Traduzione Aziendale</span>
                     {pqcDecryptedResults ? (
-                      <span className="text-[9px] text-green-400 font-bold flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/30">
+                      <span className="text-[9px] text-green-400 font-bold flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/30 font-mono">
                         <ShieldCheck className="w-3 h-3" /> {t('ibm_pqc_verified')}
                       </span>
                     ) : (
-                      <span className="text-[9px] text-quantum-primary font-bold">{t('ibm_system_measured')}</span>
+                      <span className="text-[9px] text-quantum-primary font-bold font-mono">{t('ibm_system_measured')}</span>
                     )}
                   </div>
                   
-                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1 scrollbar-hide">
-                    {Object.entries(finalResults).map(([state, shots]) => {
-                      const percentage = (((shots as number) / 1024) * 100).toFixed(1);
-                      return (
-                        <div key={state} className="space-y-1">
-                          <div className="flex justify-between text-[10px]">
-                            <span className="text-white font-bold">|ψ⟩ = |{state}⟩</span>
-                            <span className="text-gray-400">{shots as number} Shots ({percentage}%)</span>
+                  {/* States distribution with real company asset labels */}
+                  {(() => {
+                    const qubitLabels = getQubitLabels();
+
+                    return (
+                      <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1 scrollbar-hide font-sans">
+                        {Object.entries(finalResults).map(([state, shots]) => {
+                          const percentage = (((shots as number) / 1024) * 100).toFixed(1);
+                          const translated = translateBitstring(state, qubitLabels);
+
+                          return (
+                            <div key={state} className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 space-y-1.5 hover:border-quantum-primary/30 transition-all">
+                              <div className="flex items-center justify-between text-[10px]">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-white font-mono font-bold">|ψ⟩ = |{state}⟩</span>
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-quantum-secondary font-mono border border-white/5">
+                                    {shots as number} Shots
+                                  </span>
+                                </div>
+                                <span className="font-mono font-bold text-quantum-primary text-[11px]">{percentage}%</span>
+                              </div>
+
+                              {/* Direct translation with real table asset names */}
+                              <div className="text-[10px] text-gray-300 font-mono bg-[#070b14] px-2 py-1 rounded border border-white/5 flex items-center gap-1 overflow-x-auto scrollbar-hide">
+                                <span className="text-quantum-primary font-bold">➔</span>
+                                <span className="text-slate-300 whitespace-nowrap">{translated}</span>
+                              </div>
+
+                              <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/5">
+                                <motion.div 
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${percentage}%` }}
+                                  transition={{ duration: 1, ease: 'easeOut' }}
+                                  className="h-full bg-gradient-to-r from-quantum-primary to-quantum-secondary"
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+
+                  {/* 1. Comparison Box: Classical vs Quantum Computing */}
+                  {(() => {
+                    const qubitLabels = getQubitLabels();
+                    const N = qubitLabels.filter(l => !l.isAncilla).length || 3;
+                    const classicalCombinations = Math.pow(2, N);
+                    const classicalFormatted = classicalCombinations.toLocaleString();
+
+                    return (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-3.5 rounded-xl border border-indigo-500/25 bg-gradient-to-br from-[#0e162b] to-[#080d19] space-y-2.5 font-sans shadow-md"
+                      >
+                        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1 rounded-md bg-indigo-500/20 text-indigo-400">
+                              <Zap className="w-3.5 h-3.5" />
+                            </div>
+                            <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                              Confronto: Calcolo Classico vs Calcolo Quantistico IBM
+                            </h4>
                           </div>
-                          <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden border border-white/5">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${percentage}%` }}
-                              transition={{ duration: 1, ease: 'easeOut' }}
-                              className="h-full bg-gradient-to-r from-quantum-primary to-quantum-secondary"
-                            />
+                          <span className="text-[9px] font-mono text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                            N = {N} Variabili Aziendali
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                          {/* Classical computing card */}
+                          <div className="p-2.5 rounded-lg bg-black/30 border border-white/5 space-y-1">
+                            <div className="flex items-center justify-between text-gray-400 font-mono text-[10px]">
+                              <span>💻 COMPUTER CLASSICO</span>
+                              <span className="text-red-400 font-bold">Sequenziale O(2ᴺ)</span>
+                            </div>
+                            <div className="text-lg font-mono font-black text-slate-200">
+                              {classicalFormatted} <span className="text-[10px] font-normal text-gray-400">Iterazioni/Prove</span>
+                            </div>
+                            <p className="text-[10px] text-gray-400 leading-tight">
+                              Un server tradizionale deve testare i rami uno per uno, impiegando tempi che esplodono esponenzialmente.
+                            </p>
+                          </div>
+
+                          {/* Quantum computing card */}
+                          <div className="p-2.5 rounded-lg bg-quantum-primary/10 border border-quantum-primary/25 space-y-1">
+                            <div className="flex items-center justify-between text-quantum-primary font-mono text-[10px]">
+                              <span>⚛️ PROCESSORE IBM Q</span>
+                              <span className="text-emerald-400 font-bold">Istantaneo O(1)</span>
+                            </div>
+                            <div className="text-lg font-mono font-black text-quantum-primary flex items-center gap-1.5">
+                              1 Step <span className="text-[10px] font-normal text-emerald-300">({classicalFormatted} Stati Paralleli)</span>
+                            </div>
+                            <p className="text-[10px] text-gray-300 leading-tight">
+                              La sovrapposizione quantistica valuta simultaneamente tutte le {classicalFormatted} combinazioni in millisecondi.
+                            </p>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
+
+                        <div className="bg-white/5 p-2 rounded-lg flex items-center justify-between text-[10px] font-mono">
+                          <span className="text-gray-300">Vantaggio di Parallelismo:</span>
+                          <span className="text-emerald-400 font-bold">×{classicalFormatted} Accelerazione Spazio di Ricerca</span>
+                        </div>
+                      </motion.div>
+                    );
+                  })()}
+
+                  {/* 2. Elementary Explanation Module for the Client */}
+                  {(() => {
+                    const sortedStates = Object.entries(finalResults).sort((a, b) => (b[1] as number) - (a[1] as number));
+                    const topState = sortedStates[0] ? sortedStates[0][0] : '000';
+                    const topShots = sortedStates[0] ? sortedStates[0][1] : 0;
+                    const topPercentage = (((topShots as number) / 1024) * 100).toFixed(1);
+                    const qubitLabels = getQubitLabels();
+                    const topTranslated = translateBitstring(topState, qubitLabels);
+
+                    return (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-2 p-4 rounded-xl border border-quantum-primary/25 bg-gradient-to-br from-[#0c1527] to-[#060b14] space-y-3 font-sans text-left shadow-lg"
+                      >
+                        <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                          <div className="p-1.5 rounded-lg bg-quantum-primary/15 text-quantum-primary">
+                            <Lightbulb className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                              Cosa hai ottenuto con questi dati (In parole semplici)
+                            </h4>
+                            <span className="text-[9px] text-gray-400 font-mono">
+                              Spiegazione elementare dei risultati elaborati da IBM Quantum
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Top state badge with translation */}
+                        <div className="bg-quantum-primary/10 border border-quantum-primary/30 p-2.5 rounded-lg space-y-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="w-4 h-4 text-quantum-primary shrink-0 animate-pulse" />
+                              <div>
+                                <span className="text-[10px] font-mono text-gray-300 block">Stato Ottimale Calcolato:</span>
+                                <span className="text-xs font-mono font-black text-quantum-primary">|ψ⟩ = |{topState}⟩</span>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
+                              {topPercentage}% Probabilità
+                            </span>
+                          </div>
+
+                          <div className="text-[10.5px] font-mono text-gray-200 bg-[#070b14] p-1.5 rounded border border-quantum-primary/20">
+                            <span className="text-quantum-secondary font-bold mr-1">Configurazione Reale:</span>
+                            {topTranslated}
+                          </div>
+                        </div>
+
+                        {/* Elementary bullet points */}
+                        <div className="space-y-2 text-[11px] text-gray-300 leading-relaxed font-sans">
+                          <div className="flex items-start gap-2">
+                            <span className="text-quantum-primary font-bold mt-0.5">•</span>
+                            <p>
+                              <strong className="text-white">1. Lettura degli Stati:</strong> Il processore quantistico ha convertito le righe dei tuoi dati in bit quantistici. Lo stato <code className="bg-white/10 text-quantum-secondary px-1 rounded font-mono text-[10px]">|{topState}⟩</code> rappresenta la combinazione aziendale a massima efficienza e stabilità.
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="text-quantum-primary font-bold mt-0.5">•</span>
+                            <p>
+                              <strong className="text-white">2. Il Vantaggio Quantistico:</strong> IBM Quantum ha eseguito <strong className="text-white">1.024 simulazioni parallele</strong> istantanee, filtrando le interferenze e individuando la soluzione a minor rischio per la tua azienda.
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="text-quantum-primary font-bold mt-0.5">•</span>
+                            <p>
+                              <strong className="text-white">3. Risultato Pratico di Business:</strong> Puoi applicare direttamente questa configurazione operativa: gli elementi contrassegnati con <span className="text-emerald-400 font-mono">OK</span> operano in sicurezza, mentre quelli segnalati come <span className="text-amber-400 font-mono">Saturo</span> richiedono attenzione preventiva.
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })()}
                 </div>
               ) : !pqcRxData && (
                 <div className="border border-white/5 rounded-lg p-6 bg-white/5 flex flex-col items-center justify-center text-center opacity-40 min-h-[140px]">

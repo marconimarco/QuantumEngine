@@ -50,9 +50,10 @@ interface Props {
   onSubMenuToggle?: (isSub: boolean) => void;
   onOpenAgents?: () => void;
   onOpenIbm?: () => void;
+  onOpenHelp?: () => void;
 }
 
-export default function SectorSelector({ onSelect, initialSubMenu = null, onSubMenuToggle, onOpenAgents, onOpenIbm }: Props) {
+export default function SectorSelector({ onSelect, initialSubMenu = null, onSubMenuToggle, onOpenAgents, onOpenIbm, onOpenHelp }: Props) {
   const { t, language } = useTranslation();
   const [activeSubMenu, setActiveSubMenu] = useState<SectorId | null>(initialSubMenu);
 
@@ -107,6 +108,12 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
     if (id === 'quantum_code' || id === 'pqc_group') {
       setActiveSubMenu(id);
       onSubMenuToggle?.(true);
+    } else if (id === 'realq') {
+      if (onOpenHelp) {
+        onOpenHelp();
+      } else {
+        onSelect(id);
+      }
     } else {
       onSelect(id);
     }

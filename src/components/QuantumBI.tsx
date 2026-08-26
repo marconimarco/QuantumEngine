@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../lib/TranslationContext';
 import axios from 'axios';
+import { generateQuantumBiLocalResponse } from '../data/quantumBiEngine';
 
 interface Props {
   onSwitchToCross?: () => void;
@@ -798,42 +799,30 @@ Do you have a file ready or would you like assistance structuring one? If you al
       }
 
     } catch (error: any) {
-      console.error("AI Communication Error:", error);
+      console.warn("AI Backend unavailable or key error, executing resilient local quantum intelligence engine:", error);
       
-      let status = error.response?.status;
-      const responseData = error.response?.data;
-      const isStartupHTML = (typeof responseData === 'string' && (responseData.includes('<!doctype html>') || responseData.includes('Starting Server...'))) || error.message === "SERVER_STARTING";
-      
-      if (isStartupHTML) {
-        status = 503;
-      }
-      
-      setErrorStatus(status || 500);
-      const serverErrorField = error.response?.data?.error;
-      
-      let feedback = "";
-      
-      if (isStartupHTML) {
-        feedback = "[STARTUP ERROR]: Server is loading or was recently restarted to update configuration.";
-      } else if (serverErrorField) {
-        feedback = `[AI ERROR]: ${serverErrorField}`;
-      } else if (error.message) {
-        feedback = `[ERROR]: ${error.message}`;
-      } else {
-        feedback = "An unexpected error occurred during communication.";
-      }
+      try {
+        const localFallback = generateQuantumBiLocalResponse(messageText, messages, {
+          detectedSector,
+          sectorBrief,
+          allEntities,
+          numCols,
+          selectedColsCount: parsedParams.selectedColsCount,
+          qubitPrecision: parsedParams.qubitPrecision,
+          criticalThreshold: parsedParams.criticalThreshold,
+          stressScenario: parsedParams.stressScenario
+        });
 
-      if (status === 429) {
-        // Dynamically extract retry seconds from Gemini error string, default to 30s to avoid spamming
-        const secMatch = feedback.match(/Riprova tra ([\d.]+)/i);
-        const parsedSecs = secMatch ? Math.ceil(parseFloat(secMatch[1])) : 29;
-        setRetryCountdown(parsedSecs > 0 ? parsedSecs : 29);
-        feedback += "\n\n💡 Suggerimento: Attendi che il timer scada prima di riprovare. Il limite di traffico gratuito è temporaneo.";
-      } else if (status === 503 || isStartupHTML) {
-        feedback += "\n\n🔄 Suggerimento: I server o l'ambiente sono carichi. Prova a fare clic su 'Riprova' tra qualche secondo.";
-      }
+        addMessage('bot', localFallback.text);
 
-      addMessage('bot', feedback);
+        if (localFallback.jsonCode) setJsonConfig(localFallback.jsonCode);
+        if (localFallback.pythonCode) setPythonCode(localFallback.pythonCode);
+        if (localFallback.qasmCode) setQasmCode(localFallback.qasmCode);
+        setErrorStatus(null);
+      } catch (fallbackErr) {
+        console.error("Local engine error:", fallbackErr);
+        addMessage('bot', "⚠️ Si è verificato un errore durante l'elaborazione. Per favore riprova inviando il messaggio.");
+      }
     } finally {
       setIsProcessing(false);
     }

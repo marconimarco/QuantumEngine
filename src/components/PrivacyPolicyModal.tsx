@@ -137,11 +137,18 @@ architecture shall remain the sole legally and hermeneutically binding text betw
 interface PrivacyPolicyModalProps {
   isOpen: boolean;
   onClose: () => void;
+  canEdit?: boolean;
+  canDownload?: boolean;
 }
 
 const STORAGE_KEY = 'spark_quantum_privacy_policy_text';
 
-export default function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps) {
+export default function PrivacyPolicyModal({ 
+  isOpen, 
+  onClose,
+  canEdit = false,
+  canDownload = false
+}: PrivacyPolicyModalProps) {
   const [policyText, setPolicyText] = useState<string>(() => {
     return localStorage.getItem(STORAGE_KEY) || DEFAULT_PRIVACY_POLICY_TEXT;
   });
@@ -238,28 +245,30 @@ export default function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyMod
         {/* Toolbar */}
         <div className="px-4 sm:px-6 py-3 bg-white/[0.02] border-b border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
-                isEditing
-                  ? 'bg-quantum-primary text-black border-quantum-primary font-bold'
-                  : 'bg-white/5 hover:bg-white/10 border-white/10 text-gray-200'
-              }`}
-            >
-              {isEditing ? (
-                <>
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>Preview</span>
-                </>
-              ) : (
-                <>
-                  <Edit3 className="w-3.5 h-3.5 text-quantum-primary" />
-                  <span>Edit Text</span>
-                </>
-              )}
-            </button>
+            {canEdit && (
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+                  isEditing
+                    ? 'bg-quantum-primary text-black border-quantum-primary font-bold'
+                    : 'bg-white/5 hover:bg-white/10 border-white/10 text-gray-200'
+                }`}
+              >
+                {isEditing ? (
+                  <>
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Preview</span>
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="w-3.5 h-3.5 text-quantum-primary" />
+                    <span>Edit Text (Admin)</span>
+                  </>
+                )}
+              </button>
+            )}
 
-            {isEditing && (
+            {canEdit && isEditing && (
               <button
                 onClick={handleSave}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/40 transition-all font-bold cursor-pointer"
@@ -269,14 +278,16 @@ export default function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyMod
               </button>
             )}
 
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-300 border border-white/10 hover:border-red-500/30 transition-all cursor-pointer"
-              title="Reset to original default text"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Reset Default</span>
-            </button>
+            {canEdit && (
+              <button
+                onClick={handleReset}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-300 border border-white/10 hover:border-red-500/30 transition-all cursor-pointer"
+                title="Reset to original default text"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Reset Default</span>
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -293,14 +304,16 @@ export default function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyMod
               <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
 
-            <button
-              onClick={handleDownload}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all cursor-pointer"
-              title="Download as .txt file"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Download TXT</span>
-            </button>
+            {canDownload && (
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all cursor-pointer"
+                title="Download as .txt file"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Download TXT</span>
+              </button>
+            )}
           </div>
         </div>
 
