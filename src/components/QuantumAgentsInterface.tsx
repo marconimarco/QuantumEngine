@@ -446,46 +446,6 @@ for state, freq in sorted(counts.items(), key=lambda x: x[1], reverse=True):
 
     return (
       <div key={key} className="my-5 overflow-hidden rounded-xl border border-slate-700 bg-[#0c1322] shadow-[0_10px_30px_rgba(0,0,0,0.6)] text-xs max-w-full font-sans">
-        {/* Ribbon Tab Bar */}
-        <div className="bg-[#0b0f19] px-3.5 py-1.5 flex items-center justify-between border-b border-slate-800 text-[11px] select-none shrink-0 font-sans">
-          <div className="flex items-center gap-3.5">
-            <span className="flex items-center gap-1.5 text-emerald-500 font-extrabold text-[12px] uppercase tracking-wider font-mono">
-              <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0" /> QuantumSheet
-            </span>
-            <div className="hidden xs:flex items-center gap-3 text-slate-400 font-semibold">
-              <span className="hover:text-white cursor-pointer transition-colors px-1 text-[10.5px]">File</span>
-              <span className="text-emerald-400 font-bold border-b-2 border-emerald-500 px-1 py-1 text-[10.5px]">Home</span>
-              <span className="hover:text-white cursor-pointer transition-colors px-1 text-[10.5px]">Inserisci</span>
-              <span className="hover:text-white cursor-pointer transition-colors px-1 text-[10.5px]">Formule</span>
-              <span className="hover:text-white cursor-pointer transition-colors px-1 text-[10.5px]">Dati QML</span>
-            </div>
-          </div>
-          <div className="text-[10px] text-slate-500 font-mono tracking-wider font-bold">
-            SPREADSHEET ENGINE
-          </div>
-        </div>
-        
-        {/* Formula Bar */}
-        <div className="bg-[#121b2d]/80 px-3 py-2 flex items-center gap-2 border-b border-slate-800 text-xs shrink-0 font-sans">
-          {/* Cell Selector Input (e.g. A1) */}
-          <div className="bg-[#090d16] border border-slate-700 text-emerald-400 font-mono text-center px-2 py-1 rounded min-w-[45px] font-black select-none text-[11px] tracking-wide">
-            {activeCellName}
-          </div>
-          
-          {/* Divider */}
-          <div className="text-slate-700 h-4 border-r border-slate-700 mx-0.5" />
-          
-          {/* fx Button */}
-          <span className="text-emerald-500 italic font-serif font-extrabold text-sm px-1.5 select-none">
-            fx
-          </span>
-          
-          {/* Formula value display input */}
-          <div className="flex-1 bg-[#090d16] border border-slate-800 rounded px-3 py-1.5 text-slate-200 font-mono text-[11.5px] overflow-hidden truncate">
-            {activeCellValue || <span className="text-slate-600 italic">empty cell</span>}
-          </div>
-        </div>
-        
         {/* Grid Viewport */}
         <div className="overflow-x-auto max-w-full">
           <table className="w-full text-left border-collapse border-spacing-0 min-w-[600px]">
@@ -557,50 +517,6 @@ for state, freq in sorted(counts.items(), key=lambda x: x[1], reverse=True):
           </table>
         </div>
 
-        {/* Excel Status Bar at Bottom */}
-        <div className="bg-[#0b0f19] px-3.5 py-1.5 flex flex-wrap items-center justify-between border-t border-slate-800 text-[10.5px] select-none text-slate-400 font-sans">
-          <div className="flex items-center gap-2">
-            {/* Active Sheet Tab */}
-            <div className="flex items-center gap-1.5 bg-[#0c1322] text-slate-200 border-t-2 border-t-emerald-500 border-x border-slate-800 px-3.5 py-1 text-[11px] font-bold rounded-t-sm shadow-md">
-              📊 Foglio1
-            </div>
-            {/* Add button */}
-            <button className="p-1 hover:bg-slate-800 hover:text-white rounded transition-colors text-slate-500 cursor-not-allowed">
-              +
-            </button>
-          </div>
-          <div className="flex items-center gap-4 text-[10px] font-mono">
-            <span className="flex items-center gap-1 text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> {isIt ? 'PRONTO' : 'READY'}
-            </span>
-            <span className="hidden sm:inline text-slate-500">
-              {isIt ? 'RIGHE' : 'ROWS'}: {rows.length} | {isIt ? 'COLONNE' : 'COLUMNS'}: {headerCols.length}
-            </span>
-          </div>
-        </div>
-
-        {/* Excel Table Action Toolbar */}
-        <div className="bg-[#080d1a] p-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={handleDownloadCsvTemplate}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm"
-              title={isIt ? "Scarica questo modello CSV per modificarlo sul tuo computer" : "Download this CSV template to edit on your computer"}
-            >
-              <Download className="w-3.5 h-3.5" /> {isIt ? 'Scarica Modello CSV' : 'Download CSV Template'}
-            </button>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-quantum-primary/15 hover:bg-quantum-primary/25 border border-quantum-primary/30 text-quantum-primary font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm"
-              title={isIt ? "Carica il file CSV con i tuoi dati reali" : "Upload the CSV file with your real corporate data"}
-            >
-              <Upload className="w-3.5 h-3.5" /> {isIt ? 'Carica File CSV Compilato' : 'Upload Completed CSV File'}
-            </button>
-          </div>
-          <span className="text-[10px] text-slate-400 font-mono">
-            *{isIt ? "Scarica, inserisci i dati reali e ricarica per l'elaborazione quantistica IBM" : "Download, enter real data and re-upload for IBM Quantum processing"}
-          </span>
-        </div>
       </div>
     );
   };
@@ -623,59 +539,8 @@ for state, freq in sorted(counts.items(), key=lambda x: x[1], reverse=True):
           const rows = lines.slice(1).map(line => line.split(',').map(v => v.trim())).filter(row => row.length > 0 && row[0] !== '');
           const tableId = `csv-${idx}`;
 
-          const isThisTableSelected = selectedCell && selectedCell.tableId === tableId;
-          const activeRowIdx = isThisTableSelected ? selectedCell.rowIndex : 0;
-          const activeColIdx = isThisTableSelected ? selectedCell.colIndex : 0;
-
-          // Safety checks
-          const safeRowIdx = Math.min(activeRowIdx, rows.length - 1);
-          const safeColIdx = Math.min(activeColIdx, headerCols.length - 1);
-
-          const activeCellValue = rows[safeRowIdx] && rows[safeRowIdx][safeColIdx] ? rows[safeRowIdx][safeColIdx] : '';
-          const activeCellName = `${getColLetter(safeColIdx)}${safeRowIdx + 1}`;
-
           return (
             <div key={idx} className="my-5 overflow-hidden rounded-xl border border-slate-700 bg-[#0c1322] shadow-[0_10px_30px_rgba(0,0,0,0.6)] text-xs max-w-full font-sans">
-              {/* Ribbon Tab Bar */}
-              <div className="bg-[#0b0f19] px-3.5 py-1.5 flex items-center justify-between border-b border-slate-800 text-[11px] select-none shrink-0 font-sans">
-                <div className="flex items-center gap-3.5">
-                  <span className="flex items-center gap-1.5 text-emerald-500 font-extrabold text-[12px] uppercase tracking-wider font-mono">
-                    <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0" /> QuantumSheet [CSV]
-                  </span>
-                  <div className="hidden xs:flex items-center gap-3 text-slate-400 font-semibold">
-                    <span className="hover:text-white cursor-pointer transition-colors px-1 text-[10.5px]">File</span>
-                    <span className="text-emerald-400 font-bold border-b-2 border-emerald-500 px-1 py-1 text-[10.5px]">Home</span>
-                    <span className="hover:text-white cursor-pointer transition-colors px-1 text-[10.5px]">Inserisci</span>
-                    <span className="hover:text-white cursor-pointer transition-colors px-1 text-[10.5px]">Formule</span>
-                    <span className="hover:text-white cursor-pointer transition-colors px-1 text-[10.5px]">Campione</span>
-                  </div>
-                </div>
-                <div className="text-[10px] text-slate-500 font-mono tracking-wider font-bold">
-                  SAMPLES WRITER
-                </div>
-              </div>
-              
-              {/* Formula Bar */}
-              <div className="bg-[#121b2d]/80 px-3 py-2 flex items-center gap-2 border-b border-slate-800 text-xs shrink-0 font-sans">
-                {/* Cell Selector Input (e.g. A1) */}
-                <div className="bg-[#090d16] border border-slate-700 text-emerald-400 font-mono text-center px-2 py-1 rounded min-w-[45px] font-black select-none text-[11px] tracking-wide">
-                  {activeCellName}
-                </div>
-                
-                {/* Divider */}
-                <div className="text-slate-700 h-4 border-r border-slate-700 mx-0.5" />
-                
-                {/* fx Button */}
-                <span className="text-emerald-500 italic font-serif font-extrabold text-sm px-1.5 select-none">
-                  fx
-                </span>
-                
-                {/* Formula value display input */}
-                <div className="flex-1 bg-[#090d16] border border-slate-800 rounded px-3 py-1.5 text-slate-200 font-mono text-[11.5px] overflow-hidden truncate">
-                  {activeCellValue || <span className="text-slate-600 italic">empty cell</span>}
-                </div>
-              </div>
-              
               {/* Grid Viewport */}
               <div className="overflow-x-auto max-w-full">
                 <table className="w-full text-left border-collapse border-spacing-0 min-w-[600px]">
@@ -746,50 +611,6 @@ for state, freq in sorted(counts.items(), key=lambda x: x[1], reverse=True):
                 </table>
               </div>
 
-              {/* Excel Status Bar at Bottom */}
-              <div className="bg-[#0b0f19] px-3.5 py-1.5 flex flex-wrap items-center justify-between border-t border-slate-800 text-[10.5px] select-none text-slate-400 font-sans">
-                <div className="flex items-center gap-2">
-                  {/* Active Sheet Tab */}
-                  <div className="flex items-center gap-1.5 bg-[#0c1322] text-slate-200 border-t-2 border-t-emerald-500 border-x border-slate-800 px-3.5 py-1 text-[11px] font-bold rounded-t-sm shadow-md">
-                    📊 Foglio_Campione
-                  </div>
-                  {/* Add button */}
-                  <button className="p-1 hover:bg-slate-800 hover:text-white rounded transition-colors text-slate-500 cursor-not-allowed">
-                    +
-                  </button>
-                </div>
-                <div className="flex items-center gap-4 text-[10px] font-mono">
-                  <span className="flex items-center gap-1 text-emerald-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> {isIt ? 'PRONTO_CAMPIONE' : 'SAMPLE_READY'}
-                  </span>
-                  <span className="hidden sm:inline text-slate-500">
-                    {isIt ? 'RIGHE' : 'ROWS'}: {rows.length} | {isIt ? 'COLONNE' : 'COLUMNS'}: {headerCols.length}
-                  </span>
-                </div>
-              </div>
-
-              {/* Excel Table Action Toolbar */}
-              <div className="bg-[#080d1a] p-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={handleDownloadCsvTemplate}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm"
-                    title={isIt ? "Scarica questo modello CSV per modificarlo sul tuo computer" : "Download this CSV template to edit on your computer"}
-                  >
-                    <Download className="w-3.5 h-3.5" /> {isIt ? 'Scarica Modello CSV' : 'Download CSV Template'}
-                  </button>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-quantum-primary/15 hover:bg-quantum-primary/25 border border-quantum-primary/30 text-quantum-primary font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm"
-                    title={isIt ? "Carica il file CSV con i tuoi dati reali" : "Upload the CSV file with your real corporate data"}
-                  >
-                    <Upload className="w-3.5 h-3.5" /> {isIt ? 'Carica File CSV Compilato' : 'Upload Completed CSV File'}
-                  </button>
-                </div>
-                <span className="text-[10px] text-slate-500 font-mono">
-                  *{isIt ? "Modifica e carica per avviare la sintesi quantistica" : "Edit and upload to initiate quantum synthesis"}
-                </span>
-              </div>
             </div>
           );
         }
@@ -2393,9 +2214,14 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
     let negativeClampedCount = 0;
 
     // Retrieve clean records
-    let cleanRecords: Array<{ article: string, saturation: number, abbinamento: string }> = [];
+    let cleanRecords: Array<{ article: string, saturation: number, abbinamento: string, correlazioneNumerica?: number }> = [];
     let maxSeenSaturation = 0;
-    const tempRecords: Array<{ article: string, saturation: number, abbinamento: string }> = [];
+    const tempRecords: Array<{ article: string, saturation: number, abbinamento: string, correlazioneNumerica?: number }> = [];
+
+    // Check if there is a 4th column or explicit correlation column
+    const idxCorrelazione = originalHeaders.findIndex((h, idx) => 
+      idx === 3 || ['spot', 'exchange', 'correlation', 'correlazione', 'cambio', 'tasso', 'weight', 'peso'].some(term => h.toLowerCase().includes(term))
+    );
 
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(delimiter);
@@ -2438,6 +2264,22 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
         }
       }
 
+      // Extract 4th column (Spot Exchange Rates / Dynamic Correlation)
+      let correlazioneNumerica: number | undefined = undefined;
+      const rawCorrText = (idxCorrelazione !== -1 && parts[idxCorrelazione]) 
+        ? parts[idxCorrelazione].replace(/^["']|["']$/g, '').replace(/,/g, '.').trim() 
+        : (parts[3] ? parts[3].replace(/^["']|["']$/g, '').replace(/,/g, '.').trim() : '');
+
+      if (rawCorrText) {
+        let parsed = parseFloat(rawCorrText);
+        if (!isNaN(parsed)) {
+          if (parsed > 1.0 && parsed <= 100.0) parsed = parsed / 100.0;
+          else if (parsed > 100.0) parsed = 1.0;
+          else if (parsed < 0.0) parsed = 0.0;
+          correlazioneNumerica = parsed;
+        }
+      }
+
       // Auto-correct comma decimals
       if (originalSaturationText.includes(',')) {
         originalSaturationText = originalSaturationText.replace(',', '.');
@@ -2463,7 +2305,7 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
         outOfScaleCount++;
       }
 
-      tempRecords.push({ article, saturation: saturationValue, abbinamento });
+      tempRecords.push({ article, saturation: saturationValue, abbinamento, correlazioneNumerica });
       if (saturationValue > maxSeenSaturation) {
         maxSeenSaturation = saturationValue;
       }
@@ -2597,13 +2439,17 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation
       qasmCircuitCode += `// Option B [Angle/Geometry Only]: Strictly isolated parametric rotations applied to independent qubits\n`;
       cleanRecords.forEach((record, index) => {
         const pClipped = Math.max(0, Math.min(record.saturation, 1.0));
-        const theta = 2 * Math.asin(Math.sqrt(pClipped));
-        const phi = (pClipped * Math.PI) + ((index + 1) * (Math.PI / (2 * N)));
+        const thetaSat = 2 * Math.asin(Math.sqrt(pClipped));
+        
+        // Check if there is an explicit numeric correlation value in the row to calculate angle ex-novo
+        const parsedCorrVal = parseFloat(record.abbinamento.replace(/,/g, '.'));
+        const hasNumericCorr = !isNaN(parsedCorrVal) && parsedCorrVal >= 0 && parsedCorrVal <= 1.0;
+        const thetaCorr = hasNumericCorr ? (2 * Math.asin(Math.sqrt(parsedCorrVal))) : ((pClipped * Math.PI) + ((index + 1) * (Math.PI / (2 * N))));
         const gamma = (Math.PI / 4) * (1.0 + pClipped);
-        const secRotation = (theta / 2.0);
+        const secRotation = (thetaSat / 2.0);
 
         qasmCircuitCode += `// Isolated geometric coordinate mapping for ${record.article} (Qubit q[${index}])\n`;
-        qasmCircuitCode += `rz(${phi.toFixed(5)}) q[${index}]; // Longitudinal geometric rotation\n`;
+        qasmCircuitCode += `rz(${thetaCorr.toFixed(5)}) q[${index}]; // Isolated local phase rotation calculated ex-novo${hasNumericCorr ? ` from correlation (${parsedCorrVal.toFixed(4)})` : ''}\n`;
         qasmCircuitCode += `rx(${gamma.toFixed(5)}) q[${index}]; // Transverse parametric rotation\n`;
         qasmCircuitCode += `ry(${secRotation.toFixed(5)}) q[${index}]; // Independent angular coordinate adjustment\n`;
       });
@@ -2630,6 +2476,15 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation
       });
 
       Object.entries(groups).forEach(([groupName, indices]) => {
+        const getRecordCorr = (record: { article: string, saturation: number, abbinamento: string, correlazioneNumerica?: number }): number => {
+          if (record.correlazioneNumerica !== undefined && !isNaN(record.correlazioneNumerica)) {
+            return Math.max(0, Math.min(1, record.correlazioneNumerica));
+          }
+          const parsedCorr = parseFloat((record.abbinamento || '').replace(/,/g, '.'));
+          if (!isNaN(parsedCorr) && parsedCorr >= 0 && parsedCorr <= 1.0) return parsedCorr;
+          return 0.5;
+        };
+
         if (indices.length > 1) {
           // Check if groupName or values represent a decimal correlation coefficient (e.g., "0.12", "0.65", "0.85")
           const parsedCorrVal = parseFloat(groupName.replace(/,/g, '.'));
@@ -2637,31 +2492,30 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation
 
           if (isNumericCorr) {
             const thetaCorr = 2 * Math.asin(Math.sqrt(parsedCorrVal));
-            qasmCircuitCode += `// Partial entanglement mapping for numeric correlation value (${parsedCorrVal.toFixed(4)}) with q[${indices[0]}] as control:\n`;
+            qasmCircuitCode += `// Partial entanglement mapping for numeric correlation (${parsedCorrVal.toFixed(4)}) with q[${indices[0]}] as control:\n`;
             for (let g = 1; g < indices.length; g++) {
               qasmCircuitCode += `cry(${thetaCorr.toFixed(5)}) q[${indices[0]}], q[${indices[g]}];\n`;
               entanglementAdded = true;
             }
           } else {
-            // Group label (e.g. "PORTFOLIO_HEDGE", "CORRIDOR_WEST"): apply partial entanglement based on target node saturation or standard CX
-            qasmCircuitCode += `// Relationship group with identical values (q[${indices[0]}] as common control qubit): ${groupName}\n`;
+            // Group label (e.g. "SET_PRIMA", "PORTFOLIO_HEDGE"): apply controlled-RY using dynamic correlation from 4th column
+            qasmCircuitCode += `// Group "${groupName}" with q[${indices[0]}] as common control qubit:\n`;
             for (let g = 1; g < indices.length; g++) {
               const targetRecord = cleanRecords[indices[g]];
-              const pTgt = Math.max(0, Math.min(targetRecord?.saturation ?? 0.5, 1.0));
-              const thetaCorr = 2 * Math.asin(Math.sqrt(pTgt));
-              // Use CRY partial entanglement for smooth decimal correlations
-              if (pTgt < 0.999 && pTgt > 0.001) {
-                qasmCircuitCode += `cry(${thetaCorr.toFixed(5)}) q[${indices[0]}], q[${indices[g]}]; // Continuous partial entanglement\n`;
-              } else {
-                qasmCircuitCode += `cx q[${indices[0]}], q[${indices[g]}];\n`;
-              }
+              const corrVal = getRecordCorr(targetRecord);
+              const thetaCorr = 2 * Math.asin(Math.sqrt(corrVal));
+              qasmCircuitCode += `cry(${thetaCorr.toFixed(5)}) q[${indices[0]}], q[${indices[g]}]; // Dynamic Correlation = ${corrVal.toFixed(4)}\n`;
               entanglementAdded = true;
             }
           }
         } else if (indices.length === 1) {
           const idx = indices[0];
-          qasmCircuitCode += `// Independent node in Feature Map for single value (q[${idx}])\n`;
-          qasmCircuitCode += `rz(pi/4) q[${idx}]; // Parametric phase rotation for distributed quantum coherence\n`;
+          const rec = cleanRecords[idx];
+          const corrVal = getRecordCorr(rec);
+          const thetaCorr = 2 * Math.asin(Math.sqrt(corrVal));
+          qasmCircuitCode += `// Independent node ${rec.article} (Dynamic Correlation = ${corrVal.toFixed(4)}):\n`;
+          qasmCircuitCode += `rz(${thetaCorr.toFixed(5)}) q[${idx}];\n`;
+          entanglementAdded = true;
         }
       });
 
@@ -3230,33 +3084,17 @@ To run real-time simulation and transmit the circuit to the physical quantum har
             })()}
 
             {step === 3 && (
-              <div className="flex flex-wrap items-center justify-between gap-2.5 w-full bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={handleDownloadCsvTemplate}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm"
-                  >
-                    <Download className="w-3.5 h-3.5" /> {isIt ? '📥 Scarica Modello CSV' : '📥 Download CSV Template'}
-                  </button>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-quantum-primary/20 hover:bg-quantum-primary/30 border border-quantum-primary/40 text-quantum-primary font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm"
-                  >
-                    <Upload className="w-3.5 h-3.5" /> {isIt ? '📁 Carica File CSV' : '📁 Upload CSV File'}
-                  </button>
-                </div>
-                <div className="flex items-center gap-2 ml-auto">
-                  <span className="text-[10px] font-mono text-gray-400 uppercase">{t('agents_threshold') || 'Threshold:'}</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    max="1"
-                    value={threshold}
-                    onChange={(e) => setThreshold(parseFloat(e.target.value) || 0.04)}
-                    className="w-16 bg-[#070b14] border border-white/10 rounded px-2 py-1 text-xs text-white text-center font-mono focus:outline-none focus:border-quantum-primary"
-                  />
-                </div>
+              <div className="flex items-center justify-end gap-2 w-full px-2 py-1">
+                <span className="text-[10px] font-mono text-gray-400 uppercase">{t('agents_threshold') || 'Threshold:'}</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max="1"
+                  value={threshold}
+                  onChange={(e) => setThreshold(parseFloat(e.target.value) || 0.04)}
+                  className="w-16 bg-[#070b14] border border-white/10 rounded px-2 py-1 text-xs text-white text-center font-mono focus:outline-none focus:border-quantum-primary"
+                />
               </div>
             )}
           </div>
