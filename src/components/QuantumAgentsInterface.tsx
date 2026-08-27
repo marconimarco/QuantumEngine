@@ -198,34 +198,41 @@ export default function QuantumAgentsInterface({ onBack, onSendToIbm }: Props) {
     let extraVals2 = '';
     let extraVals3 = '';
     
-    if (scenario.macroarea.includes('Finanza')) {
+    if (scenario.macroarea.includes('Finanza') || scenario.macroarea.includes('Finance')) {
       asset1 = 'OPZIONE_ETH';
       asset2 = 'FUTURES_GOLD';
       asset3 = 'CROSS_EUR_USD';
       extraVals1 = '0.35,0.45,1.08';
       extraVals2 = '0.12,0.85,1.12';
       extraVals3 = '0.65,0.20,1.05';
-    } else if (scenario.macroarea.includes('Logistica')) {
+    } else if (scenario.macroarea.includes('Logistica') || scenario.macroarea.includes('Logistics')) {
       asset1 = 'VEICOLO_HUB_A';
       asset2 = 'VEICOLO_HUB_B';
       asset3 = 'ROTTA_BACKUP';
       extraVals1 = '45.12,12:00,10,0.5';
       extraVals2 = '45.18,14:30,12,0.8';
       extraVals3 = '45.30,18:00,5,0.1';
-    } else if (scenario.macroarea.includes('Chimica') || scenario.macroarea.includes('Genomica')) {
+    } else if (scenario.macroarea.includes('Chimica') || scenario.macroarea.includes('Chemistry')) {
       asset1 = 'CATALIZZATORE_PT';
       asset2 = 'MOL_BIO_DEGR';
       asset3 = 'REATTIVO_C';
       extraVals1 = '4.2,0.15,0.88';
       extraVals2 = '2.8,0.05,0.95';
       extraVals3 = '5.0,0.60,0.12';
-    } else if (scenario.macroarea.includes('Manifattura')) {
+    } else if (scenario.macroarea.includes('Manifattura') || scenario.macroarea.includes('Manutenzione') || scenario.macroarea.includes('Manufacturing')) {
       asset1 = 'ROBOT_SALDATORE_3';
       asset2 = 'CNC_FRESATRICE';
       asset3 = 'LINEA_MONTAGGIO';
       extraVals1 = '120,4.5,12';
       extraVals2 = '150,2.1,3';
       extraVals3 = '90,8.4,24';
+    } else if (scenario.macroarea.includes('Sanità') || scenario.macroarea.includes('Genomica') || scenario.macroarea.includes('Healthcare')) {
+      asset1 = 'PATIENT_DONOR';
+      asset2 = 'PATIENT_RECPT';
+      asset3 = 'PATIENT_ISO';
+      extraVals1 = '0.95,0.40,0.12';
+      extraVals2 = '0.95,0.60,0.15';
+      extraVals3 = '0.10,0.24,0.30';
     } else if (scenario.macroarea.includes('Cybersecurity')) {
       asset1 = 'CHIAVE_AES_256';
       asset2 = 'FIREWALL_EAST';
@@ -1584,8 +1591,9 @@ PACKAGING_LINE,0.15,10.0,INDEPENDENT`;
   const displaySectorColumnProposal = (sectorName: string) => {
     let colsText = '';
     let csvTemplate = '';
+    const secLower = (sectorName || '').toLowerCase();
 
-    if (sectorName === 'Finanza') {
+    if (secLower.includes('finan')) {
       colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`AZ_ENEL\` or \`BTC_PORTFOLIO\`): Represents the single financial asset or stock of your company.
 - **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.35\`): Corresponds to the measured risk, variance or volatility level.
 - **Expected_Return** (Type: *Decimal*, e.g.: \`0.06\`): Estimated annual return rate.
@@ -1598,7 +1606,7 @@ BOND_USA_10Y,0.78,0.03,INDEPENDENT
 AZ_UNICREDIT,0.60,0.12,PROTECTED_HIGH_YIELD
 AZ_INTESA,0.30,0.09,PROTECTED_HIGH_YIELD
 ETH_RESERVE,0.85,0.25,INDEPENDENT`;
-    } else if (sectorName === 'Logistica') {
+    } else if (secLower.includes('logist')) {
       colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`TRUCK_NORTH\` or \`CONTAINER_X\`): Fleet vehicle, truck or cargo container code.
 - **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.85\`): Stowage level, delay or load capacity saturation.
 - **Priority** (Type: *Text*, e.g.: \`High\` / \`Low\`): Shipment priority or urgency level.
@@ -1611,7 +1619,7 @@ VAN_LOCAL,0.78,Medium,INDEPENDENT
 CARGO_CONTAINER,0.60,Critical,ROUTE_WEST
 SHIP_CARRIER,0.30,Low,ROUTE_WEST
 DRONE_EXPRESS,0.85,Critical,INDEPENDENT`;
-    } else if (sectorName === 'Chimica') {
+    } else if (secLower.includes('chimic') || secLower.includes('chem')) {
       colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`REACTIVE_MOL\`): Molecule, material, or raw material identifier.
 - **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.40\`): Energy stability or chemical instability level.
 - **Limit_Temperature** (Type: *Decimal*, e.g.: \`180.5\`): Maximum critical temperature for the compound.
@@ -1624,7 +1632,7 @@ STABILIZER_ADDITIVE,0.70,90.0,INDEPENDENT
 HDPE_POLYMER,0.12,240.0,DIPOLE_FUSION
 SOLVENT_B,0.35,85.0,DIPOLE_FUSION
 H2_ELEMENT,0.95,300.0,INDEPENDENT`;
-    } else if (sectorName === 'Sanita') {
+    } else if (secLower.includes('sanit') || secLower.includes('health') || secLower.includes('genom')) {
       colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`PATIENT_Rossi\`): Anonymous patient code or genomic strand ID.
 - **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.65\`): Immune rejection level, biological expression or incidence.
 - **Compatibility** (Type: *Decimal*, e.g.: \`0.92\`): Reciprocal suitability or therapeutic efficacy score.
@@ -1637,7 +1645,7 @@ AUTONOMOUS_PATIENT,0.80,0.10,INDEPENDENT
 GEN_SAMPLE_A,0.50,0.88,MUTATION_LINK_X
 GEN_SAMPLE_B,0.22,0.88,MUTATION_LINK_X
 HEALTHY_PATIENT,0.10,0.99,INDEPENDENT`;
-    } else if (sectorName === 'Cybersecurity') {
+    } else if (secLower.includes('cyber')) {
       colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`IP_GATEWAY\`): Hostname, IP address, or network node in your infrastructure.
 - **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.80\`): Congestion, CPU load, or anomalous packet rate.
 - **Active_Ports** (Type: *Integer*, e.g.: \`14\`): Number of open communication ports.
@@ -1650,7 +1658,7 @@ DEVELOPER_PC,0.12,12,INDEPENDENT
 DATA_STORAGE,0.30,1,BACKUP_LINK
 VIRTUAL_MACHINE_B,0.40,15,BACKUP_LINK
 INTERNAL_WIFI_ROUTER,0.95,44,INDEPENDENT`;
-    } else { // Manufacturing / Factory
+    } else { // Manufacturing / Factory / Maintenance
       colsText = `- **Item_Code** (Type: *Text/Identifier*, e.g.: \`CNC_MACHINE\` or \`WELDING_ROBOT\`): Mechanical equipment identifier.
 - **Saturation_Percentage** (Type: *Decimal between 0.00 and 1.00*, e.g.: \`0.55\`): Wear or stress rate measured on the machine cycle.
 - **Work_Hours** (Type: *Decimal*, e.g.: \`180.5\`): Total operating hours accumulated over the last month.
@@ -2552,8 +2560,12 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation
 
     setMappingSummary(logicSummary);
 
-    let qasmCircuitCode = `OPENQASM 2.0;\ninclude "qelib1.inc";\n\n`;
-    qasmCircuitCode += `// Quantum register of exact size N + 1 for Comparator\n`;
+    const usesCryGate = !isOptionB && !isOptionC;
+    let qasmCircuitCode = `OPENQASM 2.0;\ninclude "qelib1.inc";\n`;
+    if (usesCryGate) {
+      qasmCircuitCode += `gate cry(theta) a, b { cu3(theta, 0, 0) a, b; }\n`;
+    }
+    qasmCircuitCode += `\n// Quantum register of exact size N + 1 for Comparator\n`;
     qasmCircuitCode += `qreg q[${N + 1}];\n`;
     qasmCircuitCode += `creg c[${N + 1}];\n\n`;
 
@@ -2619,10 +2631,32 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation
 
       Object.entries(groups).forEach(([groupName, indices]) => {
         if (indices.length > 1) {
-          qasmCircuitCode += `// Relationship group with identical values (q[${indices[0]}] as common control qubit): ${groupName}\n`;
-          for (let g = 1; g < indices.length; g++) {
-            qasmCircuitCode += `cx q[${indices[0]}], q[${indices[g]}];\n`;
-            entanglementAdded = true;
+          // Check if groupName or values represent a decimal correlation coefficient (e.g., "0.12", "0.65", "0.85")
+          const parsedCorrVal = parseFloat(groupName.replace(/,/g, '.'));
+          const isNumericCorr = !isNaN(parsedCorrVal) && parsedCorrVal > 0 && parsedCorrVal <= 1.0;
+
+          if (isNumericCorr) {
+            const thetaCorr = 2 * Math.asin(Math.sqrt(parsedCorrVal));
+            qasmCircuitCode += `// Partial entanglement mapping for numeric correlation value (${parsedCorrVal.toFixed(4)}) with q[${indices[0]}] as control:\n`;
+            for (let g = 1; g < indices.length; g++) {
+              qasmCircuitCode += `cry(${thetaCorr.toFixed(5)}) q[${indices[0]}], q[${indices[g]}];\n`;
+              entanglementAdded = true;
+            }
+          } else {
+            // Group label (e.g. "PORTFOLIO_HEDGE", "CORRIDOR_WEST"): apply partial entanglement based on target node saturation or standard CX
+            qasmCircuitCode += `// Relationship group with identical values (q[${indices[0]}] as common control qubit): ${groupName}\n`;
+            for (let g = 1; g < indices.length; g++) {
+              const targetRecord = cleanRecords[indices[g]];
+              const pTgt = Math.max(0, Math.min(targetRecord?.saturation ?? 0.5, 1.0));
+              const thetaCorr = 2 * Math.asin(Math.sqrt(pTgt));
+              // Use CRY partial entanglement for smooth decimal correlations
+              if (pTgt < 0.999 && pTgt > 0.001) {
+                qasmCircuitCode += `cry(${thetaCorr.toFixed(5)}) q[${indices[0]}], q[${indices[g]}]; // Continuous partial entanglement\n`;
+              } else {
+                qasmCircuitCode += `cx q[${indices[0]}], q[${indices[g]}];\n`;
+              }
+              entanglementAdded = true;
+            }
           }
         } else if (indices.length === 1) {
           const idx = indices[0];
