@@ -130,14 +130,10 @@ export default function QuantumAgentsInterface({ onBack, onSendToIbm }: Props) {
         const isOptC = scenarioSelection === 'C' || rawContent.toLowerCase().includes('option c') || rawContent.toLowerCase().includes('amplitude') || rawContent.toLowerCase().includes('probab');
         const isOptB = scenarioSelection === 'B';
 
-        if (isOptC) {
-          if (scenarioSelection !== 'C') setScenarioSelection('C');
-          processInputCSV(rawContent, true);
-        } else if (isOptB) {
-          processInputCSV(rawContent, true);
-        } else {
-          prepareCsvMapping(rawContent);
+        if (isOptC && scenarioSelection !== 'C') {
+          setScenarioSelection('C');
         }
+        processInputCSV(rawContent, true);
       }
     };
     reader.readAsText(file);
@@ -517,11 +513,62 @@ for state, freq in sorted(counts.items(), key=lambda x: x[1], reverse=True):
           </table>
         </div>
 
+        {/* Action Toolbar under the table */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5 bg-[#090e1a] border-t border-slate-800 text-[11px] font-mono">
+          <div className="flex items-center gap-2 text-slate-400">
+            <FileSpreadsheet className="w-4 h-4 text-quantum-primary" />
+            <span className="text-[10.5px] font-semibold text-slate-300">
+              {isIt ? 'Dataset Tabellare Quantistico' : 'Quantum Dataset Table'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const cleanHeaders = headerCols.map(h => h.replace(/\*\*/g, '').replace(/<[^>]*>/g, '').trim());
+                const cleanRows = rows.map(r => r.map(cell => cell.replace(/\*\*/g, '').replace(/<[^>]*>/g, '').trim()));
+                const csvContent = [
+                  cleanHeaders.join(','),
+                  ...cleanRows.map(r => r.join(','))
+                ].join('\n');
+                
+                const cleanSectorName = (selectedSector || 'Quantum').replace(/[^a-zA-Z0-9]/g, '_');
+                const filename = `quantum_table_default_${cleanSectorName}.csv`;
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm hover:shadow-[0_0_10px_rgba(16,185,129,0.25)]"
+              title={isIt ? "Scarica questa tabella come file CSV" : "Download this table as CSV"}
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{isIt ? 'Scarica CSV' : 'Download CSV'}</span>
+            </button>
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-quantum-primary/15 hover:bg-quantum-primary/25 border border-quantum-primary/40 text-quantum-primary font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm hover:shadow-[0_0_10px_rgba(0,242,255,0.25)]"
+              title={isIt ? "Carica un file CSV dal tuo computer" : "Upload a CSV file from your computer"}
+            >
+              <Upload className="w-3.5 h-3.5 text-quantum-primary" />
+              <span>{isIt ? 'Carica file CSV' : 'Upload CSV File'}</span>
+            </button>
+          </div>
+        </div>
+
       </div>
     );
   };
 
-  const renderMessageContent = (text: string) => {
+  const renderMessageContent = (rawText: string) => {
+    const text = rawText.replace(/\[DATI_QUANTISTICI\][\s\S]*$/g, '').trim();
     const parts = text.split(/(```[\s\S]*?```)/g);
     
     return parts.map((part, idx) => {
@@ -609,6 +656,50 @@ for state, freq in sorted(counts.items(), key=lambda x: x[1], reverse=True):
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Action Toolbar under the CSV table */}
+              <div className="flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5 bg-[#090e1a] border-t border-slate-800 text-[11px] font-mono">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <FileSpreadsheet className="w-4 h-4 text-quantum-primary" />
+                  <span className="text-[10.5px] font-semibold text-slate-300">
+                    {isIt ? 'Dataset Tabellare Quantistico' : 'Quantum Dataset Table'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const csvText = [headerCols.join(','), ...rows.map(r => r.join(','))].join('\n');
+                      const cleanSectorName = (selectedSector || 'Quantum').replace(/[^a-zA-Z0-9]/g, '_');
+                      const filename = `quantum_template_${cleanSectorName}.csv`;
+
+                      const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.setAttribute('href', url);
+                      link.setAttribute('download', filename);
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm hover:shadow-[0_0_10px_rgba(16,185,129,0.25)]"
+                    title={isIt ? "Scarica questa tabella come file CSV" : "Download this table as CSV"}
+                  >
+                    <Download className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{isIt ? 'Scarica CSV' : 'Download CSV'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-quantum-primary/15 hover:bg-quantum-primary/25 border border-quantum-primary/40 text-quantum-primary font-mono text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm hover:shadow-[0_0_10px_rgba(0,242,255,0.25)]"
+                    title={isIt ? "Carica un file CSV dal tuo computer" : "Upload a CSV file from your computer"}
+                  >
+                    <Upload className="w-3.5 h-3.5 text-quantum-primary" />
+                    <span>{isIt ? 'Carica file CSV' : 'Upload CSV File'}</span>
+                  </button>
+                </div>
               </div>
 
             </div>
@@ -1270,13 +1361,19 @@ DESKTOP_CLIENT,0.01,0.20,0.02,0.10,INDEPENDENT`
       {
         id: 'welcome',
         sender: 'system',
-        text: `${t('agents_welcome_text') || 'Welcome to the enterprise quantum compilation and entanglement system. To narrow down the scope and formulate specific questions, select your main macro-area of interest:'}
-📊 ${t('agents_sec_finance') || '1. Finance & Markets'}
-🚚 ${t('agents_sec_logistics') || '2. Logistics & Smart Cities'}
-🔬 ${t('agents_sec_chemistry') || '3. Chemistry & Green Tech'}
-🏭 ${t('agents_sec_factory') || '4. Maintenance, Manufacturing & Apparel'}
-🧬 ${t('agents_sec_healthcare') || '5. Healthcare & Genomics'}
-🛡️ ${t('agents_sec_cybersec') || '6. Cybersecurity'}`,
+        text: `👋 **Benvenuto nel Quantum Engine BI Orchestrator (V9 Core)**
+
+Sono la tua interfaccia conversazionale per la compilazione e traduzione quantistica verso IBM Quantum. 
+L'acquisizione dei dati aziendali avverrà in modo guidato direttamente qui in chat, ponendo **una sola domanda alla volta** per calibrare il circuito OpenQASM 2.0.
+
+👉 **FASE 0 - Seleziona la tua Macro-Area aziendale di riferimento (digita il numero da 1 a 6 o clicca sotto):**
+
+1. 📊 **Finanza e Mercati**
+2. 🚚 **Logistica e Smart Cities**
+3. 🔬 **Chimica e Green Tech**
+4. 🏭 **Manutenzione, Manifatturiero e Abbigliamento**
+5. 🧬 **Sanità e Genomica**
+6. 🛡️ **Cybersecurity**`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -1375,12 +1472,29 @@ PACKAGING_LINE,0.15,10.0,INDEPENDENT`;
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
-      if (text) {
-        addMessage('user', `Uploaded file: ${file.name}`);
-        prepareCsvMapping(text);
+      if (text && text.trim()) {
+        const uploadMsg = isIt
+          ? `📁 **File CSV caricato:** \`${file.name}\`\n\n\`\`\`csv\n${text.trim()}\n\`\`\``
+          : `📁 **CSV File Uploaded:** \`${file.name}\`\n\n\`\`\`csv\n${text.trim()}\n\`\`\``;
+        addMessage('user', uploadMsg);
+        setTempCsvContent(text);
+        setIsCsvLoaded(true);
+        setStep(3);
+
+        const lower = text.toLowerCase();
+        const isOptC = scenarioSelection === 'C' || lower.includes('option c') || lower.includes('amplitude') || lower.includes('probab');
+        const isOptB = scenarioSelection === 'B' || lower.includes('option b') || lower.includes('geometry') || lower.includes('angol') || lower.includes('strike');
+
+        if (isOptC && scenarioSelection !== 'C') {
+          setScenarioSelection('C');
+        } else if (isOptB && scenarioSelection !== 'B' && !isOptC) {
+          setScenarioSelection('B');
+        }
+        processInputCSV(text, true);
       }
     };
     reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -1400,9 +1514,25 @@ PACKAGING_LINE,0.15,10.0,INDEPENDENT`;
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
-      if (text) {
-        addMessage('user', `Uploaded file via Drag & Drop: ${file.name}`);
-        prepareCsvMapping(text);
+      if (text && text.trim()) {
+        const uploadMsg = isIt
+          ? `📁 **File CSV caricato via Drag & Drop:** \`${file.name}\`\n\n\`\`\`csv\n${text.trim()}\n\`\`\``
+          : `📁 **CSV File Uploaded via Drag & Drop:** \`${file.name}\`\n\n\`\`\`csv\n${text.trim()}\n\`\`\``;
+        addMessage('user', uploadMsg);
+        setTempCsvContent(text);
+        setIsCsvLoaded(true);
+        setStep(3);
+
+        const lower = text.toLowerCase();
+        const isOptC = scenarioSelection === 'C' || lower.includes('option c') || lower.includes('amplitude') || lower.includes('probab');
+        const isOptB = scenarioSelection === 'B' || lower.includes('option b') || lower.includes('geometry') || lower.includes('angol') || lower.includes('strike');
+
+        if (isOptC && scenarioSelection !== 'C') {
+          setScenarioSelection('C');
+        } else if (isOptB && scenarioSelection !== 'B' && !isOptC) {
+          setScenarioSelection('B');
+        }
+        processInputCSV(text, true);
       }
     };
     reader.readAsText(file);
@@ -1516,12 +1646,18 @@ ${csvTemplate}
 
   const handleChoiceOption = (choice: 'A' | 'B' | 'C') => {
     setScenarioSelection(choice);
+    setStep(3);
     setInterviewSubstep(1);
-    const details = getScenarioDetails(selectedSectorLong || 'Finance & Markets', choice);
-    addMessage('system', `Great! You selected **Option ${choice}**: **${details.name}**.
+    const scenarioInfo = getV9ScenarioInterviewInfo(selectedSector || 'Finanza', choice);
     
-Let's start the calibration process. Please answer this first question:
-👉 **${details.q1}**`);
+    setTimeout(() => {
+      addMessage('system', `🎯 **Paradigma Attivato:** **Opzione ${choice}** (*${choice === 'A' ? 'Misto / Entanglement' : choice === 'B' ? 'Solo Angolo / Geometria' : 'Solo Ampiezza / Probabilità'}*)
+
+Iniziamo ora l'acquisizione dei dati aziendali ponendo **una sola domanda alla volta**.
+
+👉 **DOMANDA 1:**
+${scenarioInfo.qElements}`);
+    }, 300);
   };
 
   const handleSelectScenarioAndStart = (scenario: QuantumScenario) => {
@@ -1544,18 +1680,21 @@ Let's start the calibration process. Please answer this first question:
     setSelectedSectorLong(fullArea);
     setScenarioSelection(opt);
     
-    setStep(2);
+    setStep(3);
     setInterviewSubstep(1);
     setCalibrationAnswers([]);
 
-    const details = getScenarioDetails(fullArea, opt);
-    addMessage('user', `Selecting specific scenario: ${scenario.name}`);
+    const scenarioInfo = getV9ScenarioInterviewInfo(sectorName, opt);
+    addMessage('user', `Selezionato target: ${scenario.name}`);
     setTimeout(() => {
-      addMessage('system', `You selected the specific scenario **${scenario.name}** from the archive. This corresponds to **Option ${opt} (${opt === 'A' ? 'Mixed/Entanglement' : opt === 'B' ? 'Geometry/Angle' : 'Probability/Amplitude'})**.
-      
-To calibrate the simulation, please answer this first question:
-👉 **${details.q1}**`);
-    }, 400);
+      addMessage('system', `🎯 **Scenario Specifico Attivato:** **${scenario.name}**
+*Macro-Area:* ${fullArea} | *Paradigma:* **Opzione ${opt}** (${opt === 'A' ? 'Misto / Entanglement' : opt === 'B' ? 'Solo Angolo / Geometria' : 'Solo Ampiezza / Probabilità'})
+
+Iniziamo l'acquisizione conversazionale dei dati per questo scenario:
+
+👉 **DOMANDA 1:**
+${scenarioInfo.qElements}`);
+    }, 350);
   };
 
   const handleSelectSector = (sectorName: string) => {
@@ -1572,14 +1711,27 @@ To calibrate the simulation, please answer this first question:
     setInterviewSubstep(0);
     setCalibrationAnswers([]);
 
-    const detA = getScenarioDetails(fullArea, 'A');
-    const detB = getScenarioDetails(fullArea, 'B');
-    const detC = getScenarioDetails(fullArea, 'C');
+    const detA = getV9ScenarioInterviewInfo(sectorName, 'A');
+    const detB = getV9ScenarioInterviewInfo(sectorName, 'B');
+    const detC = getV9ScenarioInterviewInfo(sectorName, 'C');
 
-    addMessage('user', `Selecting main macro-area: ${fullArea}`);
+    addMessage('user', `Selezionata Macro-Area: ${fullArea}`);
     setTimeout(() => {
-      addMessage('system', `Great choice! We have 3 scenarios available for **${fullArea}**:\n\n* **Option A [Mixed Entanglement]** - *${detA.name}*\n  👉 *What you will get:* ${detA.benefit}\n\n* **Option B [Angle/Geometry Only]** - *${detB.name}*\n  👉 *What you will get:* ${detB.benefit}\n\n* **Option C [Amplitude/Probability Only]** - *${detC.name}*\n  👉 *What you will get:* ${detC.benefit}\n\n❓ **Which scenario do you prefer to activate for your quantum simulation? Reply by typing 'A', 'B', or 'C'.**`);
-    }, 400);
+      addMessage('system', `🎯 **Macro-Area Selezionata: ${fullArea}**
+
+Scegli ora il **Paradigma di Calcolo Quantistico** che desideri applicare per la tua azienda:
+
+🅰️ **Opzione A [Misto / Entanglement]**:
+Correlazione multi-variabile ad accoppiamento forte tramite porte a 2 qubit (\`cry\` / \`cx\`). Ideale per valutare interdipendenze sistemiche e decisioni cross-asset. (*Es: ${detA.title}*)
+
+🅱️ **Opzione B [Solo Angolo / Geometria]**:
+Mappatura spaziale 3D sulla sfera di Bloch tramite rotazioni isolate (\`rz\`, \`rx\`) a zero porte CNOT. Perfetto per traiettorie geometriche, cinematica e vincoli temporali. (*Es: ${detB.title}*)
+
+🆃 **Opzione C [Solo Ampiezza / Probabilità]**:
+Mappatura probabilistica pura a singolo qubit (\`ry\`) a zero CNOT. Ideale per stime di rischio default, probabilità di failure e turnover liquidità. (*Es: ${detC.title}*)
+
+👉 *Rispondi digitando **A**, **B** oppure **C** (o clicca uno dei pulsanti rapidi sotto la chat).*`);
+    }, 350);
   };
 
   const extractCsvFromText = (rawText: string): string | null => {
@@ -1592,7 +1744,10 @@ To calibrate the simulation, please answer this first question:
       const mdLines = clean.split(/\r?\n/).map(l => l.trim()).filter(l => l.startsWith('|') && l.endsWith('|'));
       if (mdLines.length >= 2) {
         const rows = mdLines
-          .filter(l => !l.replace(/[\s|:-]/g, '').length === false) // filter out separator row |---|---|
+          .filter(l => {
+            const stripped = l.replace(/[\s|:-]/g, '');
+            return stripped.length > 0;
+          })
           .map(l => l.slice(1, -1).split('|').map(c => c.trim()).join(','));
         if (rows.length >= 2) {
           clean = rows.join('\n');
@@ -1603,43 +1758,40 @@ To calibrate the simulation, please answer this first question:
     const allLines = clean.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
     if (allLines.length < 2) return null;
 
+    const detectLineDelimiter = (line: string): string => {
+      if (line.includes('\t')) return '\t';
+      if (line.includes(';') && line.split(';').length >= 2) return ';';
+      if (line.includes('|') && line.split('|').length >= 2) return '|';
+      return ',';
+    };
+
     let startIdx = -1;
     let delimiter = ',';
 
     for (let i = 0; i < allLines.length; i++) {
       const line = allLines[i];
-      const d = line.includes(';') ? ';' : ',';
+      const d = detectLineDelimiter(line);
       const parts = line.split(d);
       if (parts.length >= 2) {
-        const lower = line.toLowerCase();
-        if (
-          lower.includes('item') || lower.includes('code') || lower.includes('saturation') ||
-          lower.includes('articolo') || lower.includes('saturazione') || lower.includes('flow_') ||
-          lower.includes('id_') || lower.includes('percentage') || lower.includes('percentuale') ||
-          lower.includes('valore') || (i + 1 < allLines.length && allLines[i + 1].split(d).length >= 2)
-        ) {
-          startIdx = i;
-          delimiter = d;
-          break;
-        }
+        startIdx = i;
+        delimiter = d;
+        break;
       }
     }
 
-    if (startIdx === -1) {
-      const d = allLines[0].includes(';') ? ';' : ',';
-      if (allLines[0].split(d).length >= 2 && allLines[1].split(d).length >= 2) {
-        startIdx = 0;
-        delimiter = d;
-      } else {
-        return null;
-      }
-    }
+    if (startIdx === -1) return null;
 
     const csvLines: string[] = [];
     for (let j = startIdx; j < allLines.length; j++) {
       const l = allLines[j];
-      if (l.split(delimiter).length >= 2) {
-        csvLines.push(l);
+      const d = detectLineDelimiter(l);
+      const parts = l.split(d);
+      if (parts.length >= 2) {
+        if (d !== ',') {
+          csvLines.push(parts.map(cell => cell.trim()).join(','));
+        } else {
+          csvLines.push(l);
+        }
       } else if (csvLines.length >= 2) {
         break;
       }
@@ -1672,23 +1824,7 @@ To calibrate the simulation, please answer this first question:
       }
     }
 
-    // 2. Scan entire chat history for real dataset patterns (e.g. FLOW_JAN, FLOW_FEB, FLOW_MAR with custom values)
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const m = messages[i];
-      if (m.text.includes('FLOW_JAN') || m.text.includes('FLOW_FEB') || m.text.includes('FLOW_MAR')) {
-        const extracted = extractCsvFromText(m.text);
-        if (extracted) return extracted;
-        // If embedded in unstructured text, synthesize the exact real dataset
-        if (m.text.includes('0.30') || m.text.includes('0.55') || m.text.includes('0.12')) {
-          return `Item_Code,Saturation_Percentage,Invoices_Issued,Invoices_Received,Payment_Maturities,Entanglement_Link
-FLOW_JAN,0.30,0.75,0.60,0.15,LIQUIDITY_SET
-FLOW_FEB,0.55,0.90,0.70,0.30,LIQUIDITY_SET
-FLOW_MAR,0.12,0.25,0.10,0.10,INDEPENDENT`;
-        }
-      }
-    }
-
-    // 3. Check loaded tempCsvContent
+    // 2. Scan loaded tempCsvContent
     if (isCsvLoaded && tempCsvContent) {
       const extracted = extractCsvFromText(tempCsvContent);
       if (extracted) return extracted;
@@ -1697,406 +1833,713 @@ FLOW_MAR,0.12,0.25,0.10,0.10,INDEPENDENT`;
     return null;
   };
 
+  // V9 Conversational Interview Data State
+  const [v9Elements, setV9Elements] = useState<string[]>([]);
+  const [v9Saturations, setV9Saturations] = useState<number[]>([]);
+  const [v9Correlations, setV9Correlations] = useState<string[]>([]);
+  const [v9AnglesPhase2, setV9AnglesPhase2] = useState<number[]>([]);
+
+  // Sound chime notification
+  const playChimeAlert = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.12); // E5
+      osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.24); // G5
+      osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.36); // C6
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.7);
+    } catch (e) {
+      // Audio playback silently suppressed if autoplay not permitted yet
+    }
+  };
+
+  // Helper to obtain scenario-specific interview questions for all 18 combinations (6 macro-areas x 3 options)
+  const getV9ScenarioInterviewInfo = (sector: string, opt: 'A' | 'B' | 'C') => {
+    const s = sector.toLowerCase();
+    
+    if (s.includes('finan') || s.includes('invest') || s.includes('money')) {
+      if (opt === 'A') {
+        return {
+          title: "Finanza & Mercati - Portafoglio Correlato (Misto / Entanglement)",
+          qElements: "Quali e quanti asset o titoli finanziari desideri analizzare contemporaneamente nel tuo portafoglio correlato? (Elenca fino a un massimo di 6 elementi separati da virgola, es. `AZ_ENEL, AZ_INTESA, AZ_UNICREDIT, BOND_BTP`)",
+          sampleElements: "AZ_ENEL, AZ_INTESA, AZ_UNICREDIT, BOND_BTP",
+          qSaturation: "Indica il livello di rischio o volatilità percentuale stimato per ciascun asset inserito (es. `35%, 45%, 78%, 20%` o decimali `0.35, 0.45, 0.78, 0.20`):",
+          sampleSaturation: "35%, 45%, 78%, 20%",
+          qCorrelation: "Indica l'abbinamento di correlazione per la diversificazione quantistica (es. per titoli accoppiati scrivi `SET_HEDGE` e `INDEPENDENT` per gli altri isolati, es. `SET_HEDGE, SET_HEDGE, INDEPENDENT, INDEPENDENT`):",
+          sampleCorrelation: "SET_HEDGE, SET_HEDGE, INDEPENDENT, INDEPENDENT",
+          qThreshold: "Qual è la soglia percentuale critica di rischio/perdita per l'attivazione del comparatore quantistico ancilla? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.70748, 1.87549, 1.47063, 0.85421]
+        };
+      } else if (opt === 'B') {
+        return {
+          title: "Finanza & Mercati - Pricing Derivati & Struttura a Termine (Solo Angolo / Geometria)",
+          qElements: "Quali contratti opzioni, derivati o strike desideri posizionare nello spazio angolare 3D di Bloch? (Elenca fino a un massimo di 6 elementi separati da virgola, es. `CALL_ENEL_40, PUT_INTESA_2, OPTION_BTP_100`)",
+          sampleElements: "CALL_ENEL_40, PUT_INTESA_2, OPTION_BTP_100",
+          qSaturation: "Indica la volatilità implicita percentuale per ciascun contratto (es. `25%, 38%, 50%` o `0.25, 0.38, 0.50`):",
+          sampleSaturation: "25%, 38%, 50%",
+          qCorrelation: "Indica il tasso di rotazione angolare o maturity in radianti (es. `0.785, 1.570, 0.523`):",
+          sampleCorrelation: "0.785, 1.570, 0.523",
+          qThreshold: "Qual è la soglia di rendimento o strike target per il comparatore ancilla? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.78539, 1.57079, 0.52359]
+        };
+      } else {
+        return {
+          title: "Finanza & Mercati - Rischio Liquidità & Flussi di Cassa (Solo Ampiezza / Probabilità)",
+          qElements: "Quali linee di credito, crediti verso clienti o flussi di cassa intendi monitorare per il rischio di insoluto/liquidità? (Elenca fino a un massimo di 6 elementi, es. `CLIENTE_ALPHA, CLIENTE_BETA, CREDITO_EXPORT`)",
+          sampleElements: "CLIENTE_ALPHA, CLIENTE_BETA, CREDITO_EXPORT",
+          qSaturation: "Indica la probabilità percentuale stimata di insoluto o mancato incasso per ciascun elemento (es. `15%, 30%, 85%` o `0.15, 0.30, 0.85`):",
+          sampleSaturation: "15%, 30%, 85%",
+          qCorrelation: "",
+          sampleCorrelation: "",
+          qThreshold: "Qual è la soglia minima di sicurezza per la riserva di liquidità aziendale da assegnare all'ancilla? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: []
+        };
+      }
+    } else if (s.includes('logist') || s.includes('ship') || s.includes('transp') || s.includes('truck')) {
+      if (opt === 'A') {
+        return {
+          title: "Logistica & Smart Cities - Flotta e Nodi Distribuiti (Misto / Entanglement)",
+          qElements: "Quali tratte, veicoli della flotta o cargo container desideri ottimizzare in sincrono? (Elenca fino a un massimo di 6 elementi, es. `TRUCK_NORD, TRUCK_SUD, CONTAINER_WEST`)",
+          sampleElements: "TRUCK_NORD, TRUCK_SUD, CONTAINER_WEST",
+          qSaturation: "Indica la percentuale di saturazione di carico o probabilità di ritardo per ciascun veicolo/tratta (es. `28%, 45%, 78%`):",
+          sampleSaturation: "28%, 45%, 78%",
+          qCorrelation: "Indica le rotte congiunte da correlare in entanglement (es. `ROUTE_A, ROUTE_A, INDEPENDENT`):",
+          sampleCorrelation: "ROUTE_A, ROUTE_A, INDEPENDENT",
+          qThreshold: "Qual è la soglia percentuale di ritardo critico da impostare sull'ancilla? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.70748, 1.87549, 1.47063]
+        };
+      } else if (opt === 'B') {
+        return {
+          title: "Logistica & Smart Cities - Baricentro & Stivaggio 3D (Solo Angolo / Geometria)",
+          qElements: "Quali vani o stive navali intendi bilanciare tridimensionalmente per il baricentro? (Elenca fino a 6 elementi, es. `STIVA_PRUA, STIVA_POPPA, VANO_CENTRALE`)",
+          sampleElements: "STIVA_PRUA, STIVA_POPPA, VANO_CENTRALE",
+          qSaturation: "Indica la percentuale di saturazione di peso/volume per ciascun vano (es. `40%, 65%, 80%`):",
+          sampleSaturation: "40%, 65%, 80%",
+          qCorrelation: "Indica l'offset baricentro o angolo di sfasamento di carico in radianti (es. `0.523, 1.047, 0.785`):",
+          sampleCorrelation: "0.523, 1.047, 0.785",
+          qThreshold: "Qual è la soglia massima di tolleranza per lo sbilanciamento del baricentro? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.52359, 1.04719, 0.78539]
+        };
+      } else {
+        return {
+          title: "Logistica & Smart Cities - Noli Spot & Spedizioni (Solo Ampiezza / Probabilità)",
+          qElements: "Quali canali di trasporto marittimo o spedizioni spot desideri includere nell'analisi d'ampiezza? (Elenca fino a 6 elementi, es. `SPEDIZIONE_ASIA, ROTTA_MEDITERRANEO, AIR_EXPRESS`)",
+          sampleElements: "SPEDIZIONE_ASIA, ROTTA_MEDITERRANEO, AIR_EXPRESS",
+          qSaturation: "Indica la volatilità tariffaria o probabilità di sovrapprezzo per ciascun canale (es. `35%, 60%, 20%`):",
+          sampleSaturation: "35%, 60%, 20%",
+          qCorrelation: "",
+          sampleCorrelation: "",
+          qThreshold: "Qual è il target percentuale di riduzione costi noli da impostare per il comparatore? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: []
+        };
+      }
+    } else if (s.includes('chem') || s.includes('lab') || s.includes('chimic')) {
+      if (opt === 'A') {
+        return {
+          title: "Chimica & Green Tech - Reazioni Catalitiche e Legami (Misto / Entanglement)",
+          qElements: "Quali reattivi, catalizzatori o materiali chimici desideri analizzare nella simulazione di legame? (Elenca fino a 6 elementi, es. `CATALIZZATORE_PT, REATTIVO_N2, POLIMERO_HDPE`)",
+          sampleElements: "CATALIZZATORE_PT, REATTIVO_N2, POLIMERO_HDPE",
+          qSaturation: "Indica il livello di instabilità o saturazione energetica per ciascun componente (es. `25%, 55%, 70%`):",
+          sampleSaturation: "25%, 55%, 70%",
+          qCorrelation: "Indica i canali di reazione catalitica da accoppiare (es. `REACTION_1, REACTION_1, INDEPENDENT`):",
+          sampleCorrelation: "REACTION_1, REACTION_1, INDEPENDENT",
+          qThreshold: "Qual è la soglia critica di dissipazione termica per il comparatore ancilla? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.70748, 1.87549, 1.47063]
+        };
+      } else if (opt === 'B') {
+        return {
+          title: "Chimica & Green Tech - Simulazione Molecolare VQE (Solo Angolo / Geometria)",
+          qElements: "Quali orbitali molecolari o legami conformazionali intendi mappare su angoli VQE? (Elenca fino a 6 orbitali, es. `ORBITALE_HOMO, ORBITALE_LUMO, LEGAME_PI`)",
+          sampleElements: "ORBITALE_HOMO, ORBITALE_LUMO, LEGAME_PI",
+          qSaturation: "Indica la probabilità di eccitazione elettronica per ciascun orbitale (es. `30%, 50%, 15%`):",
+          sampleSaturation: "30%, 50%, 15%",
+          qCorrelation: "Indica l'angolo di rotazione ansatz o rotazione torsionale in radianti (es. `0.785, 1.570, 0.392`):",
+          sampleCorrelation: "0.785, 1.570, 0.392",
+          qThreshold: "Qual è la soglia di convergenza energetica Hartree per l'ancilla? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.78539, 1.57079, 0.39269]
+        };
+      } else {
+        return {
+          title: "Chimica & Green Tech - Gestione Accumulo BESS (Solo Ampiezza / Probabilità)",
+          qElements: "Quali sistemi di accumulo batteria BESS o sezioni di impianto rinnovabile intendi monitorare? (Elenca fino a 6 impianti/batterie, es. `BESS_01, SOLAR_PARK_A, WIND_FARM_B`)",
+          sampleElements: "BESS_01, SOLAR_PARK_A, WIND_FARM_B",
+          qSaturation: "Indica lo stato di carica o percentuale di curtailing energetico per ciascuno (es. `80%, 45%, 20%`):",
+          sampleSaturation: "80%, 45%, 20%",
+          qCorrelation: "",
+          sampleCorrelation: "",
+          qThreshold: "Qual è la soglia di sicurezza per il limite di immissione in rete? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: []
+        };
+      }
+    } else if (s.includes('maint') || s.includes('factor') || s.includes('manuf') || s.includes('industr') || s.includes('apparel') || s.includes('cloth')) {
+      if (opt === 'A') {
+        return {
+          title: "Manutenzione & Manifattura - Linee Robotizzate Sincrone (Misto / Entanglement)",
+          qElements: "Quali robot industriali, presse o macchine CNC intendi connettere nell'analisi di linea? (Elenca fino a 6 macchinari, es. `CNC_MILLING, ROBOT_WELDING, PRESSA_IDRAULICA`)",
+          sampleElements: "CNC_MILLING, ROBOT_WELDING, PRESSA_IDRAULICA",
+          qSaturation: "Indica la percentuale di usura o stress operativo stimato per ciascuna macchina (es. `45%, 60%, 85%`):",
+          sampleSaturation: "45%, 60%, 85%",
+          qCorrelation: "Indica le linee di produzione condivise per l'entanglement (es. `LINEA_A, LINEA_A, INDEPENDENT`):",
+          sampleCorrelation: "LINEA_A, LINEA_A, INDEPENDENT",
+          qThreshold: "Qual è la soglia critica per l'allerta di manutenzione predittiva? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.70748, 1.87549, 1.47063]
+        };
+      } else if (opt === 'B') {
+        return {
+          title: "Manutenzione & Manifattura - Giunti Robotici & Saldatura 3D (Solo Angolo / Geometria)",
+          qElements: "Quali giunti, punti di saldatura o assi cinematici 3D del robot intendi mappare? (Elenca fino a 6 giunti, es. `GIUNTO_J1, GIUNTO_J2, SALDATURA_P3`)",
+          sampleElements: "GIUNTO_J1, GIUNTO_J2, SALDATURA_P3",
+          qSaturation: "Indica il carico cinematico o percentuale di sforzo per ciascun giunto (es. `30%, 75%, 40%`):",
+          sampleSaturation: "30%, 75%, 40%",
+          qCorrelation: "Indica il raggio di curvatura o angolo di inclinazione 3D in radianti (es. `0.523, 1.047, 0.280`):",
+          sampleCorrelation: "0.523, 1.047, 0.280",
+          qThreshold: "Qual è la tolleranza massima di deviazione della traiettoria per l'ancilla? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.52359, 1.04719, 0.28000]
+        };
+      } else {
+        return {
+          title: "Manifattura & Abbigliamento - Stock Magazzino & Sconto Dinamico (Solo Ampiezza / Probabilità)",
+          qElements: "Quali categorie o lotti di magazzino/abbigliamento intendi analizzare per il recupero margini e sconto dinamico? (Elenca fino a 6 lotti, es. `MAGLIERIA_CASHMERE, CAPPOTTI_INVERNALI, ACCESSORI_LINEA_A`)",
+          sampleElements: "MAGLIERIA_CASHMERE, CAPPOTTI_INVERNALI, ACCESSORI_LINEA_A",
+          qSaturation: "Indica la percentuale di invenduto stagionale o giacenza per ciascun lotto (es. `65%, 40%, 25%`):",
+          sampleSaturation: "65%, 40%, 25%",
+          qCorrelation: "",
+          sampleCorrelation: "",
+          qThreshold: "Qual è il margine minimo di sicurezza percentuale sotto il quale non applicare sconti? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: []
+        };
+      }
+    } else if (s.includes('health') || s.includes('med') || s.includes('hosp') || s.includes('sanit') || s.includes('genom')) {
+      if (opt === 'A') {
+        return {
+          title: "Sanità & Genomica - Compatibilità Trapianti e Matching HLA (Misto / Entanglement)",
+          qElements: "Quali coppie donatore-ricevente o campioni clinici desideri correlare per l'analisi di compatibilità? (Elenca fino a 6 elementi, es. `DONOR_A, RECIPIENT_A, DONOR_B, RECIPIENT_B`)",
+          sampleElements: "DONOR_A, RECIPIENT_A, DONOR_B, RECIPIENT_B",
+          qSaturation: "Indica la percentuale di rischio di rigetto immunitario HLA stimato per ciascun elemento (es. `35%, 65%, 20%, 40%`):",
+          sampleSaturation: "35%, 65%, 20%, 40%",
+          qCorrelation: "Indica l'abbinamento clinico di entanglement (es. `PAIR_01, PAIR_01, PAIR_02, PAIR_02`):",
+          sampleCorrelation: "PAIR_01, PAIR_01, PAIR_02, PAIR_02",
+          qThreshold: "Qual è la soglia critica di ischemia fredda per l'attivazione del comparatore? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.70748, 1.87549, 0.70748, 1.87549]
+        };
+      } else if (opt === 'B') {
+        return {
+          title: "Sanità & Genomica - Folding Proteico & Docking 3D (Solo Angolo / Geometria)",
+          qElements: "Quali residui amminoacidici o segmenti proteici intendi modellare geometricamente in 3D? (Elenca fino a 6 residui, es. `RESIDUO_P1, RESIDUO_P2, RESIDUO_P3`)",
+          sampleElements: "RESIDUO_P1, RESIDUO_P2, RESIDUO_P3",
+          qSaturation: "Indica l'energia di legame o instabilità percentuale per ciascun residuo (es. `20%, 55%, 75%`):",
+          sampleSaturation: "20%, 55%, 75%",
+          qCorrelation: "Indica l'angolo diedro torsionale phi/psi o orientamento in radianti (es. `0.650, 1.200, 0.450`):",
+          sampleCorrelation: "0.650, 1.200, 0.450",
+          qThreshold: "Qual è la soglia di tolleranza energetica conformazionale per l'ancilla? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.65000, 1.20000, 0.45000]
+        };
+      } else {
+        return {
+          title: "Sanità & Genomica - Riammissioni Ospedaliere & Rischio Clinico (Solo Ampiezza / Probabilità)",
+          qElements: "Quali reparti ospedalieri o cluster di pazienti intendi monitorare per il rischio di riammissione post-dimissione? (Elenca fino a 6 reparti/cluster, es. `CLUSTER_CARDIO, CLUSTER_GERIATRICO, REPARTO_CHIRURGIA`)",
+          sampleElements: "CLUSTER_CARDIO, CLUSTER_GERIATRICO, REPARTO_CHIRURGIA",
+          qSaturation: "Indica la percentuale stimata di riammissione a 30 giorni per ciascun gruppo (es. `28%, 52%, 18%`):",
+          sampleSaturation: "28%, 52%, 18%",
+          qCorrelation: "",
+          sampleCorrelation: "",
+          qThreshold: "Qual è la soglia critica di allerta riammissioni per l'ancilla? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: []
+        };
+      }
+    } else {
+      // Cybersecurity default
+      if (opt === 'A') {
+        return {
+          title: "Cybersecurity - Architettura Zero Trust & Nodi Distribuiti (Misto / Entanglement)",
+          qElements: "Quali nodi di rete, firewall o server strategici desideri correlare nell'architettura Zero Trust? (Elenca fino a 6 nodi, es. `GATEWAY_FIREWALL, API_SERVER, DATABASE_CENTRAL, BACKUP_NODE`)",
+          sampleElements: "GATEWAY_FIREWALL, API_SERVER, DATABASE_CENTRAL, BACKUP_NODE",
+          qSaturation: "Indica l'indice di carico, congestione o anomalia di traffico percentuale per ciascun nodo (es. `85%, 50%, 30%, 40%`):",
+          sampleSaturation: "85%, 50%, 30%, 40%",
+          qCorrelation: "Indica il segmento di rete protetto per l'entanglement (es. `LAN_WEST, LAN_WEST, BACKUP_LINK, BACKUP_LINK`):",
+          sampleCorrelation: "LAN_WEST, LAN_WEST, BACKUP_LINK, BACKUP_LINK",
+          qThreshold: "Qual è la soglia di allerta anomala per l'ancilla comparatore? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.70748, 1.87549, 1.47063, 0.85421]
+        };
+      } else if (opt === 'B') {
+        return {
+          title: "Cybersecurity - Crittografia QKD & Rotazione Chiavi (Solo Angolo / Geometria)",
+          qElements: "Quali canali crittografici o chiavi quantistiche QKD intendi ruotare nello spazio di Hilbert? (Elenca fino a 6 chiavi/canali, es. `QKD_KEY_ALPHA, QKD_KEY_BETA, CHANNEL_FIBER_1`)",
+          sampleElements: "QKD_KEY_ALPHA, QKD_KEY_BETA, CHANNEL_FIBER_1",
+          qSaturation: "Indica l'indice di attenuazione o tasso di errore bit quantistico (QBER) % per ciascun canale (es. `12%, 25%, 8%`):",
+          sampleSaturation: "12%, 25%, 8%",
+          qCorrelation: "Indica l'angolo di sfasamento di polarizzazione o rotazione della chiave in radianti (es. `0.785, 1.570, 0.523`):",
+          sampleCorrelation: "0.785, 1.570, 0.523",
+          qThreshold: "Qual è la soglia massima accettabile per il tasso di errore QBER? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: [0.78539, 1.57079, 0.52359]
+        };
+      } else {
+        return {
+          title: "Cybersecurity - Valutazione Asset & Migrazione Post-Quantum (Solo Ampiezza / Probabilità)",
+          qElements: "Quali database, archivi storici o server aziendali intendi prioritizzare per la migrazione Post-Quantum? (Elenca fino a 6 archivi, es. `DB_CLIENTI, ARCHIVIO_FINANZIARIO, CLOUD_BACKUP`)",
+          sampleElements: "DB_CLIENTI, ARCHIVIO_FINANZIARIO, CLOUD_BACKUP",
+          qSaturation: "Indica il livello di vulnerabilità o esposizione a minacce crittografiche % per ciascun archivio (es. `60%, 80%, 35%`):",
+          sampleSaturation: "60%, 80%, 35%",
+          qCorrelation: "",
+          sampleCorrelation: "",
+          qThreshold: "Qual è il limite di tolleranza al rischio per l'integrità dei dati aziendali? (Valore consigliato: `4%` o `0.04`):",
+          sampleThreshold: "4%",
+          defaultAngles: []
+        };
+      }
+    }
+  };
+
+  // Dedicated OpenQASM 2.0 CAM Circuit Code Generator
+  const generateV9OpenQasmCode = (
+    elements: string[],
+    saturations: number[],
+    correlations: string[],
+    angles2: number[],
+    option: 'A' | 'B' | 'C',
+    critThreshold: number
+  ): string => {
+    const N = elements.length;
+    const ancillaIdx = N;
+    const totalQubits = N + 1;
+    const tClipped = Math.max(0, Math.min(critThreshold, 1.0));
+    const totalTh = 2 * Math.asin(Math.sqrt(tClipped));
+    const distTh = (totalTh / N).toFixed(5);
+
+    let code = `OPENQASM 2.0;\ninclude "qelib1.inc";\n\n`;
+    code += `// Definizione della porta controllata cry (rotazione condizionale su Y)\ngate cry(theta) a, b {\n  cu3(theta, 0, 0) a, b;\n}\n\n`;
+    code += `qreg q[${totalQubits}];\ncreg c[${totalQubits}];\n\n`;
+
+    // FASE 1: INIZIALIZZAZIONE
+    code += `// --- FASE 1: INIZIALIZZAZIONE (Rotazioni RY d'ampiezza) ---\n`;
+    elements.forEach((el, i) => {
+      const p = Math.max(0, Math.min(saturations[i] ?? 0.35, 1.0));
+      const th = (2 * Math.asin(Math.sqrt(p))).toFixed(5);
+      code += `ry(${th}) q[${i}]; // Qubit q[${i}]: ${el} (Saturazione/Rischio = ${(p * 100).toFixed(1)}%)\n`;
+    });
+    code += `\n`;
+
+    // FASE 2: INTERAZIONE / FASE
+    code += `// --- FASE 2: INTERAZIONE, ENTANGLEMENT E FASE ---\n`;
+    if (option === 'C') {
+      code += `// Opzione C: Mappatura Ampiezza/Probabilistica Pura (Fase 2 vuota, zero porte CNOT/CRY intermedie)\n`;
+    } else if (option === 'B') {
+      code += `// Opzione B: Mappatura Geometrica Angolare Pura (Porte rz locali isolate, zero entanglement)\n`;
+      elements.forEach((el, i) => {
+        const ang = (angles2[i] ?? 0.78539).toFixed(5);
+        code += `rz(${ang}) q[${i}]; // Rotazione di fase locale per ${el}\n`;
+      });
+    } else {
+      // Option A: Mixed Entanglement
+      code += `// Opzione A: Mappatura a Entanglement Misto (CRY per gruppi correlati, RZ per nodi indipendenti)\n`;
+      const groupMap: Record<string, number[]> = {};
+      correlations.forEach((grp, idx) => {
+        const upper = (grp || 'INDEPENDENT').toUpperCase().trim();
+        if (upper === 'INDEPENDENT' || upper === 'LIBERO' || upper === 'ISOLATO') {
+          const ang = (angles2[idx] ?? 0.78539).toFixed(5);
+          code += `rz(${ang}) q[${idx}]; // Nodo isolato indipendente (${elements[idx]})\n`;
+        } else {
+          if (!groupMap[upper]) groupMap[upper] = [];
+          groupMap[upper].push(idx);
+        }
+      });
+
+      Object.entries(groupMap).forEach(([grpName, indices]) => {
+        if (indices.length > 1) {
+          for (let k = 0; k < indices.length - 1; k++) {
+            const ctrl = indices[k];
+            const tgt = indices[k + 1];
+            const ang = (angles2[ctrl] ?? 0.70748).toFixed(5);
+            code += `cry(${ang}) q[${ctrl}], q[${tgt}]; // Entanglement gruppo ${grpName} (${elements[ctrl]} -> ${elements[tgt]})\n`;
+          }
+        } else if (indices.length === 1) {
+          const idx = indices[0];
+          const ang = (angles2[idx] ?? 0.78539).toFixed(5);
+          code += `rz(${ang}) q[${idx}]; // Gruppo singolo ${grpName} (${elements[idx]})\n`;
+        }
+      });
+    }
+    code += `\n`;
+
+    // FASE 3: COMPARATORE ANCILLA
+    code += `// --- FASE 3: COMPARATORE ANCILLA (Soglia Critica ${(tClipped * 100).toFixed(1)}%) ---\n`;
+    code += `// Distribuzione uniforme dell'angolo soglia (${distTh} rad) verso il qubit ancilla q[${ancillaIdx}]\n`;
+    for (let i = 0; i < N; i++) {
+      code += `cry(${distTh}) q[${i}], q[${ancillaIdx}];\n`;
+    }
+    code += `\n`;
+
+    // FASE 4: MISURAZIONE
+    code += `// --- FASE 4: MISURAZIONE E REGISTRAZIONE STATI ---\n`;
+    for (let i = 0; i <= N; i++) {
+      code += `measure q[${i}] -> c[${i}];\n`;
+    }
+
+    return code;
+  };
+
   const handleSendMessage = () => {
     if (!inputText.trim()) return;
-    const userText = inputText;
+    const userText = inputText.trim();
     setInputText('');
     addMessage('user', userText);
 
-    // CRITICAL BACKEND PROTOCOL: Real-time user CSV detection overrides all prior RAG context or sample defaults
-    if (checkLooksLikeCsv(userText)) {
-      setStep(3);
-      setTempCsvContent(userText);
-      setIsCsvLoaded(true);
-
-      const isOptC = scenarioSelection === 'C' || userText.toLowerCase().includes('option c') || userText.toLowerCase().includes('amplitude') || userText.toLowerCase().includes('probab');
-      const isOptB = scenarioSelection === 'B';
-
-      if (isOptC) {
-        if (scenarioSelection !== 'C') setScenarioSelection('C');
-        processInputCSV(userText, true);
-      } else if (isOptB) {
-        processInputCSV(userText, true);
-      } else {
-        prepareCsvMapping(userText);
-      }
-      return;
-    }
-
-    // Dynamic interview flow
+    // ==========================================
+    // STEP 1: Corporate Macro-Area Selection (1-6)
+    // ==========================================
     if (step === 1) {
       const lower = userText.toLowerCase().trim();
       if (lower === '1' || lower.includes('finan') || lower.includes('invest') || lower.includes('money')) {
         handleSelectSector('Finanza');
       } else if (lower === '2' || lower.includes('logist') || lower.includes('ship') || lower.includes('transp') || lower.includes('truck')) {
         handleSelectSector('Logistica');
-      } else if (lower === '3' || lower.includes('chem') || lower.includes('lab') || lower.includes('molecul')) {
+      } else if (lower === '3' || lower.includes('chem') || lower.includes('lab') || lower.includes('molecul') || lower.includes('chimic')) {
         handleSelectSector('Chimica');
-      } else if (lower === '4' || lower.includes('maint') || lower.includes('factor') || lower.includes('manuf') || lower.includes('industr') || lower.includes('apparel') || lower.includes('cloth')) {
+      } else if (lower === '4' || lower.includes('maint') || lower.includes('factor') || lower.includes('manuf') || lower.includes('industr') || lower.includes('apparel') || lower.includes('cloth') || lower.includes('manifatt')) {
         handleSelectSector('Manifatturiero');
-      } else if (lower === '5' || lower.includes('health') || lower.includes('med') || lower.includes('hosp') || lower.includes('patient') || lower.includes('genom')) {
+      } else if (lower === '5' || lower.includes('health') || lower.includes('med') || lower.includes('hosp') || lower.includes('patient') || lower.includes('genom') || lower.includes('sanit')) {
         handleSelectSector('Sanita');
       } else if (lower === '6' || lower.includes('cyber') || lower.includes('secur') || lower.includes('hacker') || lower.includes('firewall')) {
         handleSelectSector('Cybersecurity');
       } else {
         setTimeout(() => {
-          addMessage('system', `Unrecognized choice. Please type a number from 1 to 6 or click on a corporate macro-area from the panel below to start the protocol.`);
-        }, 500);
+          addMessage('system', `Scelta non riconosciuta. Per favore digita un numero da **1 a 6** o clicca su una delle macro-aree aziendali nel pannello per avviare il protocollo.`);
+        }, 300);
       }
-    } else if (step === 2) {
-      if (isUserUnsureOrAsking(userText)) {
-        let clarificationText = "";
-        if (interviewSubstep === 0) {
-          clarificationText = `No problem! Here is a clarification on the differences among the 3 options for **${selectedSectorLong || 'your business'}**:
-
-* 🅰️ **Option A [Mixed Entanglement]**: Connects variables in a strong reciprocal dependency relationship. Most advanced option, ideal for cross-impact analysis and multi-factor decisions.
-* 🅱️ **Option B [Angle/Geometry Only]**: Converts data into spatial angular coordinates (internal data rotation). Perfect if your problem involves geometric layout, spatial trajectories, or exact time deadlines.
-* 🆃 **Option C [Amplitude/Probability Only]**: Suitable for evaluating statistical failure/success probability, cash risk, optimal discount probability, or readmission rates.
-
-❓ **Which scenario do you prefer to activate? Reply by typing 'A', 'B', or 'C'.**`;
-        } else {
-          const details = getScenarioDetails(selectedSectorLong || 'Finance & Markets', scenarioSelection || 'A');
-          const activeQuestion = interviewSubstep === 1 ? details.q1 : details.q2;
-          const explanation = getClarificatoryExplanation(activeQuestion);
-          
-          clarificationText = `I completely understand your query! This question calibrates the quantum circuit before loading CSV data.
-
-💡 **Simple explanation:**
-${explanation}
-
-✍ *What can you reply now?*
-You can enter any value of your choice, or if you prefer to proceed quickly by typing **'default'** or **'continue'**, you authorize me to assume the ideal pre-configured parameter!
-
-Feel free to reply when ready:
-👉 **${activeQuestion}**`;
-        }
-
-        setTimeout(() => {
-          addMessage('system', clarificationText);
-        }, 400);
-        return;
-      }
-
-      // Process standard answers with default handling
-      let processedAnswer = userText;
-      const lowerTrimmed = userText.toLowerCase().trim();
-      if (lowerTrimmed === 'default' || lowerTrimmed === 'continue' || lowerTrimmed === 'continua' || lowerTrimmed === 'proceed' || lowerTrimmed === 'ok' || lowerTrimmed === 'go') {
-        processedAnswer = "Standard (Recommended by QML compiler)";
-      }
-
-      if (interviewSubstep === 0) {
-        const rawUpper = userText.trim().toUpperCase();
-        let choice: 'A' | 'B' | 'C' | null = null;
-        if (rawUpper === 'A' || rawUpper.includes('OPTION A') || rawUpper.includes('OPZIONE A') || rawUpper.includes('ENTANGLEMENT') || rawUpper === '1') {
-          choice = 'A';
-        } else if (rawUpper === 'B' || rawUpper.includes('OPTION B') || rawUpper.includes('OPZIONE B') || rawUpper.includes('GEOMETRY') || rawUpper.includes('ANGOL') || rawUpper === '2') {
-          choice = 'B';
-        } else if (rawUpper === 'C' || rawUpper.includes('OPTION C') || rawUpper.includes('OPZIONE C') || rawUpper.includes('AMPLITUDE') || rawUpper.includes('AMPIEZZA') || rawUpper.includes('PROBABILITY') || rawUpper.includes('PROBABILIT') || rawUpper === '3') {
-          choice = 'C';
-        }
-
-        if (choice) {
-          handleChoiceOption(choice);
-        } else {
-          setTimeout(() => {
-            addMessage('system', `Invalid entry. Please select or type exactly **A**, **B**, or **C** to enable one of the available quantum scenarios.`);
-          }, 400);
-        }
-      } else if (interviewSubstep === 1) {
-        const details = getScenarioDetails(selectedSectorLong, scenarioSelection || 'A');
-
-        // Strict validation check for Question 1
-        if (details.validateQ1) {
-          const validation = details.validateQ1(userText);
-          if (!validation.valid) {
-            setTimeout(() => {
-              const errorTitle = isIt ? '⚠️ **RISPOSTA NON CONFORME ALLE OPZIONI PROPOSTE:**' : '⚠️ **RESPONSE DOES NOT MATCH PROPOSED OPTIONS:**';
-              const fallbackErr = isIt ? `La risposta "${userText}" non è valida per questa domanda di calibrazione.` : `The response "${userText}" is not valid for this calibration question.`;
-              const allowedTitle = isIt ? '👉 **Opzioni consentite e suggerite:**' : '👉 **Allowed and suggested options:**';
-              const instructions = isIt ? '*Per favore rispondi indicando una delle opzioni proposte (oppure selezionala dai pulsanti rapidi sotto la chat):*' : '*Please reply indicating one of the proposed options (or select it from the quick buttons below the chat):*';
-
-              addMessage('system', `${errorTitle}
-              
-${validation.error || fallbackErr}
-
-${allowedTitle}
-${details.optionsQ1.map(opt => `• **${opt}**`).join('\n')}
-
-${instructions}
-👉 **${details.q1}**`);
-            }, 300);
-            return; // Halt and wait for valid input
-          }
-        }
-
-        setCalibrationAnswers(prev => [...prev, processedAnswer]);
-        setInterviewSubstep(2);
-        setTimeout(() => {
-          const question2Intro = isIt
-            ? `Ricevuto. Seconda domanda per completare la calibrazione del compilatore:\n👉 **${details.q2}**`
-            : `Received. Second question to complete compiler calibration:\n👉 **${details.q2}**`;
-          addMessage('system', question2Intro);
-        }, 400);
-      } else if (interviewSubstep === 2) {
-        const details = getScenarioDetails(selectedSectorLong, scenarioSelection || 'A');
-
-        // Strict validation check for Question 2
-        if (details.validateQ2) {
-          const validation = details.validateQ2(userText);
-          if (!validation.valid) {
-            setTimeout(() => {
-              const errorTitle = isIt ? '⚠️ **RISPOSTA NON CONFORME ALLE OPZIONI PROPOSTE:**' : '⚠️ **RESPONSE DOES NOT MATCH PROPOSED OPTIONS:**';
-              const fallbackErr = isIt ? `La risposta "${userText}" non è valida per questa domanda di calibrazione.` : `The response "${userText}" is not valid for this calibration question.`;
-              const allowedTitle = isIt ? '👉 **Opzioni consentite e suggerite:**' : '👉 **Allowed and suggested options:**';
-              const instructions = isIt ? '*Per favore rispondi indicando una delle opzioni proposte (oppure selezionala dai pulsanti rapidi sotto la chat):*' : '*Please reply indicating one of the proposed options (or select it from the quick buttons below the chat):*';
-
-              addMessage('system', `${errorTitle}
-              
-${validation.error || fallbackErr}
-
-${allowedTitle}
-${details.optionsQ2.map(opt => `• **${opt}**`).join('\n')}
-
-${instructions}
-👉 **${details.q2}**`);
-            }, 300);
-            return; // Halt and wait for valid input
-          }
-        }
-
-        const currentAnswers = [...calibrationAnswers, processedAnswer];
-        setCalibrationAnswers(currentAnswers);
-        setInterviewSubstep(3);
-
-        const lines = details.sample.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        let sampleTableMarkdown = '';
-        if (lines.length >= 2) {
-          const headers = lines[0].split(',');
-          const separator = headers.map(() => '---').join(' | ');
-          const rows = lines.slice(1).map(row => row.split(',').join(' | '));
-          sampleTableMarkdown = `| ${headers.join(' | ')} |\n| ${separator} |\n${rows.map(r => `| ${r} |`).join('\n')}`;
-        }
-
-        const scenarioOpt = scenarioSelection || 'A';
-        const subcategoryExplanation = isIt
-          ? (scenarioOpt === 'A' 
-              ? 'Mappatura a Entanglement Misto (Correlazione Multivariabile tra Asset)'
-              : scenarioOpt === 'B'
-              ? 'Mappatura Geometrica Angolare 3D (Sfera di Bloch)'
-              : 'Mappatura ad Ampiezza/Probabilità Pura (Zero CNOT)')
-          : (scenarioOpt === 'A'
-              ? 'Mixed Entanglement Mapping (Multi-variable Correlation across Assets)'
-              : scenarioOpt === 'B'
-              ? '3D Angular Geometric Mapping (Bloch Sphere)'
-              : 'Pure Amplitude/Probability Mapping (Zero CNOT)');
-
-        setTimeout(() => {
-          if (isIt) {
-            addMessage('system', `🎉 **Intervista guidata completata con successo!**
-          
-📊 **RIEPILOGO DI CALIBRAZIONE ESECUTIVA:**
-- **Macro-Area / Settore Selezionato:** **${selectedSectorLong}** (*${details.name}*)
-- **Sottocategoria Attiva:** **Opzione ${scenarioOpt}** — *${subcategoryExplanation}*
-- **Parametro Operativo 1:** "${currentAnswers[0]}"
-- **Parametro Operativo 2:** "${currentAnswers[1]}"
-
----
-
-📋 **TABELLA DATI DI DEFAULT (STRUTTURA MODELLO):**
-Ecco la tabella pre-configurata con le esatte colonne matematiche pronte per il tuo scenario:
-
-${sampleTableMarkdown}
-
----
-
-📥 **COME FUNZIONA: SCARICA E CARICA I TUOI DATI AZIENDALI:**
-1. Clicca sul pulsante **📥 SCARICA MODELLO CSV** (nella barra sotto la tabella o a sinistra) per salvare questo file.
-2. Apri il file con **Excel**, **LibreOffice** o un editor di testo e sostituisci le righe di esempio con i dati reali della tua azienda (in particolare aggiorna la colonna **Saturation_Percentage** con i tuoi valori da 0.00 a 1.00).
-3. Clicca su **📁 CARICA FILE CSV COMPILATO** per caricare il tuo file. Il sistema genererà istantaneamente il codice quantistico **OpenQASM 2.0 / Qiskit**.
-
----
-
-💡 **COSA OTTERRAI DA QUESTA TABELLA DOPO L'ELABORAZIONE DEL COMPUTER IBM (In parole semplici per i tuoi clienti):**
-
-🎯 **1. Che cos'è questa Categoria e Sottocategoria:**
-Hai selezionato la macro-area **${selectedSectorLong}** con sottocategoria **Opzione ${scenarioOpt}**. Significa che il processore IBM analizzerà i tuoi asset considerando sia le percentuali di rischio individuali, sia le relazioni reciproche tra gli elementi.
-
-⚛️ **2. La Traduzione Quantistica dei tuoi Dati (Qubit e Angoli):**
-Ogni riga del tuo foglio Excel (ogni singolo prodotto, spedizione, macchina o contratto) viene associata a un **Qubit** (bit quantistico). I numeri percentuali reali vengono convertiti in precisi angoli fisici di rotazione (\`RY\`, \`RZ\`, \`CX\`) all'interno del circuito.
-
-⚡ **3. Calcolo di Tutti gli Scenari in Simultanea:**
-A differenza di un software tradizionale che calcola le combinazioni una dopo l'altra, il computer quantistico IBM sfrutta la **sovrapposizione quantistica** per esaminare contemporaneamente **tutte le possibili combinazioni** di rischio e saturazione in pochi millesimi di secondo.
-
-🏆 **4. Che cosa hai ottenuto concretamente (Il Risultato Decisionale Finale):**
-• **La Configurazione Ottimale:** Riceverai l'indicazione esatta di quale combinazione di risorse massimizza l'efficienza e riduce a zero i rischi di blocco o perdite.
-• **Mappa Preventiva dei Colli di Bottiglia:** Individuerai in anticipo quali componenti o spedizioni rischiano il sovraccarico prima che accada nella realtà.
-• **Codice Pronto per IBM Quantum:** Potrai cliccare sul pulsante **"Send to IBM"** per inviare questo circuito direttamente ai veri supercomputer quantistici IBM con token API crittografato.`);
-          } else {
-            addMessage('system', `🎉 **Guided calibration interview completed successfully!**
-          
-📊 **EXECUTIVE CALIBRATION SUMMARY:**
-- **Corporate Macro-Area / Sector Selected:** **${selectedSectorLong}** (*${details.name}*)
-- **Active Subcategory:** **Option ${scenarioOpt}** — *${subcategoryExplanation}*
-- **Operational Parameter 1:** "${currentAnswers[0]}"
-- **Operational Parameter 2:** "${currentAnswers[1]}"
-
----
-
-📋 **DEFAULT DATA TABLE (MODEL STRUCTURE):**
-Here is the pre-configured data model table with the exact mathematical columns ready for your scenario:
-
-${sampleTableMarkdown}
-
----
-
-📥 **HOW IT WORKS: DOWNLOAD AND UPLOAD YOUR CORPORATE DATA:**
-1. Click the **📥 DOWNLOAD CSV TEMPLATE** button (in the toolbar below the table or on the left) to save this file.
-2. Open the file with **Excel**, **LibreOffice**, or any text editor and replace the sample rows with your real corporate data (in particular, update the **Saturation_Percentage** column with your values from 0.00 to 1.00).
-3. Click **📁 UPLOAD COMPLETED CSV FILE** to upload your file. The system will instantly generate the **OpenQASM 2.0 / Qiskit** quantum circuit.
-
----
-
-💡 **WHAT YOU WILL OBTAIN FROM THIS TABLE AFTER IBM COMPUTER PROCESSING (In plain terms for your clients):**
-
-🎯 **1. What this Category and Subcategory represent:**
-You selected the macro-area **${selectedSectorLong}** with subcategory **Option ${scenarioOpt}**. This means the IBM processor will analyze your assets by taking into account both individual risk/saturation percentages and mutual correlations across variables.
-
-⚛️ **2. Quantum Translation of your Data (Qubits and Angles):**
-Each row of your spreadsheet (each product, shipment, machine, or contract) is mapped to a dedicated **Qubit** (quantum bit). Real percentage values are converted into precise physical rotation angles (\`RY\`, \`RZ\`, \`CX\`) inside the quantum circuit.
-
-⚡ **3. Simultaneous Evaluation of All Scenarios:**
-Unlike classical software that evaluates scenarios sequentially one by one, the IBM quantum processor leverages **quantum superposition** to evaluate **all possible combinations** of risk and saturation simultaneously in milliseconds.
-
-🏆 **4. Concrete Deliverables (Final Decision-Making Outcome):**
-• **Optimal Configuration:** You will receive the exact configuration of resources that maximizes efficiency and eliminates bottleneck risks or losses.
-• **Preventive Bottleneck Mapping:** You will identify in advance which components or shipments risk overloading before it occurs in reality.
-• **Ready-to-Run IBM Quantum Code:** You can click the **"Send to IBM"** button to dispatch this circuit directly to physical IBM Quantum supercomputers with your encrypted API token.`);
-          }
-          setStep(3);
-          setIsCsvLoaded(false);
-        }, 400);
-      }
-    } else if (step === 3) {
-      const cleanUserText = userText.trim().toUpperCase();
-      if (cleanUserText.includes('CONFIRM') || cleanUserText.includes('CONFERMA') || cleanUserText === 'RUN' || cleanUserText === 'START') {
-        const realCsv = findRealUserCsv(userText);
-        if (realCsv) {
-          setTempCsvContent(realCsv);
-          setIsCsvLoaded(true);
-          processInputCSV(realCsv, true);
-        } else {
-          const waitingMsg = isIt
-            ? `In attesa del caricamento dei dati CSV reali dell'azienda...\n\n*(Nessun dato CSV reale inserito nella chat. Incolla la tua tabella con i valori effettivi, es. \`Item_Code,Saturation_Percentage...\`, per avviare la sintesi OpenQASM 2.0 sui dati reali).*`
-            : `Waiting for real corporate CSV data upload...\n\n*(No real CSV data entered into the chat. Paste your table with actual values, e.g. \`Item_Code,Saturation_Percentage...\`, to initiate OpenQASM 2.0 synthesis on real data).*`;
-          addMessage('system', waitingMsg);
-        }
-        return;
-      }
-
-      const realCsv = findRealUserCsv(userText);
-      if (realCsv) {
-        processInputCSV(realCsv);
-      } else {
-        // Detect if user text looks like a CSV dataset or a conversational query
-        const looksLikeCsv = (text: string): boolean => {
-          const trim = text.trim();
-          const csvLines = trim.split('\n');
-          if (csvLines.length < 2) return false;
-          const delimiter = csvLines[0].includes(';') ? ';' : ',';
-          return csvLines[0].split(delimiter).length >= 2 && csvLines[1].split(delimiter).length >= 2;
-        };
-
-        if (looksLikeCsv(userText)) {
-          prepareCsvMapping(userText);
-        } else {
-          // Conversational query: query agentic RAG LLM endpoint
-          const tempMsgId = Math.random().toString();
-          setMessages(prev => [
-            ...prev,
-            {
-              id: tempMsgId,
-              sender: 'system',
-              text: `⏳ **Processing...** Querying the **Gemma QML-Core** quantum compiler via the integrated enterprise **RAG** service...`,
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }
-          ]);
-
-          const details = getScenarioDetails(selectedSectorLong, scenarioSelection || 'A');
-          const promptContext = `You are the Quantum Compiler Agent of Quantum Agents S.r.l. equipped with integrated RAG (Retrieval-Augmented Generation).
-This is the high-reliability Gemma QML-Core module.
-The client is currently in the scenario: **${details.name || selectedSectorLong}** (${selectedSectorLong}).
-Active scenario option: **Option ${scenarioSelection || 'A'}**
-
-Corporate calibration parameters:
-1. ${details.q1 || "Calibration question 1"}: "${calibrationAnswers[0] || 'Undeclared'}"
-2. ${details.q2 || "Calibration question 2"}: "${calibrationAnswers[1] || 'Undeclared'}"
-
-Required data model columns:
-- **Item_Code**
-- **Saturation_Percentage**
-- ${details.headers.map(h => `- **${h}**`).join('\n')}
-- **Entanglement_Link**
-
-If the user asks about OpenQASM 2.0 or Qiskit, explain in detail.
-If the user asks about unsold inventory, explain that the algorithm calibrates qubit amplitudes differently based on Seasonal (high frequency, short-term discount) or Annual (smoothed curve for long-term margin recovery) stock.
-ALWAYS RESPOND IN ENGLISH, clearly and educationally, using markdown tables where helpful.`;
-
-          // Pass cleaned history
-          const cleanedHistory = messages.map(m => ({
-            role: m.sender === 'user' ? 'user' : 'model',
-            text: m.text
-          }));
-
-          axios.post('/api/quantum-bi/chat', {
-            messages: [...cleanedHistory, { role: 'user', text: userText }],
-            systemPrompt: promptContext
-          })
-          .then(response => {
-            const botText = response.data?.text || "Did not receive a response from the quantum compiler. Please retry shortly.";
-            setMessages(prev => prev.filter(m => m.id !== tempMsgId));
-            addMessage('system', botText);
-          })
-          .catch(err => {
-            console.warn("AI Backend unavailable or RAG offline, generating autonomous deterministic response:", err);
-            setMessages(prev => prev.filter(m => m.id !== tempMsgId));
-            
-            // Generate clear, contextual explanation for the user query without blocking the workflow
-            const lower = userText.toLowerCase();
-            let contextualReply = "";
-            if (lower.includes('qasm') || lower.includes('circuit') || lower.includes('porta') || lower.includes('gate') || lower.includes('ry') || lower.includes('cx') || lower.includes('cnot')) {
-              contextualReply = `💡 **Quantum Engine Guidance:**
-- In this scenario (**${details.name}**), data variables are converted into quantum rotation angles via $$\\theta = 2\\arcsin(\\sqrt{P})$$.
-- ${scenarioSelection === 'C' ? '**Option C [Amplitude Only]** is active: exclusively single-qubit `ry` gates are applied with zero inter-qubit entanglement (`cx` or CNOT).' : scenarioSelection === 'B' ? '**Option B [Geometry Only]** is active: 3D isolated spatial rotations are used with zero CNOT gates.' : '**Option A [Entanglement]** is active: variables are cross-linked using controlled-NOT gates (`cx`).'}
-- To simulate the circuit immediately, paste your CSV data or reply with **'CONFIRM'** to run with the calibrated template table.`;
-            } else if (lower.includes('sample') || lower.includes('dati') || lower.includes('csv') || lower.includes('colonn') || lower.includes('valori')) {
-              contextualReply = `📊 **Data Structure Specification:**
-For the **${details.name}** scenario, your CSV dataset must contain:
-1. **Item_Code**: Asset or business entity identifier (e.g. \`FLOW_JAN\`, \`FLOW_FEB\`, \`FLOW_MAR\`).
-2. **Saturation_Percentage**: Value between \`0.0\` and \`1.0\` (e.g. \`0.30\`, \`0.55\`, \`0.12\`).
-3. **Sector Metrics**: \`${details.headers.join('`, `')}\`.
-4. **Entanglement_Link**: Group identifier or \`INDEPENDENT\`.
-
-👉 *You can paste your CSV dataset directly into this chat or type **'CONFIRM'** to proceed with the verified benchmark.*`;
-            } else {
-              contextualReply = `🤖 **Gemma QML-Core Local Guidance:**
-I have logged your request regarding **${selectedSectorLong || 'Corporate Quantum Calibration'}** (**Option ${scenarioSelection || 'A'}**).
-
-Parameters configured:
-- **Sector Target:** ${details.name}
-- **Calibration Status:** Verified and ready for simulation.
-
-👉 *Reply with **'CONFIRM'** to execute the quantum circuit with the calibrated sample dataset, or paste your custom CSV text directly into the chat.*`;
-            }
-
-            addMessage('system', contextualReply);
-          });
-        }
-      }
-    } else {
-      setTimeout(() => {
-        addMessage('system', `The OpenQASM 2.0 quantum circuit is ready. You can transmit it to IBM Q by pressing the button or upload another CSV file to re-run the simulation.`);
-      }, 500);
+      return;
     }
+
+    // ==========================================
+    // STEP 2: Paradigm Selection (Option A, B, C)
+    // ==========================================
+    if (step === 2) {
+      const rawUpper = userText.trim().toUpperCase();
+      let choice: 'A' | 'B' | 'C' | null = null;
+      if (rawUpper === 'A' || rawUpper.includes('OPTION A') || rawUpper.includes('OPZIONE A') || rawUpper.includes('ENTANGLEMENT') || rawUpper === '1' || rawUpper.includes('MISTO')) {
+        choice = 'A';
+      } else if (rawUpper === 'B' || rawUpper.includes('OPTION B') || rawUpper.includes('OPZIONE B') || rawUpper.includes('GEOMETRY') || rawUpper.includes('GEOMETRIA') || rawUpper.includes('ANGOL') || rawUpper === '2') {
+        choice = 'B';
+      } else if (rawUpper === 'C' || rawUpper.includes('OPTION C') || rawUpper.includes('OPZIONE C') || rawUpper.includes('AMPLITUDE') || rawUpper.includes('AMPIEZZA') || rawUpper.includes('PROBABILITY') || rawUpper.includes('PROBABILIT') || rawUpper === '3') {
+        choice = 'C';
+      }
+
+      if (choice) {
+        handleChoiceOption(choice);
+      } else {
+        setTimeout(() => {
+          addMessage('system', `Risposta non valida. Per favore rispondi indicando **A**, **B** oppure **C** per scegliere uno dei tre paradigmi quantistici.`);
+        }, 300);
+      }
+      return;
+    }
+
+    // =========================================================================
+    // STEP 3: V9 Conversational Interview State Machine (1 Question at a time)
+    // =========================================================================
+    if (step === 3) {
+      const currentSector = selectedSector || 'Finanza';
+      const currentOpt = scenarioSelection || 'A';
+      const scenarioInfo = getV9ScenarioInterviewInfo(currentSector, currentOpt);
+      const fillerWords = ['ciao', 'salve', 'buongiorno', 'buonasera', 'ok', 'va bene', 'vabene', 'boh', 'non so', 'dimmi tu', 'si', 'no', 'yes', 'aiuto', 'help', 'grazie', 'bene', 'test', 'asd', 'asdasd', 'null', 'undefined', 'niente', 'nessuno', 'cosa devo fare', 'prosegui', 'avanti', 'vai', 'fatto', 'prova'];
+
+      // -------------------------------------------------------------
+      // SUBSTEP 1: Elements Acquisition (D1) with Hard Cap check (max 6) & Validation
+      // -------------------------------------------------------------
+      if (interviewSubstep === 1) {
+        const rawTokens = userText
+          .replace(/[;\n]/g, ',')
+          .split(',')
+          .map(t => t.trim().replace(/^["']|["']$/g, ''))
+          .filter(t => t.length > 0);
+
+        // Check if user input is purely conversational filler or empty
+        const isAllFillers = rawTokens.length === 0 || rawTokens.every(t => fillerWords.includes(t.toLowerCase()) || !/[a-zA-Z0-9]/.test(t));
+
+        if (isAllFillers) {
+          setTimeout(() => {
+            addMessage('system', `⚠️ **RISPOSTA NON VALIDA per la Domanda 1:**
+Non è stato possibile identificare codici o nomi validi di asset/elementi aziendali per la simulazione quantistica.
+
+👉 **Cosa fare:**
+- Scrivi da **1 a 6 elementi/asset aziendali** separati da virgola (es. \`${scenarioInfo.sampleElements}\`).
+- Oppure clicca direttamente su uno dei pulsanti suggeriti qui sotto per caricare l'esempio.`);
+          }, 300);
+          return;
+        }
+
+        // HARD CAP VALIDATION (> 6 items)
+        if (rawTokens.length > 6) {
+          setTimeout(() => {
+            addMessage('system', `⚠️ **ATTENZIONE (Cap Massimo QPU Superato):**
+Il computer quantistico IBM allocato supporta una simulazione simultanea di massimo **6 elementi** in questo registro. Hai inserito ${rawTokens.length} elementi.
+
+👉 Per favore, riduci l'elenco specificando fino a 6 elementi (es. \`${scenarioInfo.sampleElements}\`) o clicca sulla configurazione suggerita.`);
+          }, 300);
+          return;
+        }
+
+        const elements = rawTokens.map(t => t.toUpperCase().replace(/\s+/g, '_'));
+        setV9Elements(elements);
+        setInterviewSubstep(2);
+
+        setTimeout(() => {
+          addMessage('system', `✅ **Elementi Registrati (${elements.length}):** **${elements.join(', ')}**.\n\n👉 **DOMANDA 2:**\n${scenarioInfo.qSaturation}`);
+        }, 350);
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // SUBSTEP 2: Saturation / Risk % Acquisition (D2) with Vague text alert & Strict Validation
+      // -------------------------------------------------------------
+      if (interviewSubstep === 2) {
+        const lower = userText.toLowerCase();
+        const vagueWords = ['alto', 'alta', 'alti', 'alte', 'basso', 'bassa', 'bassi', 'basse', 'medio', 'media', 'medi', 'medie', 'elevato', 'elevata', 'ridotto', 'ridotta', 'critico', 'critica', 'buono', 'buona', 'ottimo', 'discreto', 'normale', 'molto', 'poco', 'abbastanza', 'grave', 'minimo', 'massimo'];
+        const containsVagueWord = vagueWords.some(w => lower.includes(w));
+
+        // Extract all numbers / percentages from text
+        const matches = userText.match(/(?:\d+[.,]?\d*|\.\d+)\s*%?/g) || [];
+        const parsedNums: number[] = [];
+
+        matches.forEach(m => {
+          const isPercent = m.includes('%');
+          const cleanNum = parseFloat(m.replace('%', '').replace(',', '.').trim());
+          if (!isNaN(cleanNum)) {
+            const val = (isPercent || cleanNum > 1.0) ? cleanNum / 100 : cleanNum;
+            parsedNums.push(Math.max(0.001, Math.min(val, 1.0)));
+          }
+        });
+
+        // If no numbers at all or purely vague text
+        if (parsedNums.length === 0) {
+          setTimeout(() => {
+            addMessage('system', `⚠️ **ALERT DATO NON VALIDO (Domanda 2):**
+Il sistema quantistico richiede valori numerici precisi o percentuali (es. \`${scenarioInfo.sampleSaturation}\` o \`45%\`, \`0.45\`) per calcolare l'angolo di rotazione $2\\arcsin(\\sqrt{p})$ sulle porte \`ry\`.
+${containsVagueWord ? `\nNon è possibile calcolare il circuito su descrizioni qualitative come *"${userText}"*.` : ''}
+
+👉 **Cosa fare:**
+- Inserisci ${v9Elements.length > 0 ? v9Elements.length : 'i'} valori percentuali per i tuoi elementi (**${(v9Elements.length > 0 ? v9Elements : ['Elementi']).join(', ')}**), es. \`${scenarioInfo.sampleSaturation}\`.
+- Oppure clicca su uno dei valori percentuali proposti in basso.`);
+          }, 300);
+          return;
+        }
+
+        // Fill saturations for each element
+        const N = v9Elements.length > 0 ? v9Elements.length : parsedNums.length;
+        const saturations: number[] = [];
+        for (let i = 0; i < N; i++) {
+          saturations.push(parsedNums[i] !== undefined ? parsedNums[i] : parsedNums[parsedNums.length - 1]);
+        }
+        setV9Saturations(saturations);
+
+        // Branching based on Option:
+        // Option C (Amplitude Only) SKIPS Question 3 (Correlations/Angles) and goes straight to Question 4 (Threshold)
+        if (currentOpt === 'C') {
+          setInterviewSubstep(4);
+          setTimeout(() => {
+            addMessage('system', `✅ **Valori di saturazione/probabilità registrati:** ${saturations.map((s, idx) => `\`${v9Elements[idx] || `Asset_${idx+1}`}\`: **${(s * 100).toFixed(1)}%**`).join(', ')}.\n*(Trattandosi di Opzione C ad ampiezza pura, non sono necessarie porte di correlazione/entanglement intermedie).* \n\n👉 **DOMANDA 4:**\n${scenarioInfo.qThreshold}`);
+          }, 350);
+        } else {
+          setInterviewSubstep(3);
+          setTimeout(() => {
+            addMessage('system', `✅ **Valori di saturazione/rischio registrati:** ${saturations.map((s, idx) => `\`${v9Elements[idx] || `Asset_${idx+1}`}\`: **${(s * 100).toFixed(1)}%**`).join(', ')}.\n\n👉 **DOMANDA 3:**\n${scenarioInfo.qCorrelation}`);
+          }, 350);
+        }
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // SUBSTEP 3: Correlation Links or Angular 3D Rotations (D3) & Validation
+      // -------------------------------------------------------------
+      if (interviewSubstep === 3) {
+        if (currentOpt === 'A') {
+          // Option A: Extract group names
+          const tokens = userText
+            .replace(/[;\n]/g, ',')
+            .split(',')
+            .map(t => t.trim().toUpperCase().replace(/^["']|["']$/g, ''))
+            .filter(t => t.length > 0);
+
+          const isAllFillers = tokens.length === 0 || tokens.every(t => fillerWords.includes(t.toLowerCase()) || !/[a-zA-Z0-9]/.test(t));
+
+          if (isAllFillers) {
+            setTimeout(() => {
+              addMessage('system', `⚠️ **DATO NON VALIDO per la Domanda 3 (Fase 2 - Entanglement):**
+Per l'Opzione A devi specificare i gruppi di correlazione per ciascun elemento (**${v9Elements.join(', ')}**), ad esempio \`${scenarioInfo.sampleCorrelation}\`, oppure digitare \`INDEPENDENT\` per i nodi isolati.
+
+👉 Inserisci i gruppi corretti separati da virgola o clicca sulla configurazione suggerita sotto.`);
+            }, 300);
+            return;
+          }
+
+          const correlations: string[] = [];
+          const N = v9Elements.length > 0 ? v9Elements.length : tokens.length;
+          for (let i = 0; i < N; i++) {
+            correlations.push(tokens[i] || (tokens.length > 0 ? tokens[0] : 'INDEPENDENT'));
+          }
+          setV9Correlations(correlations);
+          
+          // Phase 2 angles mapping from default
+          const angles2 = correlations.map((_, i) => scenarioInfo.defaultAngles[i] || 0.70748);
+          setV9AnglesPhase2(angles2);
+        } else {
+          // Option B: Extract angular radians/degrees
+          const matches = userText.match(/(?:\d+[.,]?\d*|\.\d+)/g) || [];
+          const parsedAngles = matches.map(m => parseFloat(m.replace(',', '.'))).filter(n => !isNaN(n));
+
+          if (parsedAngles.length === 0) {
+            setTimeout(() => {
+              addMessage('system', `⚠️ **DATO NON VALIDO per la Domanda 3 (Fase 2 - Rotazioni Geometriche):**
+Per l'Opzione B devi inserire valori numerici di rotazione in radianti o gradi per ciascun elemento (es. \`${scenarioInfo.sampleCorrelation}\`).
+
+👉 Inserisci valori numerici corretti oppure clicca sul suggerimento proposto.`);
+            }, 300);
+            return;
+          }
+
+          const N = v9Elements.length > 0 ? v9Elements.length : parsedAngles.length;
+          const angles2: number[] = [];
+          for (let i = 0; i < N; i++) {
+            angles2.push(parsedAngles[i] !== undefined ? parsedAngles[i] : (scenarioInfo.defaultAngles[i] || 0.78539));
+          }
+          setV9AnglesPhase2(angles2);
+          setV9Correlations(angles2.map(a => `RZ(${a.toFixed(3)})`));
+        }
+
+        setInterviewSubstep(4);
+        setTimeout(() => {
+          addMessage('system', `✅ **Parametri di Fase 2 configurati con successo.**\n\n👉 **DOMANDA 4:**\n${scenarioInfo.qThreshold}`);
+        }, 350);
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // SUBSTEP 4: Ancilla Comparator Threshold (D4) & Strict Validation & Final Execution
+      // -------------------------------------------------------------
+      if (interviewSubstep === 4) {
+        const matches = userText.match(/(?:\d+[.,]?\d*|\.\d+)\s*%?/g) || [];
+
+        if (matches.length === 0) {
+          setTimeout(() => {
+            addMessage('system', `⚠️ **DATO NON VALIDO per la Domanda 4 (Soglia Ancilla):**
+È necessario specificare un valore numerico percentuale o decimale valido per impostare la soglia critica del qubit comparatore ancilla (es. \`4%\`, \`5%\` o \`0.04\`).
+
+👉 Inserisci un valore numerico percentuale oppure clicca su uno dei pulsanti suggeriti (es. **4% (Standard Benchmark)**).`);
+          }, 300);
+          return;
+        }
+
+        let threshVal = 0.04;
+        const isPercent = matches[0].includes('%');
+        const num = parseFloat(matches[0].replace('%', '').replace(',', '.').trim());
+        if (!isNaN(num)) {
+          threshVal = (isPercent || num > 1.0) ? num / 100 : num;
+        }
+        threshVal = Math.max(0.001, Math.min(threshVal, 1.0));
+        setThreshold(threshVal);
+
+        const elements = v9Elements.length > 0 ? v9Elements : ['ASSET_1', 'ASSET_2', 'ASSET_3'];
+        const saturations = v9Saturations.length === elements.length ? v9Saturations : elements.map(() => 0.35);
+        const correlations = v9Correlations.length === elements.length ? v9Correlations : elements.map(() => 'INDEPENDENT');
+        const angles2 = v9AnglesPhase2.length === elements.length ? v9AnglesPhase2 : elements.map(() => 0.78539);
+
+        // Generate clean OpenQASM 2.0 code
+        const qasmCode = generateV9OpenQasmCode(elements, saturations, correlations, angles2, currentOpt, threshVal);
+        setQasmOutput(qasmCode);
+
+        // Update clean records for IBM visual composer board
+        const cleanRecs = elements.map((el, i) => {
+          const sat = saturations[i] ?? 0.35;
+          const pClamped = Math.max(0, Math.min(sat, 1.0));
+          const th1 = 2 * Math.asin(Math.sqrt(pClamped));
+          const th2 = angles2[i] ?? 0.78539;
+          return {
+            article: el,
+            saturation: sat,
+            abbinamento: correlations[i] || 'INDEPENDENT',
+            correlazioneNumerica: th2,
+            anglePhase1: th1,
+            anglePhase2: th2
+          };
+        });
+        setCleanedRecords(cleanRecs);
+        setStep(4);
+
+        // Play audio chime
+        playChimeAlert();
+
+        // Build data summary table markdown
+        const tableRows = elements.map((el, i) => {
+          const sat = saturations[i] ?? 0.35;
+          const th1 = (2 * Math.asin(Math.sqrt(Math.max(0, Math.min(sat, 1.0))))).toFixed(5);
+          const th2 = (angles2[i] ?? 0.78539).toFixed(5);
+          const corr = correlations[i] || 'INDEPENDENT';
+          return `| \`q[${i}]\` | **${el}** | ${(sat * 100).toFixed(1)}% | \`${th1} rad\` | \`${th2} rad\` | \`${corr}\` |`;
+        }).join('\n');
+
+        const summaryTableMarkdown = `| Qubit | Elemento / Asset | Saturazione / Rischio | Angolo Fase 1 (RY) | Angolo Fase 2 | Gruppo / Correlazione |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+${tableRows}
+| \`q[${elements.length}]\` | **ANCILLA COMPARATORE** | Soglia: ${(threshVal * 100).toFixed(1)}% | Distribuito: \`${((2 * Math.asin(Math.sqrt(threshVal))) / elements.length).toFixed(5)} rad\` | - | Target Allerta |`;
+
+        // Exact closing statement
+        const closingPhrase = `**Ho raccolto tutti i dati necessari e generato il codice OpenQASM che vedi qui sopra.**
+
+Premere il pulsante in basso a destra per inviare il codice QASM a IBM Quantum  Computing.`;
+
+        setTimeout(() => {
+          addMessage('system', `🎉 **Calibrazione Completata con Successo!**
+
+📊 **RIEPILOGO STRUTTURA DATI QUANTISTICI:**
+- **Settore Macro-Area:** **${selectedSectorLong || currentSector}**
+- **Paradigma:** **Opzione ${currentOpt}** (*${currentOpt === 'A' ? 'Misto / Entanglement' : currentOpt === 'B' ? 'Solo Angolo / Geometria' : 'Solo Ampiezza / Probabilità'}*)
+- **Dimensione Registro:** ${elements.length} Qubit di dato + 1 Qubit Ancilla (Totale: ${elements.length + 1} Qubit)
+- **Soglia Comparatore Ancilla:** **${(threshVal * 100).toFixed(1)}%**
+
+${summaryTableMarkdown}
+
+---
+
+💻 **CIRCUITO SINTETIZZATO (OPENQASM 2.0):**
+\`\`\`qasm
+${qasmCode}
+\`\`\`
+
+${closingPhrase}`);
+        }, 400);
+
+        return;
+      }
+    }
+
+    // Fallback if completed
+    setTimeout(() => {
+      addMessage('system', `Il circuito OpenQASM 2.0 è pronto e validato. Puoi inviarlo direttamente al processore quantistico IBM cliccando su **"Send to IBM"** in alto.`);
+    }, 300);
   };
 
   const prepareCsvMapping = (csvTextContent: string) => {
@@ -2145,9 +2588,13 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
       return;
     }
 
-    // Auto-detect the column delimiter: semicolon is preferred if present in header, otherwise fallback to comma
+    // Auto-detect the column delimiter: supports tab, semicolon, comma, pipe
     const headerLine = lines[0];
-    const delimiter = headerLine.includes(';') ? ';' : ',';
+    let delimiter = ',';
+    if (headerLine.includes('\t')) delimiter = '\t';
+    else if (headerLine.includes(';')) delimiter = ';';
+    else if (headerLine.includes('|')) delimiter = '|';
+    else delimiter = ',';
 
     const originalHeaders = headerLine.split(delimiter).map(h => h.trim());
     const headers = originalHeaders.map(h => h.trim().toLowerCase());
@@ -2165,9 +2612,9 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
       idxArticolo = headers.findIndex(h => secondaryArticoloTerms.some(term => h.includes(term)));
     }
 
-    // 2. Saturation Column Finding
-    const primarySaturazioneTerms = ['saturation_percentage', 'saturation', 'saturazione', 'percentuale', 'percentage', 'probabilita', 'probability', 'prob'];
-    const secondarySaturazioneTerms = ['rischio', 'valore', 'level', 'ratio', 'efficienza', 'indice', 'load', 'rate', 'dazi', 'index', 'value', 'risk', 'importo'];
+    // 2. Saturation Column Finding (Column 2 / Saturation Percentage)
+    const primarySaturazioneTerms = ['saturation_percentage', 'saturation percentage', 'saturation', 'saturazione', 'percentuale', 'percentage', 'probabilita', 'probability', 'prob'];
+    const secondarySaturazioneTerms = ['rischio', 'valore', 'level', 'ratio', 'efficienza', 'indice', 'load', 'rate', 'dazi', 'index', 'value', 'risk', 'importo', 'angle_phase1', 'fase1'];
 
     idxSaturazione = headers.findIndex(h => primarySaturazioneTerms.some(term => h.includes(term)));
     if (idxSaturazione === -1) {
@@ -2192,6 +2639,35 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
       return;
     }
 
+    // 3. Entanglement Link Column Finding
+    const idxAbbinamento = originalHeaders.findIndex(h => 
+      ['abbinamento', 'legame', 'relazione', 'gruppo', 'accoppiamento', 'entanglement', 'link'].some(term => h.toLowerCase().includes(term))
+    );
+
+    // 4. Check for Phase 2 / Strike / Correlation / Rate Column (4th Column / Index 3)
+    let idxCorrelazione = originalHeaders.findIndex(h => {
+      const hLower = h.toLowerCase();
+      return ['angle_phase2', 'phase2', 'fase2', 'strike_price', 'strike price', 'strike', 'spot_exchange_rates', 'spot exchange rates', 'spot_exchange', 'spot exchange', 'dynamic_correlation', 'dynamic correlation', 'correlation', 'correlazione', 'cambio', 'tasso', 'risk_free_rate', 'risk free rate', 'risk_free', 'risk free', 'rate', 'compatibility', 'limit_temperature', 'work_hours', 'active_ports', 'expected_return'].some(term => hLower === term || hLower.includes(term));
+    });
+
+    if (idxCorrelazione === -1) {
+      idxCorrelazione = originalHeaders.findIndex((h, idx) => {
+        return idx !== idxArticolo && idx !== idxSaturazione && idx !== idxAbbinamento && idx === 3;
+      });
+    }
+    if (idxCorrelazione === -1 && originalHeaders.length >= 4) {
+      idxCorrelazione = 3;
+    }
+
+    const idxAnglePhase1 = originalHeaders.findIndex(h => {
+      const hl = h.toLowerCase();
+      return hl.includes('angle_phase1') || hl.includes('angle_1') || hl.includes('fase1_rad');
+    });
+    const idxAnglePhase2 = originalHeaders.findIndex(h => {
+      const hl = h.toLowerCase();
+      return hl.includes('angle_phase2') || hl.includes('angle_2') || hl.includes('fase2_rad');
+    });
+
     const hasEntanglementMapping = selectedEntanglementCols.length > 0;
 
     // Identify ignored columns for data reduction log
@@ -2214,14 +2690,9 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
     let negativeClampedCount = 0;
 
     // Retrieve clean records
-    let cleanRecords: Array<{ article: string, saturation: number, abbinamento: string, correlazioneNumerica?: number }> = [];
+    let cleanRecords: Array<{ article: string, saturation: number, abbinamento: string, correlazioneNumerica?: number, anglePhase1?: number, anglePhase2?: number }> = [];
     let maxSeenSaturation = 0;
-    const tempRecords: Array<{ article: string, saturation: number, abbinamento: string, correlazioneNumerica?: number }> = [];
-
-    // Check if there is a 4th column or explicit correlation column
-    const idxCorrelazione = originalHeaders.findIndex((h, idx) => 
-      idx === 3 || ['spot', 'exchange', 'correlation', 'correlazione', 'cambio', 'tasso', 'weight', 'peso'].some(term => h.toLowerCase().includes(term))
-    );
+    const tempRecords: Array<{ article: string, saturation: number, abbinamento: string, correlazioneNumerica?: number, anglePhase1?: number, anglePhase2?: number }> = [];
 
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(delimiter);
@@ -2245,9 +2716,6 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
 
       // Build key based on selected entanglement columns
       let abbinamento = 'INDEPENDENT';
-      const idxAbbinamento = originalHeaders.findIndex(h => 
-        ['abbinamento', 'legame', 'relazione', 'gruppo', 'accoppiamento', 'entanglement', 'link'].some(term => h.toLowerCase().includes(term))
-      );
       if (idxAbbinamento !== -1 && parts[idxAbbinamento]) {
         abbinamento = parts[idxAbbinamento].replace(/^["']|["']$/g, '').trim().toUpperCase();
       } else if (hasEntanglementMapping) {
@@ -2264,7 +2732,7 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
         }
       }
 
-      // Extract 4th column (Spot Exchange Rates / Dynamic Correlation)
+      // Extract Correlation / Rate / Phase 2 numeric value
       let correlazioneNumerica: number | undefined = undefined;
       const rawCorrText = (idxCorrelazione !== -1 && parts[idxCorrelazione]) 
         ? parts[idxCorrelazione].replace(/^["']|["']$/g, '').replace(/,/g, '.').trim() 
@@ -2274,10 +2742,22 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
         let parsed = parseFloat(rawCorrText);
         if (!isNaN(parsed)) {
           if (parsed > 1.0 && parsed <= 100.0) parsed = parsed / 100.0;
-          else if (parsed > 100.0) parsed = 1.0;
+          else if (parsed > 100.0) parsed = 0.5;
           else if (parsed < 0.0) parsed = 0.0;
           correlazioneNumerica = parsed;
         }
+      }
+
+      // Check if angles are already pre-calculated in table
+      let anglePhase1: number | undefined = undefined;
+      if (idxAnglePhase1 !== -1 && parts[idxAnglePhase1]) {
+        const pAngle1 = parseFloat(parts[idxAnglePhase1].replace(/^["']|["']$/g, '').replace(/,/g, '.').trim());
+        if (!isNaN(pAngle1)) anglePhase1 = pAngle1;
+      }
+      let anglePhase2: number | undefined = undefined;
+      if (idxAnglePhase2 !== -1 && parts[idxAnglePhase2]) {
+        const pAngle2 = parseFloat(parts[idxAnglePhase2].replace(/^["']|["']$/g, '').replace(/,/g, '.').trim());
+        if (!isNaN(pAngle2)) anglePhase2 = pAngle2;
       }
 
       // Auto-correct comma decimals
@@ -2305,7 +2785,7 @@ Without entanglement to link chosen columns, using quantum hardware offers no ma
         outOfScaleCount++;
       }
 
-      tempRecords.push({ article, saturation: saturationValue, abbinamento, correlazioneNumerica });
+      tempRecords.push({ article, saturation: saturationValue, abbinamento, correlazioneNumerica, anglePhase1, anglePhase2 });
       if (saturationValue > maxSeenSaturation) {
         maxSeenSaturation = saturationValue;
       }
@@ -2381,7 +2861,7 @@ ${autoCorrectedDecimalCount > 0 ? `• **Decimal Separators:** Converted **${aut
 ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturazione: **${r.saturation}**, Relazione: **${isOptionC ? 'ISOLATED_PROBABILITY' : isOptionB ? 'ISOLATED_GEOMETRY' : r.abbinamento}**)`).join('\n')}
  
 - **Allocazione Registro Quantistico:** \`qreg q[${N + 1}];\` (incluso Qubit Comparatore Ancilla q[${N}])
-- **Modalità di Codifica:** ${isOptionC ? 'Ampiezza/Probabilità Pura Isolata (Zero CNOT/CX)' : isOptionB ? 'Geometrica Pura 3D Isolata (Zero CNOT/CX)' : 'Entanglement Coerente Multi-Qubit (RY + CNOT/CX)'}`
+- **Modalità di Codifica:** ${isOptionC ? 'Ampiezza/Probabilità Pura Isolata (Zero CNOT/CX)' : isOptionB ? 'Geometrica Pura Isolata (Solo Porte RZ - Zero CNOT/CX)' : 'Entanglement Coerente Multi-Qubit (RY + CRY/RZ)'}`
       : `${qualityReportCard}
 
 ---
@@ -2398,11 +2878,11 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturazion
 ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation: **${r.saturation}**, Relation: **${isOptionC ? 'ISOLATED_PROBABILITY' : isOptionB ? 'ISOLATED_GEOMETRY' : r.abbinamento}**)`).join('\n')}
  
 - **Quantum Register Allocation:** \`qreg q[${N + 1}];\` (including Ancilla Comparator Qubit q[${N}])
-- **Encoding Mode:** ${isOptionC ? 'Pure Isolated Amplitude/Probability (Zero CNOT/CX)' : isOptionB ? 'Pure Isolated 3D Geometric (Zero CNOT/CX)' : 'Multi-Qubit Coherent Entanglement (RY + CNOT/CX)'}`;
+- **Encoding Mode:** ${isOptionC ? 'Pure Isolated Amplitude/Probability (Zero CNOT/CX)' : isOptionB ? 'Pure Isolated Geometric (RZ Only - Zero CNOT/CX)' : 'Multi-Qubit Coherent Entanglement (RY + CRY/RZ)'}`;
 
     setMappingSummary(logicSummary);
 
-    const usesCryGate = !isOptionB && !isOptionC;
+    const usesCryGate = !isOptionC;
     let qasmCircuitCode = `OPENQASM 2.0;\ninclude "qelib1.inc";\n`;
     if (usesCryGate) {
       qasmCircuitCode += `gate cry(theta) a, b { cu3(theta, 0, 0) a, b; }\n`;
@@ -2414,13 +2894,13 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation
     qasmCircuitCode += `// === PHASE 1: INITIALIZATION ROTATIONS (RY) ===\n`;
     cleanRecords.forEach((record, index) => {
       const pClipped = Math.max(0, Math.min(record.saturation, 1.0));
-      const theta = 2 * Math.asin(Math.sqrt(pClipped));
+      const theta1 = record.anglePhase1 !== undefined ? record.anglePhase1 : (2 * Math.asin(Math.sqrt(pClipped)));
       if (isOptionC) {
-        qasmCircuitCode += `// Probabilistic amplitude mapping for ${record.article} (Input Saturation_Percentage: ${record.saturation} -> P(|1>) = ${(pClipped * 100).toFixed(2)}%)\n`;
+        qasmCircuitCode += `// Probabilistic amplitude mapping for ${record.article} (Input: ${record.saturation} -> Angle: ${theta1.toFixed(5)} rad)\n`;
       } else {
-        qasmCircuitCode += `// Protected wave mapping for ${record.article} (Input: ${record.saturation})\n`;
+        qasmCircuitCode += `// Amplitude initialization for ${record.article} (Input: ${record.saturation} -> Angle: ${theta1.toFixed(5)} rad)\n`;
       }
-      qasmCircuitCode += `ry(${theta.toFixed(5)}) q[${index}];\n`;
+      qasmCircuitCode += `ry(${theta1.toFixed(5)}) q[${index}];\n`;
     });
     qasmCircuitCode += `\n`;
 
@@ -2428,30 +2908,19 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation
 
     if (isOptionC) {
       // Option C [Amplitude/Probability Only]: Pure single-qubit amplitude encoding.
-      // STRICTLY ZERO CNOT / CX GATES, AND NO OPTION B TRI-ROTATIONS.
-      qasmCircuitCode += `// === PHASE 2: PURE PROBABILISTIC ISOLATION (ZERO ENTANGLEMENT / ZERO CNOT OR CX / NO OPTION B TRI-ROTATIONS) ===\n`;
-      qasmCircuitCode += `// Option C [Amplitude/Probability Only]: Strictly isolated amplitude mapping; each qubit represents an autonomous probability amplitude distribution.\n`;
-      qasmCircuitCode += `// Preserves exact fidelity of user input CSV Saturation_Percentage values with zero inter-qubit gate noise.\n\n`;
+      // STRICTLY ZERO CNOT / CX GATES, AND NO PHASE 2 GATES.
+      qasmCircuitCode += `// === PHASE 2: PURE PROBABILISTIC ISOLATION (ZERO ENTANGLEMENT / ZERO CNOT OR CX) ===\n`;
+      qasmCircuitCode += `// Option C [Amplitude/Probability Only]: Strictly isolated amplitude mapping; Phase 2 is left empty.\n\n`;
     } else if (isOptionB) {
-      // Option B [Angle/Geometry Only]: Strictly isolated parametric single-qubit rotations (RY, RZ, RX).
-      // ABSOLUTELY ZERO CNOT / CX GATES.
+      // Option B [Angle Only]: Strictly isolated parametric single-qubit rotations (RZ).
+      // ABSOLUTELY ZERO CNOT / CX / CRY GATES in Phase 2.
       qasmCircuitCode += `// === PHASE 2: PURE GEOMETRIC ANGLE ROTATIONS (NO ENTANGLEMENT / ZERO CNOT OR CX) ===\n`;
-      qasmCircuitCode += `// Option B [Angle/Geometry Only]: Strictly isolated parametric rotations applied to independent qubits\n`;
+      qasmCircuitCode += `// Option B [Angle Only]: Strictly isolated local phase rotations rz(theta) on independent qubits\n`;
       cleanRecords.forEach((record, index) => {
-        const pClipped = Math.max(0, Math.min(record.saturation, 1.0));
-        const thetaSat = 2 * Math.asin(Math.sqrt(pClipped));
-        
-        // Check if there is an explicit numeric correlation value in the row to calculate angle ex-novo
-        const parsedCorrVal = parseFloat(record.abbinamento.replace(/,/g, '.'));
-        const hasNumericCorr = !isNaN(parsedCorrVal) && parsedCorrVal >= 0 && parsedCorrVal <= 1.0;
-        const thetaCorr = hasNumericCorr ? (2 * Math.asin(Math.sqrt(parsedCorrVal))) : ((pClipped * Math.PI) + ((index + 1) * (Math.PI / (2 * N))));
-        const gamma = (Math.PI / 4) * (1.0 + pClipped);
-        const secRotation = (thetaSat / 2.0);
-
-        qasmCircuitCode += `// Isolated geometric coordinate mapping for ${record.article} (Qubit q[${index}])\n`;
-        qasmCircuitCode += `rz(${thetaCorr.toFixed(5)}) q[${index}]; // Isolated local phase rotation calculated ex-novo${hasNumericCorr ? ` from correlation (${parsedCorrVal.toFixed(4)})` : ''}\n`;
-        qasmCircuitCode += `rx(${gamma.toFixed(5)}) q[${index}]; // Transverse parametric rotation\n`;
-        qasmCircuitCode += `ry(${secRotation.toFixed(5)}) q[${index}]; // Independent angular coordinate adjustment\n`;
+        const corrVal = record.correlazioneNumerica !== undefined ? Math.max(0, Math.min(1, record.correlazioneNumerica)) : 0.5;
+        const theta2 = record.anglePhase2 !== undefined ? record.anglePhase2 : (2 * Math.asin(Math.sqrt(corrVal)));
+        qasmCircuitCode += `// Isolated local phase mapping for ${record.article} (Value: ${corrVal.toFixed(4)} -> Angle: ${theta2.toFixed(5)} rad)\n`;
+        qasmCircuitCode += `rz(${theta2.toFixed(5)}) q[${index}];\n`;
       });
       qasmCircuitCode += `\n`;
     } else {
@@ -2475,44 +2944,34 @@ ${cleanRecords.map((r, i) => `  * Qubit q[${i}] ➔ **${r.article}** (Saturation
         }
       });
 
-      Object.entries(groups).forEach(([groupName, indices]) => {
-        const getRecordCorr = (record: { article: string, saturation: number, abbinamento: string, correlazioneNumerica?: number }): number => {
-          if (record.correlazioneNumerica !== undefined && !isNaN(record.correlazioneNumerica)) {
-            return Math.max(0, Math.min(1, record.correlazioneNumerica));
-          }
+      const getRecordCorrAngle = (record: { article: string, saturation: number, abbinamento: string, correlazioneNumerica?: number, anglePhase2?: number }): { corrVal: number, thetaCorr: number } => {
+        if (record.anglePhase2 !== undefined) {
+          return { corrVal: record.correlazioneNumerica ?? 0.5, thetaCorr: record.anglePhase2 };
+        }
+        let corrVal = 0.5;
+        if (record.correlazioneNumerica !== undefined && !isNaN(record.correlazioneNumerica)) {
+          corrVal = Math.max(0, Math.min(1, record.correlazioneNumerica));
+        } else {
           const parsedCorr = parseFloat((record.abbinamento || '').replace(/,/g, '.'));
-          if (!isNaN(parsedCorr) && parsedCorr >= 0 && parsedCorr <= 1.0) return parsedCorr;
-          return 0.5;
-        };
+          if (!isNaN(parsedCorr) && parsedCorr >= 0 && parsedCorr <= 1.0) corrVal = parsedCorr;
+        }
+        const thetaCorr = 2 * Math.asin(Math.sqrt(corrVal));
+        return { corrVal, thetaCorr };
+      };
 
+      Object.entries(groups).forEach(([groupName, indices]) => {
         if (indices.length > 1) {
-          // Check if groupName or values represent a decimal correlation coefficient (e.g., "0.12", "0.65", "0.85")
-          const parsedCorrVal = parseFloat(groupName.replace(/,/g, '.'));
-          const isNumericCorr = !isNaN(parsedCorrVal) && parsedCorrVal > 0 && parsedCorrVal <= 1.0;
-
-          if (isNumericCorr) {
-            const thetaCorr = 2 * Math.asin(Math.sqrt(parsedCorrVal));
-            qasmCircuitCode += `// Partial entanglement mapping for numeric correlation (${parsedCorrVal.toFixed(4)}) with q[${indices[0]}] as control:\n`;
-            for (let g = 1; g < indices.length; g++) {
-              qasmCircuitCode += `cry(${thetaCorr.toFixed(5)}) q[${indices[0]}], q[${indices[g]}];\n`;
-              entanglementAdded = true;
-            }
-          } else {
-            // Group label (e.g. "SET_PRIMA", "PORTFOLIO_HEDGE"): apply controlled-RY using dynamic correlation from 4th column
-            qasmCircuitCode += `// Group "${groupName}" with q[${indices[0]}] as common control qubit:\n`;
-            for (let g = 1; g < indices.length; g++) {
-              const targetRecord = cleanRecords[indices[g]];
-              const corrVal = getRecordCorr(targetRecord);
-              const thetaCorr = 2 * Math.asin(Math.sqrt(corrVal));
-              qasmCircuitCode += `cry(${thetaCorr.toFixed(5)}) q[${indices[0]}], q[${indices[g]}]; // Dynamic Correlation = ${corrVal.toFixed(4)}\n`;
-              entanglementAdded = true;
-            }
+          qasmCircuitCode += `// Group "${groupName}" with q[${indices[0]}] as common control qubit:\n`;
+          for (let g = 1; g < indices.length; g++) {
+            const targetRecord = cleanRecords[indices[g]];
+            const { corrVal, thetaCorr } = getRecordCorrAngle(targetRecord);
+            qasmCircuitCode += `cry(${thetaCorr.toFixed(5)}) q[${indices[0]}], q[${indices[g]}]; // Dynamic Correlation = ${corrVal.toFixed(4)}\n`;
+            entanglementAdded = true;
           }
         } else if (indices.length === 1) {
           const idx = indices[0];
           const rec = cleanRecords[idx];
-          const corrVal = getRecordCorr(rec);
-          const thetaCorr = 2 * Math.asin(Math.sqrt(corrVal));
+          const { corrVal, thetaCorr } = getRecordCorrAngle(rec);
           qasmCircuitCode += `// Independent node ${rec.article} (Dynamic Correlation = ${corrVal.toFixed(4)}):\n`;
           qasmCircuitCode += `rz(${thetaCorr.toFixed(5)}) q[${idx}];\n`;
           entanglementAdded = true;
@@ -2553,21 +3012,6 @@ Without entanglement, qubits process data autonomously without leveraging collec
       qasmCircuitCode += `// Ancilla comparator qubit q[${N}] initialized independently to reference threshold amplitude:\n`;
       qasmCircuitCode += `ry(${totalThresholdAngle.toFixed(5)}) q[${N}];\n`;
       qasmCircuitCode += `// Data qubits maintain exact isolated probability amplitudes derived from CSV with zero crosstalk.\n\n`;
-    } else if (isOptionB) {
-      qasmCircuitCode += `// === PHASE 3: PARAMETRIC THRESHOLD ROTATIONS (ISOLATED RY/RZ - NO ENTANGLEMENT) ===\n`;
-      qasmCircuitCode += `// Critical threshold set: ${threshold * 100}% (${threshold})\n`;
-      const thresholdClipped = Math.max(0, Math.min(threshold, 1.0));
-      const totalThresholdAngle = 2 * Math.asin(Math.sqrt(thresholdClipped));
-      const distributedAngle = totalThresholdAngle / N;
-
-      qasmCircuitCode += `// Isolated single-qubit threshold angles applied without two-qubit controlled gates (${distributedAngle.toFixed(5)} rad per qubit)\n`;
-      for (let u = 0; u < N; u++) {
-        qasmCircuitCode += `rz(${distributedAngle.toFixed(5)}) q[${u}];\n`;
-        qasmCircuitCode += `ry(${distributedAngle.toFixed(5)}) q[${u}];\n`;
-      }
-      qasmCircuitCode += `// Independent comparator reference rotation on ancilla qubit q[${N}]\n`;
-      qasmCircuitCode += `ry(${totalThresholdAngle.toFixed(5)}) q[${N}];\n`;
-      qasmCircuitCode += `\n`;
     } else {
       qasmCircuitCode += `// === PHASE 3: DISTRIBUTED COMPARATOR LOGIC (CRY) ===\n`;
       qasmCircuitCode += `// Critical threshold set: ${threshold * 100}% (${threshold})\n`;
@@ -2596,7 +3040,7 @@ Without entanglement, qubits process data autonomously without leveraging collec
     const mappedColumnsText = isOptionC
       ? '  * Pure amplitude/probability single-qubit mapping (Zero CNOT / CX gates, exact CSV Saturation_Percentage fidelity)'
       : isOptionB
-        ? '  * Pure geometric single-qubit mapping (Zero CNOT / CX gates across all qubits)'
+        ? '  * Pure geometric single-qubit mapping (Zero CNOT / CX gates, isolated RZ phase rotations)'
         : selectedEntanglementCols.length > 0 
           ? selectedEntanglementCols.map((col, cIdx) => `  * Column \`${col}\` ➔ Mapped to Qubit \`q[${cIdx}]\``).join('\n')
           : '  * No columns selected (Isolated classical processing)';
@@ -2604,8 +3048,8 @@ Without entanglement, qubits process data autonomously without leveraging collec
     addMessage('system', `⚙️ **BACKGROUND LOGIC AUTOMATION (QUANTUM PRE-PROCESSING):**
 The application is automatically setting up quantum circuit preparation according to instructions:
 - **Automatic Transcription:** Transcribing raw data into bit sequences and mapping individual records directly to input qubits.
-- **Probabilistic / Geometric Feature Mapping:** ${isOptionC ? 'Converting user CSV Saturation_Percentage values directly into isolated probability amplitudes via single-qubit RY gates without consecutive 3D rotations.' : 'Converting numerical values into high-coherence percentages and 3D quantum rotation angles (RY, RZ, RX) on the Bloch Sphere.'}
-- **Entanglement Gate Configuration:** ${isOptionC ? '**Disabled (0 CNOT / CX gates).** Pure isolated single-qubit amplitude encoding without multi-qubit entanglement or Option B tri-rotations.' : isOptionB ? '**Disabled (0 CNOT / CX gates).** Strictly isolated single-qubit parametric rotations (RY, RZ, RX) applied on independent qubits without multi-qubit entanglement.' : `Computing and applying targeted quantum CNOT entanglement gates across qubits corresponding to selected columns: **${selectedEntanglementCols.join(', ') || 'None'}**.`}
+- **Probabilistic / Geometric Feature Mapping:** ${isOptionC ? 'Converting user CSV values directly into isolated probability amplitudes via single-qubit RY gates.' : isOptionB ? 'Converting user CSV values into initialization RY gates and isolated local phase RZ gates.' : 'Converting numerical values into initialization RY angles and dynamic correlation CRY/RZ gates.'}
+- **Entanglement Gate Configuration:** ${isOptionC ? '**Disabled (0 CNOT / CX gates).** Pure isolated single-qubit amplitude encoding without multi-qubit entanglement.' : isOptionB ? '**Disabled (0 CNOT / CX gates).** Strictly isolated single-qubit rotations (RY, RZ) applied on independent qubits without multi-qubit entanglement.' : `Computing and applying targeted quantum entanglement gates across qubits corresponding to selected columns: **${selectedEntanglementCols.join(', ') || 'None'}**.`}
 
 🔌 **PASSING DIRECTIVES TO THE QUANTUM ENGINE:**
 Structural mapping completed on the quantum register:
@@ -2621,13 +3065,13 @@ These instructions have been sent to the quantum execution engine to process the
 
 ### 1. Strategic Analysis (Managerial)
 Applying **Option C: Pure Amplitude/Probability Mapping without Entanglement (Mappatura Ampiezza/Probabilità Pura Senza Entanglement)** on your business scenario (**${details.name}**).
-All financial cash flows, default risks, and saturation metrics read from your CSV dataset are converted into isolated probability amplitudes exclusively via single-qubit \`ry\` gates ($\\theta = 2\\arcsin(\\sqrt{P})$).
-- **Exact Numeric Fidelity:** All values (${cleanRecords.map(r => `\`${r.article}\`: ${r.saturation}`).join(', ')}) are faithfully preserved directly from your CSV input without distortion, unrequested extrapolation, or synthetic overwrites.
-- **Zero Entanglement & Zero Tri-Rotations:** Rigorously excludes all multi-qubit entanglement gates (\`cx\` or CNOT) and bypasses the consecutive 3D spatial rotations of Option B.
-- **Operational Advantage:** Delivers direct, noise-free stochastic cash flow projections, default probability distributions, and liquidity variance forecasts on NISQ hardware with maximum statistical transparency.
+All saturation metrics read from your CSV dataset are converted into isolated probability amplitudes exclusively via single-qubit \`ry\` gates ($\\theta = 2\\arcsin(\\sqrt{P})$).
+- **Exact Numeric Fidelity:** All values (${cleanRecords.map(r => `\`${r.article}\`: ${r.saturation}`).join(', ')}) are faithfully preserved directly from your CSV input without distortion or synthetic overwrites.
+- **Zero Entanglement:** Rigorously excludes all multi-qubit entanglement gates (\`cx\` or CNOT) and leaves Phase 2 empty.
+- **Operational Advantage:** Delivers direct, noise-free stochastic projections and default probability distributions on NISQ hardware with maximum statistical transparency.
 
 ### 2. OpenQASM 2.0 Quantum Code
-All cash flow saturation parameters have been translated into isolated probability amplitudes in OpenQASM 2.0 (Zero CNOT / CX gates, No Option B tri-rotations):
+All cash flow saturation parameters have been translated into isolated probability amplitudes in OpenQASM 2.0 (Zero CNOT / CX gates):
 
 [START_COMPOSER]
 ${qasmCircuitCode}
@@ -2642,12 +3086,11 @@ To run real-time simulation and transmit the circuit to the physical quantum har
 
 ### 1. Strategic Analysis (Managerial)
 Applying **Option B: Pure Geometric Mapping without Entanglement (Mappatura Geometrica Pura Senza Entanglement)** on your business scenario (**${details.name}**).
-All encoding and quantum transformations are conducted exclusively through isolated parametric rotations (\`ry\`, \`rz\`, \`rx\`) applied to independent single qubits, without any controlled entanglement gates (\`cx\` or CNOT).
-Each business variable is projected onto an exact spatial coordinate and rotational trajectory on the Bloch Sphere.
-- **Operational Advantage:** Completely eliminates two-qubit gate decoherence and crosstalk errors on NISQ quantum hardware, maximizing single-qubit gate fidelity and providing ultra-fast, robust geometric trajectory optimization, time-to-maturity tracking, and spatial layout resolution.
+All encoding and quantum transformations are conducted through initialization rotations (\`ry\`) and isolated local phase rotations (\`rz\`) applied to independent single qubits, without any controlled entanglement gates (\`cx\` or CNOT) in Phase 2.
+- **Operational Advantage:** Completely eliminates two-qubit gate decoherence and crosstalk errors on NISQ quantum hardware, maximizing single-qubit gate fidelity and providing robust geometric trajectory tracking.
 
 ### 2. OpenQASM 2.0 Quantum Code
-All constraints and dimensional features have been translated into isolated parametric rotations (RY, RZ, RX) in OpenQASM 2.0 with pure geometric mapping (Zero CNOT / CX gates):
+All parameters have been translated into isolated parametric rotations (RY, RZ) in OpenQASM 2.0 with pure geometric mapping (Zero CNOT / CX gates in Phase 2):
 
 [START_COMPOSER]
 ${qasmCircuitCode}
@@ -2718,13 +3161,18 @@ To run real-time simulation and transmit the circuit to the physical quantum har
       {
         id: 'new-session',
         sender: 'system',
-        text: `${t('agents_welcome_text') || 'Welcome to the enterprise quantum compilation and entanglement system. To narrow down the scope and formulate specific questions, select your main macro-area of interest:'}
-📊 ${t('agents_sec_finance') || '1. Finance & Markets'}
-🚚 ${t('agents_sec_logistics') || '2. Logistics & Smart Cities'}
-🔬 ${t('agents_sec_chemistry') || '3. Chemistry & Green Tech'}
-🏭 ${t('agents_sec_factory') || '4. Maintenance, Manufacturing & Apparel'}
-🧬 ${t('agents_sec_healthcare') || '5. Healthcare & Genomics'}
-🛡️ ${t('agents_sec_cybersec') || '6. Cybersecurity'}`,
+        text: `👋 **Nuova Sessione Inizializzata (V9 Core)**
+
+Acquisizione guidata e conversazionale dei dati aziendali per la generazione OpenQASM 2.0 verso IBM Quantum.
+
+👉 **FASE 0 - Seleziona la tua Macro-Area di riferimento (1-6 o clicca sotto):**
+
+1. 📊 **Finanza e Mercati**
+2. 🚚 **Logistica e Smart Cities**
+3. 🔬 **Chimica e Green Tech**
+4. 🏭 **Manutenzione, Manifatturiero e Abbigliamento**
+5. 🧬 **Sanità e Genomica**
+6. 🛡️ **Cybersecurity**`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -3033,24 +3481,32 @@ To run real-time simulation and transmit the circuit to the physical quantum har
               </div>
             )}
 
-            {step === 2 && interviewSubstep === 1 && (() => {
-              const details = getScenarioDetails(selectedSectorLong, scenarioSelection || 'A');
-              const opts = details.optionsQ1 || [];
+            {step === 3 && interviewSubstep === 1 && (() => {
+              const currentSector = selectedSector || 'Finanza';
+              const currentOpt = scenarioSelection || 'A';
+              const scenarioInfo = getV9ScenarioInterviewInfo(currentSector, currentOpt);
+              const sampleOpts = scenarioInfo.sampleElements.split(',').map(s => s.trim());
               return (
                 <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
                   <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
-                    {isIt ? '🎯 RISPOSTE PROPOSTE PER LA CALIBRAZIONE (DOMANDA 1/2):' : '🎯 PROPOSED CALIBRATION ANSWERS (QUESTION 1/2):'}
+                    💡 ELEMENTI SUGGERITI PER QUESTO SCENARIO (DOMANDA 1):
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1 w-full">
-                    {opts.map((opt, oIdx) => (
+                  <div className="flex flex-wrap gap-2 mt-1 w-full">
+                    <button
+                      onClick={() => setInputText(scenarioInfo.sampleElements)}
+                      className="px-3 py-2 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-quantum-primary uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-left rounded-lg"
+                    >
+                      Inserisci tutti: <span className="text-white font-normal">{scenarioInfo.sampleElements}</span>
+                    </button>
+                    {sampleOpts.map((opt, oIdx) => (
                       <button
                         key={oIdx}
                         onClick={() => {
-                          setInputText(opt);
+                          setInputText(prev => prev ? `${prev}, ${opt}` : opt);
                         }}
-                        className="px-3 py-2 bg-[#070b14] border border-quantum-primary/25 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
+                        className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-white transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
                       >
-                        {opt}
+                        + {opt}
                       </button>
                     ))}
                   </div>
@@ -3058,30 +3514,87 @@ To run real-time simulation and transmit the circuit to the physical quantum har
               );
             })()}
 
-            {step === 2 && interviewSubstep === 2 && (() => {
-              const details = getScenarioDetails(selectedSectorLong, scenarioSelection || 'A');
-              const opts = details.optionsQ2 || [];
+            {step === 3 && interviewSubstep === 2 && (() => {
+              const currentSector = selectedSector || 'Finanza';
+              const currentOpt = scenarioSelection || 'A';
+              const scenarioInfo = getV9ScenarioInterviewInfo(currentSector, currentOpt);
               return (
                 <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
                   <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
-                    {isIt ? '🎯 RISPOSTE PROPOSTE PER LA CALIBRAZIONE (DOMANDA 2/2):' : '🎯 PROPOSED CALIBRATION ANSWERS (QUESTION 2/2):'}
+                    💡 VALORI SUGGERITI (DOMANDA 2):
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1 w-full">
-                    {opts.map((opt, oIdx) => (
-                      <button
-                        key={oIdx}
-                        onClick={() => {
-                          setInputText(opt);
-                        }}
-                        className="px-3 py-2 bg-[#070b14] border border-quantum-primary/25 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
-                      >
-                        {opt}
-                      </button>
-                    ))}
+                  <div className="flex flex-wrap gap-2 mt-1 w-full">
+                    <button
+                      onClick={() => setInputText(scenarioInfo.sampleSaturation)}
+                      className="px-3 py-2 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white transition-all hover:bg-quantum-primary/10 cursor-pointer rounded-lg"
+                    >
+                      Applica esempio: <span className="text-quantum-primary font-mono">{scenarioInfo.sampleSaturation}</span>
+                    </button>
+                    <button
+                      onClick={() => setInputText('30%, 45%, 60%')}
+                      className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-gray-300 transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
+                    >
+                      30%, 45%, 60%
+                    </button>
+                    <button
+                      onClick={() => setInputText('25%, 50%, 75%')}
+                      className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-gray-300 transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
+                    >
+                      25%, 50%, 75%
+                    </button>
                   </div>
                 </div>
               );
             })()}
+
+            {step === 3 && interviewSubstep === 3 && (() => {
+              const currentSector = selectedSector || 'Finanza';
+              const currentOpt = scenarioSelection || 'A';
+              const scenarioInfo = getV9ScenarioInterviewInfo(currentSector, currentOpt);
+              return (
+                <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
+                  <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
+                    💡 CONFIGURAZIONE SUGGERITA FASE 2 (DOMANDA 3):
+                  </span>
+                  <div className="flex flex-wrap gap-2 mt-1 w-full">
+                    <button
+                      onClick={() => setInputText(scenarioInfo.sampleCorrelation)}
+                      className="px-3 py-2 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white transition-all hover:bg-quantum-primary/10 cursor-pointer rounded-lg"
+                    >
+                      Applica esempio: <span className="text-quantum-primary font-mono">{scenarioInfo.sampleCorrelation}</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {step === 3 && interviewSubstep === 4 && (
+              <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
+                <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
+                  💡 SOGLIA ANCILLA SUGGERITA (DOMANDA 4):
+                </span>
+                <div className="flex flex-wrap gap-2 mt-1 w-full">
+                  <button
+                    onClick={() => setInputText('4%')}
+                    className="px-3 py-1.5 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-quantum-primary transition-all hover:bg-quantum-primary/10 cursor-pointer rounded-lg"
+                  >
+                    4% (Standard Benchmark)
+                  </button>
+                  <button
+                    onClick={() => setInputText('5%')}
+                    className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-white transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
+                  >
+                    5%
+                  </button>
+                  <button
+                    onClick={() => setInputText('10%')}
+                    className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-white transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
+                  >
+                    10%
+                  </button>
+                </div>
+              </div>
+            )}
 
             {step === 3 && (
               <div className="flex items-center justify-end gap-2 w-full px-2 py-1">
