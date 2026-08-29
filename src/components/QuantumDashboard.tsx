@@ -321,7 +321,7 @@ export default function QuantumDashboard({ sector, onBack, onSectorChange, onOpe
     return () => clearInterval(interval);
   }, [activeJobId, jobStatus]);
 
-  const MAX_TOTAL_QUBITS = 20;
+  const MAX_TOTAL_QUBITS = 30;
   const parseAssets = (input: string) => {
     // Delimiters: comma, ampersand, ' e ', ' and ', or multiple spaces
     return input
