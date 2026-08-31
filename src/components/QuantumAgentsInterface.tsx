@@ -32,11 +32,26 @@ import {
   Share2,
   Maximize2,
   Zap,
-  Activity
+  Activity,
+  Edit3
 } from 'lucide-react';
 import { QUANTUM_SCENARIOS, QuantumScenario } from '../data/scenarios';
 import axios from 'axios';
 import { useTranslation } from '../lib/TranslationContext';
+
+export interface IndustrialScenarioInfo {
+  id: number;
+  macroarea: string;
+  scenarioName: string;
+  focus: string;
+  focusKey: 'A' | 'B' | 'C';
+  carAnalogy: string;
+  metricColName: string;
+  defaultElements: string[];
+  defaultUnit: string;
+  sampleElements: string;
+  sampleSaturation: string;
+}
 
 interface Props {
   onBack?: () => void;
@@ -64,6 +79,7 @@ export default function QuantumAgentsInterface({ onBack, onSendToIbm }: Props) {
   const [scenarioSelection, setScenarioSelection] = useState<'A' | 'B' | 'C' | null>(null);
   const [interviewSubstep, setInterviewSubstep] = useState<number>(0);
   const [calibrationAnswers, setCalibrationAnswers] = useState<string[]>([]);
+  const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
 
   // Scenario explorer state
   const [selectedScenario, setSelectedScenario] = useState<QuantumScenario | null>(null);
@@ -535,6 +551,7 @@ for state, freq in sorted(counts.items(), key=lambda x: x[1], reverse=True):
   };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatFeedRef = useRef<HTMLDivElement>(null);
 
   // Custom visual compiler formatter to justify text and render beautiful tables out of plain text
   const renderWithInlineFormats = (text: string) => {
@@ -1526,9 +1543,30 @@ L'acquisizione dei dati aziendali avverrà in modo guidato direttamente qui in c
     ]);
   }, [t]);
 
-  // Auto scroll chat
+  // Auto scroll chat: when a new message or question arrives, align the top of that message
+  // at the top of the chat window so it is immediately readable from line 1 without mouse scrolling.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+
+    const timer = setTimeout(() => {
+      if (chatFeedRef.current) {
+        const container = chatFeedRef.current;
+        const targetEl = document.getElementById(`agent-chat-msg-${lastMsg.id}`);
+
+        if (targetEl) {
+          const targetTop = targetEl.offsetTop - container.offsetTop;
+          container.scrollTo({
+            top: Math.max(0, targetTop - 8),
+            behavior: 'smooth'
+          });
+        } else {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }, 60);
+
+    return () => clearTimeout(timer);
   }, [messages]);
 
   const addMessage = (sender: 'system' | 'user', text: string, isComposerCode?: boolean, code?: string) => {
@@ -1793,17 +1831,17 @@ ${csvTemplate}
 
   const handleChoiceOption = (choice: 'A' | 'B' | 'C') => {
     setScenarioSelection(choice);
-    setStep(3);
+    setStep(1);
     setInterviewSubstep(1);
-    const scenarioInfo = getV9ScenarioInterviewInfo(selectedSector || 'Finanza', choice);
+    const scenario = getSectorIndustrialScenario(selectedSector || 'Finanza');
     
     setTimeout(() => {
       addMessage('system', `🎯 **Paradigma Attivato:** **Opzione ${choice}** (*${choice === 'A' ? 'Misto / Entanglement' : choice === 'B' ? 'Solo Angolo / Geometria' : 'Solo Ampiezza / Probabilità'}*)
 
-Iniziamo ora l'acquisizione dei dati aziendali ponendo **una sola domanda alla volta**.
+Iniziamo ora l'acquisizione dei dati aziendali con le 3 domande guidate:
 
-👉 **DOMANDA 1:**
-${scenarioInfo.qElements}`);
+👉 **DOMANDA 1 (Elementi):**
+Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inserisci da **2 a 5 nomi reali** legati al tuo problema (es. \`${scenario.sampleElements}\`).`);
     }, 300);
   };
 
@@ -1816,71 +1854,101 @@ ${scenarioInfo.qElements}`);
                        scenario.macroarea.includes('Logistica') || scenario.macroarea.includes('Logistics') ? 'Logistica' :
                        scenario.macroarea.includes('Chimica') || scenario.macroarea.includes('Chemistry') ? 'Chimica' :
                        scenario.macroarea.includes('Sanit') || scenario.macroarea.includes('Healthcare') ? 'Sanita' :
-                       scenario.macroarea.includes('Cyber') ? 'Cybersecurity' : 'Manifatturiero';
+                       scenario.macroarea.includes('Cyber') || scenario.macroarea.includes('Sicurezza') ? 'Cybersecurity' : 'Manifatturiero';
     
-    let opt: 'A' | 'B' | 'C' = 'A';
-    if (scenario.logicType?.includes('Geometria') || scenario.name.includes('Geometrico') || scenario.name.includes('Americane') || scenario.name.includes('Carpent') || scenario.name.includes('Saldatura') || scenario.name.includes('Folding')) {
-      opt = 'B';
-    } else if (scenario.logicType?.includes('Probobilità') || scenario.logicType?.includes('Probabilità') || scenario.name.includes('Stima') || scenario.name.includes('Flussi') || scenario.name.includes('Spot') || scenario.name.includes('Prezzi') || scenario.name.includes('Riammissione') || scenario.name.includes('PQC')) {
-      opt = 'C';
-    }
-
+    const industrialScenario = getSectorIndustrialScenario(sectorName);
     setSelectedSector(sectorName);
-    const fullArea = scenario.macroarea;
-    setSelectedSectorLong(fullArea);
-    setScenarioSelection(opt);
+    setSelectedSectorLong(scenario.macroarea);
     
-    setStep(3);
+    const focusKey: 'A' | 'B' | 'C' = scenario.focus === 'Angolo' ? 'B' : scenario.focus === 'Ampiezza' ? 'C' : 'A';
+    setScenarioSelection(focusKey);
+    setStep(1);
     setInterviewSubstep(1);
+    setV9Elements([]);
+    setV9Saturations([]);
+    setV9CustomSaturations(null);
+    setV9Correlations([]);
     setCalibrationAnswers([]);
 
-    const scenarioInfo = getV9ScenarioInterviewInfo(sectorName, opt);
-    addMessage('user', `Selezionato target: ${scenario.name}`);
+    const isQPU = scenario.technology.includes('QPU');
+    setRightPanelTab(isQPU ? 'composer' : 'composer');
+
+    addMessage('user', `🎯 Selezionato scenario: **${scenario.name}** [${scenario.technology}]`);
     setTimeout(() => {
-      addMessage('system', `🎯 **Scenario Specifico Attivato:** **${scenario.name}**
-*Macro-Area:* ${fullArea} | *Paradigma:* **Opzione ${opt}** (${opt === 'A' ? 'Misto / Entanglement' : opt === 'B' ? 'Solo Angolo / Geometria' : 'Solo Ampiezza / Probabilità'})
+      if (isQPU) {
+        addMessage('system', `🔬 **SCENARIO QUANTISTICO ATTIVATO: ${scenario.name}**
+*Macro-Area:* **${scenario.macroarea}** | *Tecnologia:* **${scenario.technology}**
+*Logica Algoritmica:* **${scenario.logicType}**
+*Variabili Target:* \`${scenario.targetVariables}\`
 
-Iniziamo l'acquisizione conversazionale dei dati per questo scenario:
+🔬 **MANIFESTO SCIENTIFICO:**
+Nel calcolo quantistico i tre fenomeni fisici (Entanglement, Ampiezza, Angolazione) esistono sempre simultaneamente nello spazio di Hilbert. Il circuito viene configurato con **Focus ${scenario.focus || 'Entanglement'}**.
 
-👉 **DOMANDA 1:**
-${scenarioInfo.qElements}`);
+🚗 **ANALOGIA DELL'AUTOMOBILE DA CORSA:**
+${scenario.focus === 'Ampiezza' 
+  ? '🏎️ **Rettilineo ad Alta Velocità (Ampiezza):** Massima precisione probabilistica per amplificare lo stato target.' 
+  : scenario.focus === 'Angolo' 
+  ? '📐 **Curve a Gomito Strette (Angolo 3D):** Mappatura geometrica precisa e rotazioni di fase su sfera di Bloch.' 
+  : '🌧️ **Asfalto Bagnato (Entanglement):** Correlazione e sincronizzazione non-locale tra tutte le variabili simultaneamente.'}
+
+---
+
+Iniziamo l'acquisizione guidata dei parametri:
+
+👉 **DOMANDA 1 (Elementi):**
+Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inserisci da **2 a 5 nomi reali** legati a questo scenario (es. \`${industrialScenario.sampleElements}\`).`);
+      } else {
+        addMessage('system', `💻 **SCENARIO CLASSICO / HPC ATTIVATO: ${scenario.name}**
+*Macro-Area:* **${scenario.macroarea}** | *Tecnologia:* **${scenario.technology}**
+*Architettura:* **${scenario.logicType}**
+*Variabili Target:* \`${scenario.targetVariables}\`
+
+💡 Questo scenario è ottimizzato per l'elaborazione su **Server Classici / Cluster HPC / GPU Acceleration**.
+
+---
+
+Iniziamo l'acquisizione dei dati per l'elaborazione:
+
+👉 **DOMANDA 1 (Elementi / Feature):**
+Quali e quanti elementi o sorgenti dati dobbiamo analizzare? Inserisci da **2 a 5 identificatori** (es. \`${industrialScenario.sampleElements}\`).`);
+      }
     }, 350);
   };
 
   const handleSelectSector = (sectorName: string) => {
-    let fullArea = "Finance & Markets";
-    if (sectorName === 'Logistica') fullArea = "Logistics & Smart Cities";
-    if (sectorName === 'Chimica') fullArea = "Chemistry & Green Tech";
-    if (sectorName === 'Manifatturiero') fullArea = "Maintenance, Manufacturing & Apparel";
-    if (sectorName === 'Sanita') fullArea = "Healthcare & Genomics";
-    if (sectorName === 'Cybersecurity') fullArea = "Cybersecurity";
-
+    const scenario = getSectorIndustrialScenario(sectorName);
     setSelectedSector(sectorName);
-    setSelectedSectorLong(fullArea);
-    setStep(2);
-    setInterviewSubstep(0);
+    setSelectedSectorLong(scenario.macroarea);
+    setScenarioSelection(scenario.focusKey);
+    setStep(1);
+    setInterviewSubstep(1);
+    setV9Elements([]);
+    setV9Saturations([]);
+    setV9CustomSaturations(null);
+    setV9Correlations([]);
     setCalibrationAnswers([]);
 
-    const detA = getV9ScenarioInterviewInfo(sectorName, 'A');
-    const detB = getV9ScenarioInterviewInfo(sectorName, 'B');
-    const detC = getV9ScenarioInterviewInfo(sectorName, 'C');
-
-    addMessage('user', `Selezionata Macro-Area: ${fullArea}`);
+    addMessage('user', `Selezionata Macro-Area: ${scenario.macroarea} (${sectorName})`);
     setTimeout(() => {
-      addMessage('system', `🎯 **Macro-Area Selezionata: ${fullArea}**
+      addMessage('system', `🔬 **MANIFESTO SCIENTIFICO:**
+Nel calcolo quantistico i tre fenomeni fisici (Entanglement, Ampiezza, Angolazione) esistono sempre simultaneamente nello spazio di Hilbert. La scelta del focus algoritmico serve solo a decidere quale architettura di porte logiche e quale funzione obiettivo (lo "spartito") deve avere il circuito per risolvere il problema aziendale.
 
-Scegli ora il **Paradigma di Calcolo Quantistico** che desideri applicare per la tua azienda:
+🚗 **L'ANALOGIA DELL'AUTOMOBILE DA CORSA:**
+In un'automobile da corsa, motore, sterzo e freni funzionano sempre insieme. Tuttavia:
+- Se affronti un rettilineo, imposti la mappatura sulla potenza (**Ampiezza**).
+- Se devi percorrere curve a gomito strette, ottimizzi l'assetto e l'angolo di sterzata (**Angolo 3D**).
+- Se guidi su asfalto bagnato, ottimizzi il controllo di trazione congiunto tra le 4 ruote (**Entanglement**).
 
-🅰️ **Opzione A [Misto / Entanglement]**:
-Correlazione multi-variabile ad accoppiamento forte tramite porte a 2 qubit (\`cry\` / \`cx\`). Ideale per valutare interdipendenze sistemiche e decisioni cross-asset. (*Es: ${detA.title}*)
+🎯 **SCENARIO ASSEGNATO:** **${scenario.scenarioName}**
+*Focus Algoritmico:* **${scenario.focus}**
+👉 *${scenario.carAnalogy}*
 
-🅱️ **Opzione B [Solo Angolo / Geometria]**:
-Mappatura spaziale 3D sulla sfera di Bloch tramite rotazioni isolate (\`rz\`, \`rx\`) a zero porte CNOT. Perfetto per traiettorie geometriche, cinematica e vincoli temporali. (*Es: ${detB.title}*)
+---
 
-🆃 **Opzione C [Solo Ampiezza / Probabilità]**:
-Mappatura probabilistica pura a singolo qubit (\`ry\`) a zero CNOT. Ideale per stime di rischio default, probabilità di failure e turnover liquidità. (*Es: ${detC.title}*)
+Iniziamo ora la calibrazione pratica con le 3 domande:
 
-👉 *Rispondi digitando **A**, **B** oppure **C** (o clicca uno dei pulsanti rapidi sotto la chat).*`);
+👉 **DOMANDA 1 (Input/Variabili):**
+Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inserisci da **2 a 5 nomi reali** legati al tuo problema (es. se titoli finanziari: \`ENEL, INTESA\`; se nodi logistici: \`MILANO, BOLOGNA\`; se macchine di fabbrica: \`PRESSA_01, CNC_MILLING\`).`);
     }, 350);
   };
 
@@ -1986,8 +2054,11 @@ Mappatura probabilistica pura a singolo qubit (\`ry\`) a zero CNOT. Ideale per s
   // V9 Conversational Interview Data State
   const [v9Elements, setV9Elements] = useState<string[]>([]);
   const [v9Saturations, setV9Saturations] = useState<number[]>([]);
+  const [v9CustomSaturations, setV9CustomSaturations] = useState<number[] | null>(null);
   const [v9Correlations, setV9Correlations] = useState<string[]>([]);
   const [v9AnglesPhase2, setV9AnglesPhase2] = useState<number[]>([]);
+  const [v9Prudence, setV9Prudence] = useState<string>('Bilanciato');
+  const [v9GeneratedCsv, setV9GeneratedCsv] = useState<string>('');
 
   // Sound chime notification
   const playChimeAlert = () => {
@@ -2011,257 +2082,93 @@ Mappatura probabilistica pura a singolo qubit (\`ry\`) a zero CNOT. Ideale per s
     }
   };
 
-  // Helper to obtain scenario-specific interview questions for all 18 combinations (6 macro-areas x 3 options)
-  const getV9ScenarioInterviewInfo = (sector: string, opt: 'A' | 'B' | 'C') => {
+  // Helper to obtain the single industrial scenario for each category
+  const getSectorIndustrialScenario = (sector: string): IndustrialScenarioInfo => {
     const s = sector.toLowerCase();
-    
-    if (s.includes('finan') || s.includes('invest') || s.includes('money')) {
-      if (opt === 'A') {
-        return {
-          title: "Finanza & Mercati - Portafoglio Correlato (Misto / Entanglement)",
-          qElements: "Quali e quanti asset o titoli finanziari desideri analizzare contemporaneamente nel tuo portafoglio correlato? (Elenca da 1 a massimo 30 elementi/qubit separati da virgola, es. `AZ_ENEL, AZ_INTESA, BOND_BTP`):",
-          sampleElements: "AZ_ENEL, AZ_INTESA, BOND_BTP",
-          qSaturation: "Indica il livello di rischio o volatilità percentuale stimato per ciascun asset inserito (es. `35%, 45%, 78%` o decimali `0.35, 0.45, 0.78`):",
-          sampleSaturation: "35%, 45%, 78%",
-          qCorrelation: "Indica l'abbinamento di correlazione per la diversificazione quantistica (es. per titoli accoppiati scrivi `SET_HEDGE` e `INDEPENDENT` per gli altri isolati, es. `SET_HEDGE, SET_HEDGE, INDEPENDENT`):",
-          sampleCorrelation: "SET_HEDGE, SET_HEDGE, INDEPENDENT",
-          qThreshold: "Qual è la soglia percentuale critica di rischio/perdita per l'attivazione del comparatore quantistico ancilla? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.70748, 1.87549, 1.47063]
-        };
-      } else if (opt === 'B') {
-        return {
-          title: "Finanza & Mercati - Pricing Derivati & Struttura a Termine (Solo Angolo / Geometria)",
-          qElements: "Quali contratti opzioni, derivati o strike desideri posizionare nello spazio angolare 3D di Bloch? (Elenca da 1 a massimo 30 elementi/qubit separati da virgola, es. `CALL_ENEL_40, PUT_INTESA_2, OPTION_BTP_100`):",
-          sampleElements: "CALL_ENEL_40, PUT_INTESA_2, OPTION_BTP_100",
-          qSaturation: "Indica la volatilità implicita percentuale per ciascun contratto (es. `25%, 38%, 50%` o `0.25, 0.38, 0.50`):",
-          sampleSaturation: "25%, 38%, 50%",
-          qCorrelation: "Indica il tasso di rotazione angolare o maturity in radianti (es. `0.785, 1.570, 0.523`):",
-          sampleCorrelation: "0.785, 1.570, 0.523",
-          qThreshold: "Qual è la soglia di rendimento o strike target per il comparatore ancilla? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.78539, 1.57079, 0.52359]
-        };
-      } else {
-        return {
-          title: "Finanza & Mercati - Rischio Liquidità & Flussi di Cassa (Solo Ampiezza / Probabilità)",
-          qElements: "Quali linee di credito, crediti verso clienti o flussi di cassa intendi monitorare per il rischio di insoluto/liquidità? (Elenca da 1 a massimo 30 elementi/qubit, es. `CLIENTE_ALPHA, CLIENTE_BETA, CREDITO_EXPORT`):",
-          sampleElements: "CLIENTE_ALPHA, CLIENTE_BETA, CREDITO_EXPORT",
-          qSaturation: "Indica la probabilità percentuale stimata di insoluto o mancato incasso per ciascun elemento (es. `15%, 30%, 85%` o `0.15, 0.30, 0.85`):",
-          sampleSaturation: "15%, 30%, 85%",
-          qCorrelation: "",
-          sampleCorrelation: "",
-          qThreshold: "Qual è la soglia minima di sicurezza per la riserva di liquidità aziendale da assegnare all'ancilla? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: []
-        };
-      }
-    } else if (s.includes('logist') || s.includes('ship') || s.includes('transp') || s.includes('truck')) {
-      if (opt === 'A') {
-        return {
-          title: "Logistica & Smart Cities - Flotta e Nodi Distribuiti (Misto / Entanglement)",
-          qElements: "Quali tratte, veicoli della flotta o cargo container desideri ottimizzare in sincrono? (Elenca da 1 a massimo 30 elementi/qubit, es. `TRUCK_NORD, TRUCK_SUD, CONTAINER_WEST`):",
-          sampleElements: "TRUCK_NORD, TRUCK_SUD, CONTAINER_WEST",
-          qSaturation: "Indica la percentuale di saturazione di carico o probabilità di ritardo per ciascun veicolo/tratta (es. `28%, 45%, 78%`):",
-          sampleSaturation: "28%, 45%, 78%",
-          qCorrelation: "Indica le rotte congiunte da correlare in entanglement (es. `ROUTE_A, ROUTE_A, INDEPENDENT`):",
-          sampleCorrelation: "ROUTE_A, ROUTE_A, INDEPENDENT",
-          qThreshold: "Qual è la soglia percentuale di ritardo critico da impostare sull'ancilla? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.70748, 1.87549, 1.47063]
-        };
-      } else if (opt === 'B') {
-        return {
-          title: "Logistica & Smart Cities - Baricentro & Stivaggio 3D (Solo Angolo / Geometria)",
-          qElements: "Quali vani o stive navali intendi bilanciare tridimensionalmente per il baricentro? (Elenca da 1 a massimo 30 elementi/qubit, es. `STIVA_PRUA, STIVA_POPPA, VANO_CENTRALE`):",
-          sampleElements: "STIVA_PRUA, STIVA_POPPA, VANO_CENTRALE",
-          qSaturation: "Indica la percentuale di saturazione di peso/volume per ciascun vano (es. `40%, 65%, 80%`):",
-          sampleSaturation: "40%, 65%, 80%",
-          qCorrelation: "Indica l'offset baricentro o angolo di sfasamento di carico in radianti (es. `0.523, 1.047, 0.785`):",
-          sampleCorrelation: "0.523, 1.047, 0.785",
-          qThreshold: "Qual è la soglia massima di tolleranza per lo sbilanciamento del baricentro? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.52359, 1.04719, 0.78539]
-        };
-      } else {
-        return {
-          title: "Logistica & Smart Cities - Noli Spot & Spedizioni (Solo Ampiezza / Probabilità)",
-          qElements: "Quali canali di trasporto marittimo o spedizioni spot desideri includere nell'analisi d'ampiezza? (Elenca da 1 a massimo 30 elementi/qubit, es. `SPEDIZIONE_ASIA, ROTTA_MEDITERRANEO, AIR_EXPRESS`):",
-          sampleElements: "SPEDIZIONE_ASIA, ROTTA_MEDITERRANEO, AIR_EXPRESS",
-          qSaturation: "Indica la volatilità tariffaria o probabilità di sovrapprezzo per ciascun canale (es. `35%, 60%, 20%`):",
-          sampleSaturation: "35%, 60%, 20%",
-          qCorrelation: "",
-          sampleCorrelation: "",
-          qThreshold: "Qual è il target percentuale di riduzione costi noli da impostare per il comparatore? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: []
-        };
-      }
-    } else if (s.includes('chem') || s.includes('lab') || s.includes('chimic')) {
-      if (opt === 'A') {
-        return {
-          title: "Chimica & Green Tech - Reazioni Catalitiche e Legami (Misto / Entanglement)",
-          qElements: "Quali reattivi, catalizzatori o materiali chimici desideri analizzare nella simulazione di legame? (Elenca da 1 a massimo 30 elementi/qubit, es. `CATALIZZATORE_PT, REATTIVO_N2, POLIMERO_HDPE`):",
-          sampleElements: "CATALIZZATORE_PT, REATTIVO_N2, POLIMERO_HDPE",
-          qSaturation: "Indica il livello di instabilità o saturazione energetica per ciascun componente (es. `25%, 55%, 70%`):",
-          sampleSaturation: "25%, 55%, 70%",
-          qCorrelation: "Indica i canali di reazione catalitica da accoppiare (es. `REACTION_1, REACTION_1, INDEPENDENT`):",
-          sampleCorrelation: "REACTION_1, REACTION_1, INDEPENDENT",
-          qThreshold: "Qual è la soglia critica di dissipazione termica per il comparatore ancilla? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.70748, 1.87549, 1.47063]
-        };
-      } else if (opt === 'B') {
-        return {
-          title: "Chimica & Green Tech - Simulazione Molecolare VQE (Solo Angolo / Geometria)",
-          qElements: "Quali orbitali molecolari o legami conformazionali intendi mappare su angoli VQE? (Elenca da 1 a massimo 30 orbitali/qubit, es. `ORBITALE_HOMO, ORBITALE_LUMO, LEGAME_PI`):",
-          sampleElements: "ORBITALE_HOMO, ORBITALE_LUMO, LEGAME_PI",
-          qSaturation: "Indica la probabilità di eccitazione elettronica per ciascun orbitale (es. `30%, 50%, 15%`):",
-          sampleSaturation: "30%, 50%, 15%",
-          qCorrelation: "Indica l'angolo di rotazione ansatz o rotazione torsionale in radianti (es. `0.785, 1.570, 0.392`):",
-          sampleCorrelation: "0.785, 1.570, 0.392",
-          qThreshold: "Qual è la soglia di convergenza energetica Hartree per l'ancilla? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.78539, 1.57079, 0.39269]
-        };
-      } else {
-        return {
-          title: "Chimica & Green Tech - Gestione Accumulo BESS (Solo Ampiezza / Probabilità)",
-          qElements: "Quali sistemi di accumulo batteria BESS o sezioni di impianto rinnovabile intendi monitorare? (Elenca da 1 a massimo 30 impianti/qubit, es. `BESS_01, SOLAR_PARK_A, WIND_FARM_B`):",
-          sampleElements: "BESS_01, SOLAR_PARK_A, WIND_FARM_B",
-          qSaturation: "Indica lo stato di carica o percentuale di curtailing energetico per ciascuno (es. `80%, 45%, 20%`):",
-          sampleSaturation: "80%, 45%, 20%",
-          qCorrelation: "",
-          sampleCorrelation: "",
-          qThreshold: "Qual è la soglia di sicurezza per il limite di immissione in rete? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: []
-        };
-      }
-    } else if (s.includes('maint') || s.includes('factor') || s.includes('manuf') || s.includes('industr') || s.includes('apparel') || s.includes('cloth')) {
-      if (opt === 'A') {
-        return {
-          title: "Manutenzione & Manifattura - Linee Robotizzate Sincrone (Misto / Entanglement)",
-          qElements: "Quali robot industriali, presse o macchine CNC intendi connettere nell'analisi di linea? (Elenca da 1 a massimo 30 macchinari/qubit, es. `CNC_MILLING, ROBOT_WELDING, PRESSA_IDRAULICA`):",
-          sampleElements: "CNC_MILLING, ROBOT_WELDING, PRESSA_IDRAULICA",
-          qSaturation: "Indica la percentuale di usura o stress operativo stimato per ciascuna macchina (es. `45%, 60%, 85%`):",
-          sampleSaturation: "45%, 60%, 85%",
-          qCorrelation: "Indica le linee di produzione condivise per l'entanglement (es. `LINEA_A, LINEA_A, INDEPENDENT`):",
-          sampleCorrelation: "LINEA_A, LINEA_A, INDEPENDENT",
-          qThreshold: "Qual è la soglia critica per l'allerta di manutenzione predittiva? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.70748, 1.87549, 1.47063]
-        };
-      } else if (opt === 'B') {
-        return {
-          title: "Manutenzione & Manifattura - Giunti Robotici & Saldatura 3D (Solo Angolo / Geometria)",
-          qElements: "Quali giunti, punti di saldatura o assi cinematici 3D del robot intendi mappare? (Elenca da 1 a massimo 30 giunti/qubit, es. `GIUNTO_J1, GIUNTO_J2, SALDATURA_P3`):",
-          sampleElements: "GIUNTO_J1, GIUNTO_J2, SALDATURA_P3",
-          qSaturation: "Indica il carico cinematico o percentuale di sforzo per ciascun giunto (es. `30%, 75%, 40%`):",
-          sampleSaturation: "30%, 75%, 40%",
-          qCorrelation: "Indica il raggio di curvatura o angolo di inclinazione 3D in radianti (es. `0.523, 1.047, 0.280`):",
-          sampleCorrelation: "0.523, 1.047, 0.280",
-          qThreshold: "Qual è la tolleranza massima di deviazione della traiettoria per l'ancilla? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.52359, 1.04719, 0.28000]
-        };
-      } else {
-        return {
-          title: "Manifattura & Abbigliamento - Stock Magazzino & Sconto Dinamico (Solo Ampiezza / Probabilità)",
-          qElements: "Quali categorie o lotti di magazzino/abbigliamento intendi analizzare per il recupero margini e sconto dinamico? (Elenca da 1 a massimo 30 lotti/qubit, es. `MAGLIERIA_CASHMERE, CAPPOTTI_INVERNALI, ACCESSORI_LINEA_A`):",
-          sampleElements: "MAGLIERIA_CASHMERE, CAPPOTTI_INVERNALI, ACCESSORI_LINEA_A",
-          qSaturation: "Indica la percentuale di invenduto stagionale o giacenza per ciascun lotto (es. `65%, 40%, 25%`):",
-          sampleSaturation: "65%, 40%, 25%",
-          qCorrelation: "",
-          sampleCorrelation: "",
-          qThreshold: "Qual è il margine minimo di sicurezza percentuale sotto il quale non applicare sconti? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: []
-        };
-      }
-    } else if (s.includes('health') || s.includes('med') || s.includes('hosp') || s.includes('sanit') || s.includes('genom')) {
-      if (opt === 'A') {
-        return {
-          title: "Sanità & Genomica - Compatibilità Trapianti e Matching HLA (Misto / Entanglement)",
-          qElements: "Quali coppie donatore-ricevente o campioni clinici desideri correlare per l'analisi di compatibilità? (Elenca da 1 a massimo 30 elementi/qubit, es. `DONOR_A, RECIPIENT_A, DONOR_B`):",
-          sampleElements: "DONOR_A, RECIPIENT_A, DONOR_B",
-          qSaturation: "Indica la percentuale di rischio di rigetto immunitario HLA stimato per ciascun elemento (es. `35%, 65%, 20%`):",
-          sampleSaturation: "35%, 65%, 20%",
-          qCorrelation: "Indica l'abbinamento clinico di entanglement (es. `PAIR_01, PAIR_01, INDEPENDENT`):",
-          sampleCorrelation: "PAIR_01, PAIR_01, INDEPENDENT",
-          qThreshold: "Qual è la soglia critica di ischemia fredda per l'attivazione del comparatore? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.70748, 1.87549, 0.70748]
-        };
-      } else if (opt === 'B') {
-        return {
-          title: "Sanità & Genomica - Folding Proteico & Docking 3D (Solo Angolo / Geometria)",
-          qElements: "Quali residui amminoacidici o segmenti proteici intendi modellare geometricamente in 3D? (Elenca da 1 a massimo 30 residui/qubit, es. `RESIDUO_P1, RESIDUO_P2, RESIDUO_P3`):",
-          sampleElements: "RESIDUO_P1, RESIDUO_P2, RESIDUO_P3",
-          qSaturation: "Indica l'energia di legame o instabilità percentuale per ciascun residuo (es. `20%, 55%, 75%`):",
-          sampleSaturation: "20%, 55%, 75%",
-          qCorrelation: "Indica l'angolo diedro torsionale phi/psi o orientamento in radianti (es. `0.650, 1.200, 0.450`):",
-          sampleCorrelation: "0.650, 1.200, 0.450",
-          qThreshold: "Qual è la soglia di tolleranza energetica conformazionale per l'ancilla? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.65000, 1.20000, 0.45000]
-        };
-      } else {
-        return {
-          title: "Sanità & Genomica - Riammissioni Ospedaliere & Rischio Clinico (Solo Ampiezza / Probabilità)",
-          qElements: "Quali reparti ospedalieri o cluster di pazienti intendi monitorare per il rischio di riammissione post-dimissione? (Elenca da 1 a massimo 30 reparti/qubit, es. `CLUSTER_CARDIO, CLUSTER_GERIATRICO, REPARTO_CHIRURGIA`):",
-          sampleElements: "CLUSTER_CARDIO, CLUSTER_GERIATRICO, REPARTO_CHIRURGIA",
-          qSaturation: "Indica la percentuale stimata di riammissione a 30 giorni per ciascun gruppo (es. `28%, 52%, 18%`):",
-          sampleSaturation: "28%, 52%, 18%",
-          qCorrelation: "",
-          sampleCorrelation: "",
-          qThreshold: "Qual è la soglia critica di allerta riammissioni per l'ancilla? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: []
-        };
-      }
+    if (s.includes('finan') || s.includes('invest') || s.includes('money') || s === '1') {
+      return {
+        id: 1,
+        macroarea: "Finance & Markets",
+        scenarioName: "Ottimizzazione di Portafoglio Finanziario e Rischio Sistemico (QUBO)",
+        focus: "Entanglement (Correlazione Forte tra Asset)",
+        focusKey: "A",
+        carAnalogy: "Come il controllo di trazione a 4 ruote su asfalto bagnato: bilancia e correla l'andamento congiunto di tutti i titoli per minimizzare il rischio sistemico.",
+        metricColName: "Expected_Return",
+        defaultElements: ["ENEL", "INTESA", "GENERALI", "STELLANTIS"],
+        defaultUnit: "Rendimento Atteso",
+        sampleElements: "ENEL, INTESA, GENERALI, STELLANTIS",
+        sampleSaturation: "12%, 18%, 25%, 32%"
+      };
+    } else if (s.includes('logist') || s.includes('ship') || s.includes('transp') || s.includes('truck') || s === '2') {
+      return {
+        id: 2,
+        macroarea: "Logistics & Smart Cities",
+        scenarioName: "Ottimizzazione Flotte con Finestre Temporali (VRPTW)",
+        focus: "Entanglement (Interdipendenza Percorsi e Traffico)",
+        focusKey: "A",
+        carAnalogy: "Come il differenziale autobloccante e le 4 ruote motrici: sincronizza tutti i veicoli della flotta per evitare congestioni e sovrapposizioni.",
+        metricColName: "Delivery_Time_Hours",
+        defaultElements: ["HUB_MILANO", "HUB_BOLOGNA", "HUB_ROMA", "HUB_NAPOLI"],
+        defaultUnit: "Tempo Consegna",
+        sampleElements: "HUB_MILANO, HUB_BOLOGNA, HUB_ROMA, HUB_NAPOLI",
+        sampleSaturation: "45%, 60%, 75%, 30%"
+      };
+    } else if (s.includes('chem') || s.includes('lab') || s.includes('molecul') || s.includes('chimic') || s === '3') {
+      return {
+        id: 3,
+        macroarea: "Chemistry & Green Tech",
+        scenarioName: "Simulazione Molecolare e Calcolo dello Stato Fondamentale (VQE)",
+        focus: "Angolo 3D (Rotazioni Spaziali e Conformazione)",
+        focusKey: "B",
+        carAnalogy: "Come la sterzata millimetrica su curve a gomito strette: orienta nello spazio 3D gli orbitali molecolari per trovare la minima energia di legame.",
+        metricColName: "Hartree_Energy",
+        defaultElements: ["ORBITALE_HOMO", "ORBITALE_LUMO", "LEGAME_PI", "POLAR_SIGMA"],
+        defaultUnit: "Energia di Hartree",
+        sampleElements: "ORBITALE_HOMO, ORBITALE_LUMO, LEGAME_PI, POLAR_SIGMA",
+        sampleSaturation: "30%, 55%, 70%, 40%"
+      };
+    } else if (s.includes('maint') || s.includes('factor') || s.includes('manuf') || s.includes('industr') || s.includes('apparel') || s.includes('cloth') || s.includes('manifatt') || s === '4') {
+      return {
+        id: 4,
+        macroarea: "Maintenance, Manufacturing & Apparel",
+        scenarioName: "Rilevamento Anomalie e Manutenzione Predittiva Impianti",
+        focus: "Ampiezza (Probabilità e Potenza Nominale)",
+        focusKey: "C",
+        carAnalogy: "Come la massima potenza del motore sul rettilineo: calcola con la massima precisione probabilistica la probabilità di guasto o usura meccanica.",
+        metricColName: "Vibration_Level_Hz",
+        defaultElements: ["PRESSA_01", "CNC_MILLING", "ROBOT_WELDING", "TURBINE_A"],
+        defaultUnit: "Livello Vibrazione",
+        sampleElements: "PRESSA_01, CNC_MILLING, ROBOT_WELDING, TURBINE_A",
+        sampleSaturation: "25%, 50%, 80%, 40%"
+      };
+    } else if (s.includes('health') || s.includes('med') || s.includes('hosp') || s.includes('patient') || s.includes('genom') || s.includes('sanit') || s === '5') {
+      return {
+        id: 5,
+        macroarea: "Healthcare & Genomics",
+        scenarioName: "Ripiegamento Proteico e Docking Farmaco-Recettore",
+        focus: "Angolo 3D (Geometria Diedra e Conformazione)",
+        focusKey: "B",
+        carAnalogy: "Come la traiettoria e l'inclinazione dell'auto in curva: modella gli angoli diedri amminoacidici per prevenire il ripiegamento anomalo delle proteine.",
+        metricColName: "Binding_Affinity_Kcal",
+        defaultElements: ["RESIDUO_P1", "RESIDUO_P2", "RESIDUO_P3", "SEGMENTO_HELIX"],
+        defaultUnit: "Affinità di Legame",
+        sampleElements: "RESIDUO_P1, RESIDUO_P2, RESIDUO_P3, SEGMENTO_HELIX",
+        sampleSaturation: "35%, 65%, 45%, 80%"
+      };
     } else {
-      // Cybersecurity default
-      if (opt === 'A') {
-        return {
-          title: "Cybersecurity - Architettura Zero Trust & Nodi Distribuiti (Misto / Entanglement)",
-          qElements: "Quali nodi di rete, firewall o server strategici desideri correlare nell'architettura Zero Trust? (Elenca da 1 a massimo 30 nodi/qubit, es. `GATEWAY_FIREWALL, API_SERVER, DATABASE_CENTRAL`):",
-          sampleElements: "GATEWAY_FIREWALL, API_SERVER, DATABASE_CENTRAL",
-          qSaturation: "Indica l'indice di carico, congestione o anomalia di traffico percentuale per ciascun nodo (es. `85%, 50%, 30%`):",
-          sampleSaturation: "85%, 50%, 30%",
-          qCorrelation: "Indica il segmento di rete protetto per l'entanglement (es. `LAN_WEST, LAN_WEST, INDEPENDENT`):",
-          sampleCorrelation: "LAN_WEST, LAN_WEST, INDEPENDENT",
-          qThreshold: "Qual è la soglia di allerta anomala per l'ancilla comparatore? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.70748, 1.87549, 1.47063]
-        };
-      } else if (opt === 'B') {
-        return {
-          title: "Cybersecurity - Crittografia QKD & Rotazione Chiavi (Solo Angolo / Geometria)",
-          qElements: "Quali canali crittografici o chiavi quantistiche QKD intendi ruotare nello spazio di Hilbert? (Elenca da 1 a massimo 30 chiavi/canali/qubit, es. `QKD_KEY_ALPHA, QKD_KEY_BETA, CHANNEL_FIBER_1`):",
-          sampleElements: "QKD_KEY_ALPHA, QKD_KEY_BETA, CHANNEL_FIBER_1",
-          qSaturation: "Indica l'indice di attenuazione o tasso di errore bit quantistico (QBER) % per ciascun canale (es. `12%, 25%, 8%`):",
-          sampleSaturation: "12%, 25%, 8%",
-          qCorrelation: "Indica l'angolo di sfasamento di polarizzazione o rotazione della chiave in radianti (es. `0.785, 1.570, 0.523`):",
-          sampleCorrelation: "0.785, 1.570, 0.523",
-          qThreshold: "Qual è la soglia massima accettabile per il tasso di errore QBER? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: [0.78539, 1.57079, 0.52359]
-        };
-      } else {
-        return {
-          title: "Cybersecurity - Valutazione Asset & Migrazione Post-Quantum (Solo Ampiezza / Probabilità)",
-          qElements: "Quali database, archivi storici o server aziendali intendi prioritizzare per la migrazione Post-Quantum? (Elenca da 1 a massimo 30 archivi/qubit, es. `DB_CLIENTI, ARCHIVIO_FINANZIARIO, CLOUD_BACKUP`):",
-          sampleElements: "DB_CLIENTI, ARCHIVIO_FINANZIARIO, CLOUD_BACKUP",
-          qSaturation: "Indica il livello di vulnerabilità o esposizione a minacce crittografiche % per ciascun archivio (es. `60%, 80%, 35%`):",
-          sampleSaturation: "60%, 80%, 35%",
-          qCorrelation: "",
-          sampleCorrelation: "",
-          qThreshold: "Qual è il limite di tolleranza al rischio per l'integrità dei dati aziendali? (Valore consigliato: `4%` o `0.04`):",
-          sampleThreshold: "4%",
-          defaultAngles: []
-        };
-      }
+      return {
+        id: 6,
+        macroarea: "Cybersecurity",
+        scenarioName: "Mitigazione Attacchi Distribuiti DDoS e Rilevamento Intrusioni",
+        focus: "Entanglement (Correlazione Flussi di Rete)",
+        focusKey: "A",
+        carAnalogy: "Come la telemetria sincronizzata di tutta l'auto: rileva istantaneamente comportamenti coordinati anomali tra pacchetti e porte di rete.",
+        metricColName: "Traffic_Gbps",
+        defaultElements: ["GATEWAY_FW", "API_SERVER", "DB_CENTRAL", "AUTH_PROXY"],
+        defaultUnit: "Traffico di Rete",
+        sampleElements: "GATEWAY_FW, API_SERVER, DB_CENTRAL, AUTH_PROXY",
+        sampleSaturation: "20%, 40%, 60%, 85%"
+      };
     }
   };
 
@@ -2272,93 +2179,280 @@ Mappatura probabilistica pura a singolo qubit (\`ry\`) a zero CNOT. Ideale per s
     correlations: string[],
     angles2: number[],
     option: 'A' | 'B' | 'C',
-    critThreshold: number
+    critThreshold: number,
+    prudenceLevel: string = v9Prudence || 'Bilanciato'
   ): string => {
     const N = elements.length;
     const ancillaIdx = N;
     const totalQubits = N + 1;
-    const tClipped = Math.max(0, Math.min(critThreshold, 1.0));
-    const totalTh = 2 * Math.asin(Math.sqrt(tClipped));
-    const distTh = (totalTh / N).toFixed(5);
+    const tClipped = Math.max(0.01, Math.min(critThreshold, 1.0));
+    
+    // Prudence Multiplier for Ancilla Sensitivity
+    const prudenceMultiplier = prudenceLevel === 'Alta Prudenza' ? 1.35 : (prudenceLevel === 'Tollerante' ? 0.75 : 1.0);
+    const scaledThreshold = Math.max(0.01, Math.min(0.99, tClipped * prudenceMultiplier));
+    const totalTh = 2 * Math.asin(Math.sqrt(scaledThreshold));
+    const distTh = (totalTh / Math.max(1, N)).toFixed(5);
+    const scenario = getSectorIndustrialScenario(selectedSector || 'Finanza');
 
     let code = `OPENQASM 2.0;\ninclude "qelib1.inc";\n\n`;
-    code += `qreg q[${totalQubits}];\ncreg c[${totalQubits}];\n\n`;
+    code += `// =========================================================================\n`;
+    code += `// CIRCUITO QUANTISTICO OPENQASM 2.0 - ${scenario.scenarioName.toUpperCase()}\n`;
+    code += `// Macro-Area: ${scenario.macroarea} | Prudenza: ${prudenceLevel}\n`;
+    code += `// =========================================================================\n\n`;
+    code += `// --- INIZIALIZZAZIONE REGISTRI QUANTISTICI E CLASSICI ---\n`;
+    code += `qreg q[${totalQubits}];    // Registri dati aziendali (q[0]..q[${N-1}]) + Ancilla comparatore allarme (q[${ancillaIdx}])\n`;
+    code += `creg c[${totalQubits}];    // Bit classici per la lettura dei risultati di misura\n\n`;
 
-    // FASE 1: INIZIALIZZAZIONE
-    code += `// --- FASE 1: INIZIALIZZAZIONE (Rotazioni RY d'ampiezza) ---\n`;
+    // STEP 1: ENCODING RIGIDO DELLE PERCENTUALI (NO PORTA HADAMARD DI DEFAULT)
+    code += `// --- STEP 1: ENCODING RIGIDO DELLE PERCENTUALI (STATO FONDAMENTALE |0>) ---\n`;
+    code += `// Formula: theta = 2 * arcsin(sqrt(p)) applicata direttamente per preservare la linearita' d'ampiezza\n`;
     elements.forEach((el, i) => {
-      const p = Math.max(0, Math.min(saturations[i] ?? 0.35, 1.0));
+      const p = Math.max(0.001, Math.min(saturations[i] ?? 0.35, 0.999));
       const th = (2 * Math.asin(Math.sqrt(p))).toFixed(5);
-      code += `ry(${th}) q[${i}]; // Qubit q[${i}]: ${el} (Saturazione/Rischio = ${(p * 100).toFixed(1)}%)\n`;
+      code += `ry(${th}) q[${i}]; // Encoding ${el}: Saturazione/Rischio = ${(p * 100).toFixed(1)}% (theta = ${th} rad)\n`;
     });
     code += `\n`;
 
-    // FASE 2: INTERAZIONE / FASE
-    code += `// --- FASE 2: INTERAZIONE, ENTANGLEMENT E FASE ---\n`;
-    if (option === 'C') {
-      code += `// Opzione C: Mappatura Ampiezza/Probabilistica Pura (Fase 2 vuota, zero porte CNOT/CRY intermedie)\n`;
-    } else if (option === 'B') {
-      code += `// Opzione B: Mappatura Geometrica Angolare Pura (Porte rz locali isolate, zero entanglement)\n`;
-      elements.forEach((el, i) => {
-        const ang = (angles2[i] ?? 0.78539).toFixed(5);
-        code += `rz(${ang}) q[${i}]; // Rotazione di fase locale per ${el}\n`;
-      });
-    } else {
-      // Option A: Mixed Entanglement
-      code += `// Opzione A: Mappatura a Entanglement Misto (CRY per gruppi correlati, RZ per nodi indipendenti)\n`;
-      const groupMap: Record<string, number[]> = {};
-      correlations.forEach((grp, idx) => {
-        const upper = (grp || 'INDEPENDENT').toUpperCase().trim();
-        if (upper === 'INDEPENDENT' || upper === 'LIBERO' || upper === 'ISOLATO') {
-          const ang = (angles2[idx] ?? 0.78539).toFixed(5);
-          code += `rz(${ang}) q[${idx}]; // Nodo isolato indipendente (${elements[idx]})\n`;
-        } else {
-          if (!groupMap[upper]) groupMap[upper] = [];
-          groupMap[upper].push(idx);
-        }
-      });
+    // STEP 2: GESTIONE RIGIDA DELLE RELAZIONI ED ENTANGLEMENT
+    code += `// --- STEP 2: CONFIGURAZIONE RELAZIONI ED ENTANGLEMENT (${scenario.focus}) ---\n`;
+    const independentIndices: number[] = [];
+    const groupedPairs: Array<{ from: number; to: number; label: string; angle: number }> = [];
 
-      Object.entries(groupMap).forEach(([grpName, indices]) => {
-        if (indices.length > 1) {
-          for (let k = 0; k < indices.length - 1; k++) {
-            const ctrl = indices[k];
-            const tgt = indices[k + 1];
-            const ang = (angles2[ctrl] ?? 0.70748).toFixed(5);
-            code += `cry(${ang}) q[${ctrl}], q[${tgt}]; // Entanglement gruppo ${grpName} (${elements[ctrl]} -> ${elements[tgt]})\n`;
-          }
-        } else if (indices.length === 1) {
-          const idx = indices[0];
-          const ang = (angles2[idx] ?? 0.78539).toFixed(5);
-          code += `rz(${ang}) q[${idx}]; // Gruppo singolo ${grpName} (${elements[idx]})\n`;
-        }
-      });
-    }
-    code += `\n`;
-
-    // FASE 3: COMPARATORE ANCILLA
-    code += `// --- FASE 3: COMPARATORE ANCILLA (Soglia Critica ${(tClipped * 100).toFixed(1)}%) ---\n`;
-    if (option === 'B') {
-      code += `// Opzione B [Solo Angolo / Geometria]: TOTALMENTE ZERO porte controllate (NO cry, NO cx)\n`;
-      code += `// Applicazione diretta della rotazione di soglia singola isolata sull'ancilla senza alcuna interazione cry con gli asset:\n`;
-      code += `rx(${totalTh.toFixed(5)}) q[${ancillaIdx}];\n`;
-    } else if (option === 'C') {
-      code += `// Opzione C [Solo Ampiezza / Probabilità]: Inizializzazione isolata d'ampiezza dell'ancilla comparatore (Zero porte controllate)\n`;
-      code += `ry(${totalTh.toFixed(5)}) q[${ancillaIdx}];\n`;
-    } else {
-      code += `// Opzione A [Misto / Entanglement]: Connessione controllata distribuita verso l'ancilla q[${ancillaIdx}]\n`;
-      for (let i = 0; i < N; i++) {
-        code += `cry(${distTh}) q[${i}], q[${ancillaIdx}];\n`;
+    for (let i = 0; i < N; i++) {
+      const corr = correlations[i] ? correlations[i].toUpperCase().trim() : 'INDEPENDENT';
+      if (corr === 'INDEPENDENT' || corr === 'NO' || corr === 'NONE') {
+        independentIndices.push(i);
+      } else {
+        // Find partner with same group/match or next element
+        const nextIdx = (i + 1) % N;
+        const ang = angles2[i] ?? 0.70748;
+        groupedPairs.push({ from: i, to: nextIdx, label: correlations[i], angle: ang });
       }
     }
+
+    if (independentIndices.length === N) {
+      code += `// Tutti gli elementi sono INDEPENDENT: Nessuna porta di entanglement CX/CRY applicata tra di loro\n`;
+    } else {
+      code += `// Entanglement applicato selettivamente SOLO tra elementi correlati o appartenenti allo stesso cluster:\n`;
+      groupedPairs.forEach(pair => {
+        if (option === 'C') {
+          const ampGain = (0.5 * Math.PI * (saturations[pair.from] ?? 0.35)).toFixed(5);
+          code += `ry(${ampGain}) q[${pair.from}]; // Bilanciamento ampiezza cluster per ${elements[pair.from]}\n`;
+        } else if (option === 'B') {
+          const angStr = pair.angle.toFixed(5);
+          code += `rz(${angStr}) q[${pair.from}]; // Rotazione di fase conformazionale per ${elements[pair.from]}\n`;
+          code += `cry(${angStr}) q[${pair.from}], q[${pair.to}]; // Correlazione di fase [${elements[pair.from]} <-> ${elements[pair.to]}]\n`;
+        } else {
+          const angStr = pair.angle.toFixed(5);
+          code += `cry(${angStr}) q[${pair.from}], q[${pair.to}]; // Entanglement controllato [${elements[pair.from]} -> ${elements[pair.to]}] (Gruppo: ${pair.label})\n`;
+        }
+      });
+    }
     code += `\n`;
 
-    // FASE 4: MISURAZIONE
-    code += `// --- FASE 4: MISURAZIONE E REGISTRAZIONE STATI ---\n`;
-    for (let i = 0; i <= N; i++) {
-      code += `measure q[${i}] -> c[${i}];\n`;
+    // STEP 3: LOGICA DI PRUDENZA, SOGLIA E REALE CALIBRAZIONE DELL'ANCILLA
+    code += `// --- STEP 3: COMPARATORE ANCILLA ALLARME (Soglia: ${(tClipped * 100).toFixed(1)}% | Profilo: ${prudenceLevel}) ---\n`;
+    code += `// L'ancilla q[${ancillaIdx}] riceve rotazioni controllate calibrate dinamicamente per segnalare criticita'\n`;
+    for (let i = 0; i < N; i++) {
+      code += `cry(${distTh}) q[${i}], q[${ancillaIdx}]; // Rilevamento proporzionale soglia da ${elements[i]} (peso = ${distTh} rad)\n`;
     }
+    code += `\n`;
+
+    // STEP 4: COLLASSO E MISURAZIONE FINALE SUI CANALI
+    code += `// --- STEP 4: COLLASSO E MISURAZIONE FINALE SUI CANALI ---\n`;
+    for (let i = 0; i < N; i++) {
+      code += `measure q[${i}] -> c[${i}]; // Misura stato ${elements[i]}\n`;
+    }
+    code += `measure q[${ancillaIdx}] -> c[${ancillaIdx}]; // Misura canale di allarme/ancilla\n`;
 
     return code;
+  };
+
+  // Helper to detect if user input is an exploratory question or request for information
+  const isUserAskingQuestion = (text: string, currentStep: number, currentSubstep: number): boolean => {
+    const trimmed = text.trim();
+    const lower = trimmed.toLowerCase();
+
+    // Explicit question mark
+    if (trimmed.includes('?')) return true;
+
+    // Check if input is purely a numeric or percentage value in Question 2
+    if (currentStep === 1 && currentSubstep === 2) {
+      if (/^\s*\d+([.,]\d+)?\s*%\s*$/.test(lower) || /^\s*0[.,]\d+\s*$/.test(lower) || /^\s*\d+([.,]\d+)?\s*$/.test(lower)) {
+        return false;
+      }
+    }
+
+    // Check if input is purely a selection 1, 2, 3 or prudence label in Question 3
+    if (currentStep === 1 && currentSubstep === 3) {
+      if (/^[123]$/.test(lower) || lower === 'alta' || lower === 'alta prudenza' || lower === 'bilanciato' || lower === 'tollerante') {
+        return false;
+      }
+    }
+
+    // Check if input is purely 1-6 in Category step
+    if (currentStep === 1 && currentSubstep === 0) {
+      if (/^[1-6]$/.test(lower)) return false;
+    }
+
+    // Check if input is purely confirmation in Phase 2
+    if (currentStep === 2) {
+      if (['conferma', 'confermo', 'si', 'yes', 'ok', 'procedi', 'compila', 'vai', 'avanti', 'genera', 'esegui'].includes(lower)) {
+        return false;
+      }
+    }
+
+    const questionKeywords = [
+      'cosa', 'come', 'perché', 'perche', 'qual', 'quale', 'quali', 'chi', 'dove', 'quando',
+      'quanto', 'quanta', 'quanti', 'quante', 'spiega', 'spiegami', 'chiarisci', 'chiariscimi',
+      'dimmi', 'aiuto', 'help', 'info', "cos'è", "cosa e'", "cosa è", 'a cosa serve',
+      'non capisco', 'non ho capito', 'che significa', 'che vuol dire', 'cosa fa', 'come mai',
+      'puoi', 'vorrei capire', 'vorrei sapere', 'differenza', 'differenze', 'funzionamento',
+      'cos e', 'a che serve', 'che senso ha', 'what', 'how', 'why', 'who', 'explain', 'help me', 'tell me', 'can you'
+    ];
+
+    return questionKeywords.some(kw => {
+      const regex = new RegExp(`(^|\\s|[.,;!?"'])${kw}([.,;!?"'\\s]|$)`, 'i');
+      return regex.test(lower) || lower.startsWith(kw);
+    });
+  };
+
+  // Generate an expert and accurate quantum knowledge response with dynamic resume hints
+  const handleUserQuestion = async (userQuestion: string) => {
+    setIsAiThinking(true);
+    const currentSector = selectedSector || 'Finanza';
+    const scenario = getSectorIndustrialScenario(currentSector);
+    const lower = userQuestion.toLowerCase();
+
+    // Step-specific resumption instructions
+    let resumeHint = '';
+    if (step === 1 && interviewSubstep === 0) {
+      resumeHint = isIt
+        ? '👉 **Per iniziare l\'intervista:** Digita un numero da **1 a 6** o seleziona una delle categorie aziendali in alto.'
+        : '👉 **To begin the interview:** Type a number from **1 to 6** or select a corporate category above.';
+    } else if (step === 1 && interviewSubstep === 1) {
+      resumeHint = isIt
+        ? `👉 **Per proseguire con la Domanda 1:** Scrivi da **2 a 5 variabili** separate da virgola (es. \`${scenario.defaultElements.join(', ')}\`) oppure seleziona i pulsanti suggeriti.`
+        : `👉 **To continue with Question 1:** Type **2 to 5 variables** separated by commas (e.g. \`${scenario.defaultElements.join(', ')}\`) or select the suggested buttons.`;
+    } else if (step === 1 && interviewSubstep === 2) {
+      const elList = v9Elements.length > 0 ? v9Elements.join(', ') : 'le tue variabili';
+      resumeHint = isIt
+        ? `👉 **Per proseguire con la Domanda 2:** Inserisci le percentuali da associare alle tue variabili (\`${elList}\`), ad esempio scrivendo una percentuale per ciascuna (es. \`${scenario.sampleSaturation}\`) o una soglia generale (es. \`35%\`).`
+        : `👉 **To continue with Question 2:** Type the percentages to associate with your variables (\`${elList}\`), e.g. one for each (e.g. \`${scenario.sampleSaturation}\`) or a general threshold (e.g. \`35%\`).`;
+    } else if (step === 1 && interviewSubstep === 3) {
+      resumeHint = isIt
+        ? '👉 **Per proseguire con la Domanda 3:** Scegli il livello di prudenza digitando `1` (**Alta Prudenza**), `2` (**Bilanciato**) o `3` (**Tollerante**).'
+        : '👉 **To continue with Question 3:** Choose prudence level by typing `1` (**High Prudence**), `2` (**Balanced**) or `3` (**Tolerant**).';
+    } else if (step === 2) {
+      resumeHint = isIt
+        ? '👉 **Per proseguire con la Fase 2:** Scrivi "**Conferma**" o clicca sul pulsante "**✅ Conferma Dati e Compila Circuito**".'
+        : '👉 **To continue with Phase 2:** Type "**Confirm**" or click "**✅ Confirm Data and Compile Circuit**".';
+    } else {
+      resumeHint = isIt
+        ? '👉 **Prossimo step:** Puoi copiare il codice OpenQASM 2.0 o cliccare su "**Invia a IBM Quantum 🚀**" per eseguirlo sul processore quantistico.'
+        : '👉 **Next step:** You can copy the OpenQASM 2.0 code or click "**Send to IBM Quantum 🚀**" to execute it on the QPU.';
+    }
+
+    try {
+      // 1. Try calling the backend /api/quantum-bi/chat for dynamic Gemini answers
+      const res = await axios.post('/api/quantum-bi/chat', {
+        messages: [{ role: 'user', text: userQuestion }],
+        systemPrompt: `Sei l'Assistente Quantistico Esperto (Quantum Compiler & Business Orchestrator). 
+L'utente sta svolgendo la calibrazione guidata per il settore "${currentSector}" (Scenario: ${scenario.scenarioName}).
+Rispondi in modo esaustivo, scientificamente rigoroso e chiaro in italiano alla sua domanda, usando spiegazioni comprensibili e l'analogia dell'auto da corsa o dei qubit.
+Non includere frasi di scuse o divagazioni generiche.`
+      }, { timeout: 4000 });
+
+      if (res.data && res.data.response) {
+        const fullResponse = `${res.data.response}\n\n---\n${resumeHint}`;
+        addMessage('system', fullResponse);
+        setIsAiThinking(false);
+        return;
+      }
+    } catch {
+      // Fallback seamlessly to local expert knowledge base
+    }
+
+    // 2. Comprehensive local quantum knowledge base
+    let answerText = '';
+
+    if (lower.includes('soglia') || lower.includes('allarme') || lower.includes('percentual') || lower.includes('threshold') || lower.includes('limite') || lower.includes('tolleran')) {
+      answerText = `💡 **COS'È LA SOGLIA D'ALLARME E COME FUNZIONA NEL CALCOLO QUANTISTICO:**
+
+La **soglia percentuale d'allarme** (es. \`35%\`) rappresenta il limite critico di rischio economico, usura o saturazione oltre il quale il sistema aziendale deve segnalare un allarme rosso.
+
+🔬 **Come viene tradotta nel circuito quantistico:**
+1. **Rotazione Angolare di Probabilità ($R_y$):** La percentuale di soglia viene convertita matematicamente in un angolo di rotazione $\\theta = 2 \\arcsin(\\sqrt{p})$ applicato su ciascun qubit di input.
+2. **Accoppiamento con l'Ancilla Qubit ($q[N]$):** Attraverso porte quantistiche controllate $CRY$, tutti i qubit trasferiscono la loro probabilità congiunta sull'ancilla (il canale di allarme dedicato).
+3. **Collasso e Misura ($c[N]$):** All'esecuzione sul processore IBM, se la sovrapposizione degli stati supera la soglia impostata, l'ancilla collassa sullo stato $|1\\rangle$, attivando istantaneamente il flag di allarme critico con correlazione globale.`;
+    } else if (lower.includes('variabil') || lower.includes('element') || lower.includes('5') || lower.includes('nomi') || lower.includes('qubit') || lower.includes('input')) {
+      answerText = `💡 **VARIABILI AZIENDALI E MAPPATURA SUI QUBIT QUANTISTICI:**
+
+Gli elementi che inserisci (da 2 a 5 nomi reali, come fornitori, asset finanziari o linee di produzione) rappresentano i nodi fondamentali della tua analisi.
+
+🔬 **Perché da 2 a 5 variabili?**
+- **Spazio di Hilbert $2^N$:** Ogni variabile corrisponde a 1 Qubit fisico. Con $N=5$ variabili più 1 Ancilla, il circuito esplora simultaneamente $2^5 = 32$ configurazioni parallele di rischio.
+- **Massima Fedeltà Quantistica:** Mantenere 5 registri permette di eseguire il circuito sia su chip quantistici reali IBM (es. 5-qubit o 127-qubit Eagle) sia su simulatori Statevector ad altissima fedeltà, azzerando la decoerenza termica.
+- **Sovrapposizione Iniziale (Porta Hadamard $H$):** Ogni variabile parte da uno stato di equiprobabilità pura, pronta a ricevere le rotazioni di peso specifico.`;
+    } else if (lower.includes('pruden') || lower.includes('bilanciat') || lower.includes('tolleran') || lower.includes('alta')) {
+      answerText = `💡 **I 3 LIVELLI DI PRUDENZA NELL'ORCHESTRAZIONE QUANTISTICA:**
+
+Il livello di prudenza determina come la funzione di costo (QUBO o VQE) penalizza le oscillazioni e le deviazioni estreme:
+
+1. **🛡️ 1. Alta Prudenza (Massima Protezione):**
+   - Aumenta l'intensità delle porte di correlazione $CX / CRY$, massimizzando i vincoli di sicurezza. Calcola i peggiori scenari combinatori.
+2. **⚖️ 2. Bilanciato (Rischio Moderato - Standard):**
+   - Ottimizza il compromesso matematico tra rendimento/efficienza operativa e contenimento del rischio.
+3. **⚡ 3. Tollerante (Alta Aggressività):**
+   - Riduce i vincoli di penalità, permettendo al sistema di sfruttare al massimo la capacità produttiva o il rendimento accettando una volatilità controllata.`;
+    } else if (lower.includes('porta') || lower.includes('porte') || lower.includes('gate') || lower.includes('hadamard') || lower.includes('openqasm') || lower.includes('qasm') || lower.includes('circuit')) {
+      answerText = `💡 **LE PORTE QUANTISTICHE E IL LINGUAGGIO OPENQASM 2.0:**
+
+OpenQASM (Quantum Assembly Language) è lo standard industriale per programmare i computer quantistici di IBM:
+
+- **Porta $H$ (Hadamard):** Mette il qubit in sovrapposizione perfetta tra $|0\\rangle$ e $|1\\rangle$.
+- **Porta $R_y(\\theta)$ (Rotazione Y):** Inietta i dati reali e la percentuale di saturazione ruotando il vettore di stato sulla sfera di Bloch.
+- **Porta $R_z(\\phi)$ (Rotazione Z):** Codifica le fasi tridimensionali e le interazioni angolari molecolari o di docking.
+- **Porte $CX$ / $CRY$ (Entanglement Controllato):** Creano la correlazione quantistica non-locale tra i qubit e collegano le variabili all'ancilla qubit per la misura di allarme.`;
+    } else if (lower.includes('auto') || lower.includes('analogia') || lower.includes('spartito') || lower.includes('orchestr')) {
+      answerText = `🏎️ **L'ANALOGIA DELL'AUTOMOBILE DA CORSA NELLO SPAZIO DI HILBERT:**
+
+Nel calcolo quantistico i tre fenomeni fisici (Ampiezza, Angolo 3D, Entanglement) esistono **sempre insieme**. La scelta del focus serve solo a definire quale parte del circuito deve lavorare con priorità:
+
+- **Ampiezza (Porte $R_y$):** È il *motore* — imposta la potenza e il volume di calcolo su rettilinei veloci (es. Manutenzione e Capacità).
+- **Angolo 3D (Porte $R_x / R_z$):** È lo *sterzo* — calcola le curve strette e le conformazioni tridimensionali (es. Chimica VQE e Folding Proteico).
+- **Entanglement (Porte $CX / CRY$):** È la *trazione integrale su 4 ruote con asfalto bagnato* — coordina tutti i nodi contemporaneamente per evitare sbandate (es. Finanza Cross-Asset e Logistica).`;
+    } else if (lower.includes('settor') || lower.includes('categor') || lower.includes('finanz') || lower.includes('logistic') || lower.includes('chimic') || lower.includes('sanit') || lower.includes('cyber')) {
+      answerText = `🏢 **SCENARI INDUSTRIALI INTEGRATI NELLA PIATTAFORMA:**
+
+Ogni categoria aziendale attiva un algoritmo quantistico specializzato:
+1. **Finanza:** *QUBO Cross-Asset* — minimizza la covarianza del rischio su portafogli azionari ed obbligazionari.
+2. **Logistica:** *VRPTW con Finestre Temporali* — risolve l'instradamento di flotte pesanti azzerando i ritardi.
+3. **Chimica:** *VQE (Variational Quantum Eigensolver)* — calcola l'energia dello stato fondamentale di catalizzatori molecolari.
+4. **Manifatturiero:** *Predictive Maintenance* — stima l'usura critica e i tempi di fermo macchina.
+5. **Sanità:** *Protein Folding & Docking 3D* — analizza l'affinità di legame recettore-farmaco.
+6. **Cybersecurity:** *DDoS Attack Correlation* — rileva attacchi distribuiti coordinati su nodi di rete.`;
+    } else if (lower.includes('csv') || lower.includes('tabella') || lower.includes('matrice')) {
+      answerText = `📊 **LA MATRICE DATI AZIENDALE (CSV) E LA TRASFORMAZIONE IN CIRCUITO:**
+
+La tabella CSV che generiamo nella Fase 2 raccoglie i tuoi parametri reali e li struttura nelle colonne chiave:
+- **Item_Code:** Il codice univoco delle tue variabili ($q[0] \\dots q[N-1]$).
+- **Saturation_Percentage:** Il livello di saturazione/rischio associato a ciascun elemento.
+- **Metrica Industriale:** Il valore ingegneristico calcolato per il tuo settore (es. ore residue, energia Hartree, latenza).
+- **Entanglement_Link:** Il gruppo di correlazione quantistica applicato nel circuito OpenQASM.`;
+    } else {
+      answerText = `🤖 **ASSISTENZA QUANTISTICA GEMINI:**
+
+Grazie per la tua domanda! Il nostro orchestratore quantistico unisce i principi fisici della meccanica quantistica (sovrapposizione, rotazioni angolari sulla sfera di Bloch ed entanglement a molti corpi) con le esigenze reali dell'ottimizzazione aziendale.
+
+Ogni parametro inserito durante questa calibrazione viene compilato direttamente in istruzioni assembly quantistiche OpenQASM 2.0, pronte per essere trasmesse all'infrastruttura IBM Quantum.`;
+    }
+
+    const fullResponse = `${answerText}\n\n---\n${resumeHint}`;
+    setTimeout(() => {
+      addMessage('system', fullResponse);
+      setIsAiThinking(false);
+    }, 350);
   };
 
   const handleSendMessage = () => {
@@ -2367,10 +2461,18 @@ Mappatura probabilistica pura a singolo qubit (\`ry\`) a zero CNOT. Ideale per s
     setInputText('');
     addMessage('user', userText);
 
+    // =========================================================================
+    // SMART AI QUESTION DETECTOR: If user asks a question, answer it immediately!
+    // =========================================================================
+    if (isUserAskingQuestion(userText, step, interviewSubstep)) {
+      handleUserQuestion(userText);
+      return;
+    }
+
     // ==========================================
-    // STEP 1: Corporate Macro-Area Selection (1-6)
+    // FASE 0: Corporate Category Selection (1-6)
     // ==========================================
-    if (step === 1) {
+    if (step === 1 && interviewSubstep === 0) {
       const lower = userText.toLowerCase().trim();
       if (lower === '1' || lower.includes('finan') || lower.includes('invest') || lower.includes('money')) {
         handleSelectSector('Finanza');
@@ -2386,47 +2488,22 @@ Mappatura probabilistica pura a singolo qubit (\`ry\`) a zero CNOT. Ideale per s
         handleSelectSector('Cybersecurity');
       } else {
         setTimeout(() => {
-          addMessage('system', `Scelta non riconosciuta. Per favore digita un numero da **1 a 6** o clicca su una delle macro-aree aziendali nel pannello per avviare il protocollo.`);
-        }, 300);
-      }
-      return;
-    }
-
-    // ==========================================
-    // STEP 2: Paradigm Selection (Option A, B, C)
-    // ==========================================
-    if (step === 2) {
-      const rawUpper = userText.trim().toUpperCase();
-      let choice: 'A' | 'B' | 'C' | null = null;
-      if (rawUpper === 'A' || rawUpper.includes('OPTION A') || rawUpper.includes('OPZIONE A') || rawUpper.includes('ENTANGLEMENT') || rawUpper === '1' || rawUpper.includes('MISTO')) {
-        choice = 'A';
-      } else if (rawUpper === 'B' || rawUpper.includes('OPTION B') || rawUpper.includes('OPZIONE B') || rawUpper.includes('GEOMETRY') || rawUpper.includes('GEOMETRIA') || rawUpper.includes('ANGOL') || rawUpper === '2') {
-        choice = 'B';
-      } else if (rawUpper === 'C' || rawUpper.includes('OPTION C') || rawUpper.includes('OPZIONE C') || rawUpper.includes('AMPLITUDE') || rawUpper.includes('AMPIEZZA') || rawUpper.includes('PROBABILITY') || rawUpper.includes('PROBABILIT') || rawUpper === '3') {
-        choice = 'C';
-      }
-
-      if (choice) {
-        handleChoiceOption(choice);
-      } else {
-        setTimeout(() => {
-          addMessage('system', `Risposta non valida. Per favore rispondi indicando **A**, **B** oppure **C** per scegliere uno dei tre paradigmi quantistici.`);
+          addMessage('system', `Scelta non riconosciuta. Per favore digita un numero da **1 a 6** o seleziona una delle categorie aziendali per iniziare.`);
         }, 300);
       }
       return;
     }
 
     // =========================================================================
-    // STEP 3: V9 Conversational Interview State Machine (1 Question at a time)
+    // FASE 1: Conversational Calibration Interview (3 Specific Business Questions)
     // =========================================================================
-    if (step === 3) {
+    if (step === 1) {
       const currentSector = selectedSector || 'Finanza';
-      const currentOpt = scenarioSelection || 'A';
-      const scenarioInfo = getV9ScenarioInterviewInfo(currentSector, currentOpt);
+      const scenario = getSectorIndustrialScenario(currentSector);
       const fillerWords = ['ciao', 'salve', 'buongiorno', 'buonasera', 'ok', 'va bene', 'vabene', 'boh', 'non so', 'dimmi tu', 'si', 'no', 'yes', 'aiuto', 'help', 'grazie', 'bene', 'test', 'asd', 'asdasd', 'null', 'undefined', 'niente', 'nessuno', 'cosa devo fare', 'prosegui', 'avanti', 'vai', 'fatto', 'prova'];
 
       // -------------------------------------------------------------
-      // SUBSTEP 1: Elements Acquisition (D1) with Hard Cap check (max 30) & Validation
+      // DOMANDA 1: Input / Variabili (2 to 5 elements)
       // -------------------------------------------------------------
       if (interviewSubstep === 1) {
         const rawTokens = userText
@@ -2435,28 +2512,26 @@ Mappatura probabilistica pura a singolo qubit (\`ry\`) a zero CNOT. Ideale per s
           .map(t => t.trim().replace(/^["']|["']$/g, ''))
           .filter(t => t.length > 0);
 
-        // Check if user input is purely conversational filler or empty
         const isAllFillers = rawTokens.length === 0 || rawTokens.every(t => fillerWords.includes(t.toLowerCase()) || !/[a-zA-Z0-9]/.test(t));
 
-        if (isAllFillers) {
+        if (isAllFillers || rawTokens.length < 2) {
           setTimeout(() => {
             addMessage('system', `⚠️ **RISPOSTA NON VALIDA per la Domanda 1:**
-Non è stato possibile identificare codici o nomi validi di asset/elementi aziendali per la simulazione quantistica.
+Per calibrare il circuito quantistico è necessario indicare da **2 a 5 nomi reali** di elementi legati alla tua azienda (es. \`${scenario.defaultElements.slice(0, 3).join(', ')}\`).
 
 👉 **Cosa fare:**
-- Scrivi da **1 a 30 elementi/asset aziendali** separati da virgola (limite hardware **max 30 qubit**, es. \`${scenarioInfo.sampleElements}\`).
-- Oppure clicca direttamente su uno dei pulsanti suggeriti qui sotto per caricare l'esempio.`);
+- Inserisci da 2 a 5 elementi separati da virgola (es. \`${scenario.defaultElements.join(', ')}\`).
+- Oppure clicca sul pulsante suggerito qui sotto.`);
           }, 300);
           return;
         }
 
-        // HARD CAP VALIDATION (> 30 items)
-        if (rawTokens.length > 30) {
+        if (rawTokens.length > 5) {
           setTimeout(() => {
-            addMessage('system', `⚠️ **ATTENZIONE (Cap Massimo QPU Superato - Limite 30 Qubit):**
-Il processore quantistico IBM allocato supporta una simulazione simultanea di massimo **30 qubit / asset** per questo registro di calcolo. Hai inserito **${rawTokens.length} elementi**.
+            addMessage('system', `⚠️ **LIMITE ELEMENTI:**
+Per questa calibrazione guidata inserisci tra **2 e 5 elementi** (hai indicato ${rawTokens.length} elementi).
 
-👉 Per favore, riduci l'elenco specificando da **1 a 30 elementi** (es. \`${scenarioInfo.sampleElements}\`) o clicca sulla configurazione suggerita in basso.`);
+👉 Riduci l'elenco specificando fino a 5 elementi (es. \`${scenario.defaultElements.join(', ')}\`).`);
           }, 300);
           return;
         }
@@ -2465,174 +2540,178 @@ Il processore quantistico IBM allocato supporta una simulazione simultanea di ma
         setV9Elements(elements);
         setInterviewSubstep(2);
 
+        const sampleSatList = scenario.sampleSaturation.split(',').map(s => s.trim());
+        const mappingPreview = elements.map((el, i) => `${el} ➔ ${sampleSatList[i] || '35%'}`).join(', ');
+
         setTimeout(() => {
-          addMessage('system', `✅ **Elementi Registrati (${elements.length}):** **${elements.join(', ')}**.\n\n👉 **DOMANDA 2:**\n${scenarioInfo.qSaturation}`);
+          addMessage('system', `✅ **Elementi Registrati (${elements.length}):** **${elements.join(', ')}**
+
+👉 **DOMANDA 2 (Percentuali di Rischio / Saturazione per i tuoi Elementi):**
+⚠️ **Nota importante:** Le percentuali che indichi adesso **saranno associate direttamente agli elementi inseriti nella Domanda 1** (${elements.join(', ')}).
+
+Hai due possibilità:
+• **Percentuali specifiche per ciascun elemento:** Scrivi i valori separati da virgola (es. \`${scenario.sampleSaturation}\` per associare: ${mappingPreview}).
+• **Singola soglia generale:** Scrivi una sola percentuale (es. \`35%\`), che verrà usata come soglia di base per tutti i tuoi elementi.
+
+Qual è il valore di percentuale o soglia d'allarme che vuoi impostare?`);
         }, 350);
         return;
       }
 
       // -------------------------------------------------------------
-      // SUBSTEP 2: Saturation / Risk % Acquisition (D2) with Vague text alert & Strict Validation
+      // DOMANDA 2: Soglia d'Allarme / Percentuali Assegnate agli Elementi
       // -------------------------------------------------------------
       if (interviewSubstep === 2) {
-        const lower = userText.toLowerCase();
-        const vagueWords = ['alto', 'alta', 'alti', 'alte', 'basso', 'bassa', 'bassi', 'basse', 'medio', 'media', 'medi', 'medie', 'elevato', 'elevata', 'ridotto', 'ridotta', 'critico', 'critica', 'buono', 'buona', 'ottimo', 'discreto', 'normale', 'molto', 'poco', 'abbastanza', 'grave', 'minimo', 'massimo'];
-        const containsVagueWord = vagueWords.some(w => lower.includes(w));
-
-        // Extract all numbers / percentages from text
-        const matches = userText.match(/(?:\d+[.,]?\d*|\.\d+)\s*%?/g) || [];
-        const parsedNums: number[] = [];
-
-        matches.forEach(m => {
-          const isPercent = m.includes('%');
-          const cleanNum = parseFloat(m.replace('%', '').replace(',', '.').trim());
-          if (!isNaN(cleanNum)) {
-            const val = (isPercent || cleanNum > 1.0) ? cleanNum / 100 : cleanNum;
-            parsedNums.push(Math.max(0.001, Math.min(val, 1.0)));
-          }
-        });
-
-        // If no numbers at all or purely vague text
-        if (parsedNums.length === 0) {
-          setTimeout(() => {
-            addMessage('system', `⚠️ **ALERT DATO NON VALIDO (Domanda 2):**
-Il sistema quantistico richiede valori numerici precisi o percentuali (es. \`${scenarioInfo.sampleSaturation}\` o \`45%\`, \`0.45\`) per calcolare l'angolo di rotazione $2\\arcsin(\\sqrt{p})$ sulle porte \`ry\`.
-${containsVagueWord ? `\nNon è possibile calcolare il circuito su descrizioni qualitative come *"${userText}"*.` : ''}
-
-👉 **Cosa fare:**
-- Inserisci ${v9Elements.length > 0 ? v9Elements.length : 'i'} valori percentuali per i tuoi elementi (**${(v9Elements.length > 0 ? v9Elements : ['Elementi']).join(', ')}**), es. \`${scenarioInfo.sampleSaturation}\`.
-- Oppure clicca su uno dei valori percentuali proposti in basso.`);
-          }, 300);
-          return;
-        }
-
-        // Fill saturations for each element
-        const N = v9Elements.length > 0 ? v9Elements.length : parsedNums.length;
-        const saturations: number[] = [];
-        for (let i = 0; i < N; i++) {
-          saturations.push(parsedNums[i] !== undefined ? parsedNums[i] : parsedNums[parsedNums.length - 1]);
-        }
-        setV9Saturations(saturations);
-
-        // Branching based on Option:
-        // Option C (Amplitude Only) SKIPS Question 3 (Correlations/Angles) and goes straight to Question 4 (Threshold)
-        if (currentOpt === 'C') {
-          setInterviewSubstep(4);
-          setTimeout(() => {
-            addMessage('system', `✅ **Valori di saturazione/probabilità registrati:** ${saturations.map((s, idx) => `\`${v9Elements[idx] || `Asset_${idx+1}`}\`: **${(s * 100).toFixed(1)}%**`).join(', ')}.\n*(Trattandosi di Opzione C ad ampiezza pura, non sono necessarie porte di correlazione/entanglement intermedie).* \n\n👉 **DOMANDA 4:**\n${scenarioInfo.qThreshold}`);
-          }, 350);
-        } else {
-          setInterviewSubstep(3);
-          setTimeout(() => {
-            addMessage('system', `✅ **Valori di saturazione/rischio registrati:** ${saturations.map((s, idx) => `\`${v9Elements[idx] || `Asset_${idx+1}`}\`: **${(s * 100).toFixed(1)}%**`).join(', ')}.\n\n👉 **DOMANDA 3:**\n${scenarioInfo.qCorrelation}`);
-          }, 350);
-        }
-        return;
-      }
-
-      // -------------------------------------------------------------
-      // SUBSTEP 3: Correlation Links or Angular 3D Rotations (D3) & Validation
-      // -------------------------------------------------------------
-      if (interviewSubstep === 3) {
-        if (currentOpt === 'A') {
-          // Option A: Extract group names
-          const tokens = userText
-            .replace(/[;\n]/g, ',')
-            .split(',')
-            .map(t => t.trim().toUpperCase().replace(/^["']|["']$/g, ''))
-            .filter(t => t.length > 0);
-
-          const isAllFillers = tokens.length === 0 || tokens.every(t => fillerWords.includes(t.toLowerCase()) || !/[a-zA-Z0-9]/.test(t));
-
-          if (isAllFillers) {
-            setTimeout(() => {
-              addMessage('system', `⚠️ **DATO NON VALIDO per la Domanda 3 (Fase 2 - Entanglement):**
-Per l'Opzione A devi specificare i gruppi di correlazione per ciascun elemento (**${v9Elements.join(', ')}**), ad esempio \`${scenarioInfo.sampleCorrelation}\`, oppure digitare \`INDEPENDENT\` per i nodi isolati.
-
-👉 Inserisci i gruppi corretti separati da virgola o clicca sulla configurazione suggerita sotto.`);
-            }, 300);
-            return;
-          }
-
-          const correlations: string[] = [];
-          const N = v9Elements.length > 0 ? v9Elements.length : tokens.length;
-          for (let i = 0; i < N; i++) {
-            correlations.push(tokens[i] || (tokens.length > 0 ? tokens[0] : 'INDEPENDENT'));
-          }
-          setV9Correlations(correlations);
-          
-          // Phase 2 angles mapping from default
-          const angles2 = correlations.map((_, i) => scenarioInfo.defaultAngles[i] || 0.70748);
-          setV9AnglesPhase2(angles2);
-        } else {
-          // Option B: Extract angular radians/degrees
-          const matches = userText.match(/(?:\d+[.,]?\d*|\.\d+)/g) || [];
-          const parsedAngles = matches.map(m => parseFloat(m.replace(',', '.'))).filter(n => !isNaN(n));
-
-          if (parsedAngles.length === 0) {
-            setTimeout(() => {
-              addMessage('system', `⚠️ **DATO NON VALIDO per la Domanda 3 (Fase 2 - Rotazioni Geometriche):**
-Per l'Opzione B devi inserire valori numerici di rotazione in radianti o gradi per ciascun elemento (es. \`${scenarioInfo.sampleCorrelation}\`).
-
-👉 Inserisci valori numerici corretti oppure clicca sul suggerimento proposto.`);
-            }, 300);
-            return;
-          }
-
-          const N = v9Elements.length > 0 ? v9Elements.length : parsedAngles.length;
-          const angles2: number[] = [];
-          for (let i = 0; i < N; i++) {
-            angles2.push(parsedAngles[i] !== undefined ? parsedAngles[i] : (scenarioInfo.defaultAngles[i] || 0.78539));
-          }
-          setV9AnglesPhase2(angles2);
-          setV9Correlations(angles2.map(a => `RZ(${a.toFixed(3)})`));
-        }
-
-        setInterviewSubstep(4);
-        setTimeout(() => {
-          addMessage('system', `✅ **Parametri di Fase 2 configurati con successo.**\n\n👉 **DOMANDA 4:**\n${scenarioInfo.qThreshold}`);
-        }, 350);
-        return;
-      }
-
-      // -------------------------------------------------------------
-      // SUBSTEP 4: Ancilla Comparator Threshold (D4) & Strict Validation & Final Execution
-      // -------------------------------------------------------------
-      if (interviewSubstep === 4) {
         const matches = userText.match(/(?:\d+[.,]?\d*|\.\d+)\s*%?/g) || [];
 
         if (matches.length === 0) {
           setTimeout(() => {
-            addMessage('system', `⚠️ **DATO NON VALIDO per la Domanda 4 (Soglia Ancilla):**
-È necessario specificare un valore numerico percentuale o decimale valido per impostare la soglia critica del qubit comparatore ancilla (es. \`4%\`, \`5%\` o \`0.04\`).
+            addMessage('system', `⚠️ **DATO NON VALIDO (Domanda 2):**
+È necessario inserire una percentuale o un valore numerico (es. \`35%\`, \`25%, 45%, 65%\` o \`0.35\`).
 
-👉 Inserisci un valore numerico percentuale oppure clicca su uno dei pulsanti suggeriti (es. **4% (Standard Benchmark)**).`);
+👉 Inserisci le percentuali per i tuoi elementi (**${v9Elements.join(', ')}**) o seleziona una delle proposte qui sotto.`);
           }, 300);
           return;
         }
 
-        let threshVal = 0.04;
-        const isPercent = matches[0].includes('%');
-        const num = parseFloat(matches[0].replace('%', '').replace(',', '.').trim());
-        if (!isNaN(num)) {
-          threshVal = (isPercent || num > 1.0) ? num / 100 : num;
-        }
-        threshVal = Math.max(0.001, Math.min(threshVal, 1.0));
-        setThreshold(threshVal);
+        const elements = v9Elements.length >= 2 ? v9Elements : scenario.defaultElements;
+        const parsedVals: number[] = matches.map(m => {
+          const isPercent = m.includes('%');
+          const cleanNum = parseFloat(m.replace('%', '').replace(',', '.').trim());
+          if (isNaN(cleanNum)) return 0.35;
+          const v = (isPercent || cleanNum > 1.0) ? cleanNum / 100 : cleanNum;
+          return Math.max(0.01, Math.min(v, 0.99));
+        });
 
-        const elements = v9Elements.length > 0 ? v9Elements : ['ASSET_1', 'ASSET_2', 'ASSET_3'];
+        let confirmationMsg = '';
+        if (parsedVals.length > 1) {
+          // Multiple percentages entered: associate 1-to-1 with user variables
+          const finalSats = elements.map((_, i) => parsedVals[i] !== undefined ? parsedVals[i] : parsedVals[parsedVals.length - 1]);
+          setV9CustomSaturations(finalSats);
+          setThreshold(finalSats[0]);
+          setInterviewSubstep(3);
+
+          const associations = elements.map((el, i) => `• **${el}**: **${(finalSats[i] * 100).toFixed(0)}%**`).join('\n');
+          confirmationMsg = `✅ **Percentuali Associate con Successo agli Elementi della Domanda 1:**\n${associations}\n\n👉 **DOMANDA 3 (Livello Prudenza):**\nIn merito agli imprevisti e alle oscillazioni, preferisci un algoritmo estremamente prudente che calcola ogni minimo rischio o uno più bilanciato? (Scegli tra: **Alta Prudenza**, **Bilanciato**, **Tollerante**).`;
+        } else {
+          // Single threshold percentage entered
+          const singleThresh = parsedVals[0];
+          setThreshold(singleThresh);
+          setV9CustomSaturations(null);
+          setInterviewSubstep(3);
+
+          confirmationMsg = `✅ **Soglia d'Allarme Registrata:** **${(singleThresh * 100).toFixed(0)}%**\n*(Questo valore è associato come base di calcolo a tutti i tuoi elementi: **${elements.join(', ')}**)*\n\n👉 **DOMANDA 3 (Livello Prudenza):**\nIn merito agli imprevisti e alle oscillazioni, preferisci un algoritmo estremamente prudente che calcola ogni minimo rischio o uno più bilanciato? (Scegli tra: **Alta Prudenza**, **Bilanciato**, **Tollerante**).`;
+        }
+
+        setTimeout(() => {
+          addMessage('system', confirmationMsg);
+        }, 350);
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // DOMANDA 3: Livello Prudenza & Generazione Tabella CSV (FASE 2)
+      // -------------------------------------------------------------
+      if (interviewSubstep === 3) {
+        const lower = userText.toLowerCase();
+        let prudence = 'Bilanciato';
+        if (lower.includes('alta') || lower.includes('prud') || lower.includes('sicur') || lower.includes('sever')) {
+          prudence = 'Alta Prudenza';
+        } else if (lower.includes('toll') || lower.includes('bassa') || lower.includes('permiss') || lower.includes('aggress')) {
+          prudence = 'Tollerante';
+        } else {
+          prudence = 'Bilanciato';
+        }
+        setV9Prudence(prudence);
+
+        // Precompile CSV rows based on user elements and parameters
+        const elements = v9Elements.length >= 2 ? v9Elements : scenario.defaultElements;
+        const baseThreshold = threshold || 0.35;
+        const saturations: number[] = [];
+        const correlations: string[] = [];
+        const angles2: number[] = [];
+
+        const csvRows = elements.map((el, idx) => {
+          let sat = 0.35;
+          if (v9CustomSaturations && v9CustomSaturations[idx] !== undefined) {
+            sat = v9CustomSaturations[idx];
+          } else {
+            // Calculate realistic distributed saturation around threshold
+            const offset = (idx - (elements.length - 1) / 2) * (prudence === 'Alta Prudenza' ? 0.08 : 0.05);
+            sat = Math.max(0.05, Math.min(0.95, baseThreshold + offset));
+          }
+          saturations.push(sat);
+
+          // Metric value
+          let metricVal = (100 * (1 - sat)).toFixed(1);
+          if (scenario.id === 3) metricVal = (-1.137 + idx * 0.08).toFixed(4); // VQE Hartree
+          if (scenario.id === 5) metricVal = (-8.4 - idx * 0.7).toFixed(2); // Kcal binding
+          if (scenario.id === 2) metricVal = (2.5 + idx * 1.2).toFixed(1); // Hours
+
+          // Entanglement / Group Link
+          const groupLink = scenario.focusKey === 'A' 
+            ? (idx < 2 ? 'GROUP_ALPHA' : 'INDEPENDENT')
+            : (scenario.focusKey === 'B' ? `AXIS_${idx + 1}` : 'DIRECT_AMPLITUDE');
+          correlations.push(groupLink);
+          angles2.push(0.70748 + idx * 0.15);
+
+          return `${el},${(sat * 100).toFixed(0)}%,${metricVal},${groupLink}`;
+        });
+
+        setV9Saturations(saturations);
+        setV9Correlations(correlations);
+        setV9AnglesPhase2(angles2);
+
+        const csvContent = `Item_Code,Saturation_Percentage,${scenario.metricColName},Entanglement_Link\n${csvRows.join('\n')}`;
+        setV9GeneratedCsv(csvContent);
+        setTempCsvContent(csvContent);
+        setIsCsvLoaded(true);
+
+        // Advance to FASE 2
+        setStep(2);
+        setInterviewSubstep(0);
+
+        setTimeout(() => {
+          addMessage('system', `📋 **FASE 2: TABELLA DATI AZIENDALI PRECOMPILATA (CSV)**
+
+Abbiamo elaborato la matrice dati calibrata sui tuoi parametri reali e sulla soglia del **${(baseThreshold * 100).toFixed(0)}%** (Livello di Prudenza: **${prudence}**):
+
+\`\`\`csv
+Item_Code,Saturation_Percentage,${scenario.metricColName},Entanglement_Link
+${csvRows.join('\n')}
+\`\`\`
+
+❓ **Vuoi confermare questi dati e procedere alla compilazione del circuito quantistico OpenQASM 2.0?**
+(Clicca sul pulsante "**✅ Conferma Dati e Compila Circuito**" sotto o scrivi "**Conferma**" per procedere).`);
+        }, 400);
+        return;
+      }
+    }
+
+    // =========================================================================
+    // FASE 2: Data Confirmation & Transition to FASE 3 (OpenQASM Generation)
+    // =========================================================================
+    if (step === 2) {
+      const lower = userText.toLowerCase().trim();
+      const isConfirm = ['conferma', 'confermo', 'si', 'yes', 'ok', 'procedi', 'compila', 'vai', 'avanti', 'genera', 'esegui'].some(w => lower.includes(w));
+
+      if (isConfirm) {
+        const currentSector = selectedSector || 'Finanza';
+        const scenario = getSectorIndustrialScenario(currentSector);
+        const elements = v9Elements.length >= 2 ? v9Elements : scenario.defaultElements;
         const saturations = v9Saturations.length === elements.length ? v9Saturations : elements.map(() => 0.35);
         const correlations = v9Correlations.length === elements.length ? v9Correlations : elements.map(() => 'INDEPENDENT');
         const angles2 = v9AnglesPhase2.length === elements.length ? v9AnglesPhase2 : elements.map(() => 0.78539);
+        const threshVal = threshold || 0.35;
 
         // Generate clean OpenQASM 2.0 code
-        const qasmCode = generateV9OpenQasmCode(elements, saturations, correlations, angles2, currentOpt, threshVal);
+        const qasmCode = generateV9OpenQasmCode(elements, saturations, correlations, angles2, scenario.focusKey, threshVal, v9Prudence);
         setQasmOutput(qasmCode);
 
         // Update clean records for IBM visual composer board
         const cleanRecs = elements.map((el, i) => {
           const sat = saturations[i] ?? 0.35;
-          const pClamped = Math.max(0, Math.min(sat, 1.0));
+          const pClamped = Math.max(0.001, Math.min(sat, 1.0));
           const th1 = 2 * Math.asin(Math.sqrt(pClamped));
           const th2 = angles2[i] ?? 0.78539;
           return {
@@ -2645,67 +2724,61 @@ Per l'Opzione B devi inserire valori numerici di rotazione in radianti o gradi p
           };
         });
         setCleanedRecords(cleanRecs);
-        setStep(4);
 
-        // Play audio chime
+        // Advance to FASE 3
+        setStep(3);
         playChimeAlert();
 
-        // Build data summary table markdown
-        const tableRows = elements.map((el, i) => {
-          const sat = saturations[i] ?? 0.35;
-          const th1 = (2 * Math.asin(Math.sqrt(Math.max(0, Math.min(sat, 1.0))))).toFixed(5);
-          const th2 = (angles2[i] ?? 0.78539).toFixed(5);
-          const corr = correlations[i] || 'INDEPENDENT';
-          return `| \`q[${i}]\` | **${el}** | ${(sat * 100).toFixed(1)}% | \`${th1} rad\` | \`${th2} rad\` | \`${corr}\` |`;
-        }).join('\n');
-
-        const totalThAncilla = 2 * Math.asin(Math.sqrt(threshVal));
-        const ancillaDesc = currentOpt === 'B'
-          ? `Rotazione RX isolata: \`${totalThAncilla.toFixed(5)} rad\` (Zero CRY)`
-          : currentOpt === 'C'
-          ? `Rotazione RY isolata: \`${totalThAncilla.toFixed(5)} rad\` (Zero CRY)`
-          : `Distribuito CRY: \`${(totalThAncilla / elements.length).toFixed(5)} rad\``;
-
-        const summaryTableMarkdown = `| Qubit | Elemento / Asset | Saturazione / Rischio | Angolo Fase 1 (RY) | Angolo Fase 2 | Gruppo / Correlazione |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-${tableRows}
-| \`q[${elements.length}]\` | **ANCILLA COMPARATORE** | Soglia: ${(threshVal * 100).toFixed(1)}% | ${ancillaDesc} | - | Target Allerta |`;
-
         // Exact closing statement adapted by technology
-        const isHpcSelected = selectedTechnology.includes('HPC') || selectedTechnology.includes('Classica');
+        const isHpcSelected = selectedTechnology.includes('HPC') || selectedTechnology.includes('Classica') || selectedTechnology === 'HPC';
         const closingPhrase = isHpcSelected
-          ? `**Ho raccolto tutti i dati necessari e generato il circuito matematico che vedi qui sopra.**\n\nPremere il pulsante "**⚡ ESEGUI CALCOLO CLASSICO (HPC)**" in basso per avviare l'elaborazione multithread su cluster ad alte prestazioni direttamente in questa console.`
-          : `**Ho raccolto tutti i dati necessari e generato il codice OpenQASM che vedi qui sopra.**\n\nPremere il pulsante "**🚀 CONFERMA DATI & AVVIA LA SIMULAZIONE**" in basso per inviare il codice QASM a IBM Quantum Computing.`;
+          ? `**Dati acquisiti ed elaborazione classica predisposta.**\n\nPremi il pulsante "**⚡ ESEGUI CALCOLO CLASSICO (HPC)**" in basso per avviare subito l'elaborazione su CPU/GPU classica.`
+          : `**Ho raccolto tutti i dati necessari e generato il codice OpenQASM che vedi qui sopra.**\n\nPremere il pulsante "**🚀 INVIA A IBM QUANTUM (QPU)**" in basso per trasmettere il job al computer quantistico IBM Quantum.`;
 
         setTimeout(() => {
-          addMessage('system', `🎉 **Calibrazione Completata con Successo!**
+          if (isHpcSelected) {
+            addMessage('system', `🎉 **FASE 3: MATRICE DATI PRONTA PER L'ELABORAZIONE CLASSICA (HPC)**
 
-📊 **RIEPILOGO STRUTTURA DATI QUANTISTICI:**
-- **Settore Macro-Area:** **${selectedSectorLong || currentSector}**
-- **Paradigma:** **Opzione ${currentOpt}** (*${currentOpt === 'A' ? 'Misto / Entanglement' : currentOpt === 'B' ? 'Solo Angolo / Geometria' : 'Solo Ampiezza / Probabilità'}*)
-- **Dimensione Registro:** ${elements.length} Qubit di dato + 1 Qubit Ancilla (Totale: ${elements.length + 1} Qubit)
-- **Soglia Comparatore Ancilla:** **${(threshVal * 100).toFixed(1)}%**
+💡 **COMPUTAZIONE SU HARDWARE CLASSICO (CPU/GPU Cluster):**
+I parametri sono stati mappati e validati per l'analisi deterministica/statistica su architettura classica.
 
-${summaryTableMarkdown}
+${closingPhrase}`);
+          } else {
+            addMessage('system', `🎉 **FASE 3: CIRCUITO OPENQASM 2.0 SINTETIZZATO CON SUCCESSO!**
 
----
+🎵 **L'ORCHESTRA QUANTISTICA HA COMPLETATO LO SPARTITO:**
+I qubit hanno suonato all'unisono combinando simultaneamente ampiezza, angolo ed entanglement nello spazio di Hilbert per lo scenario **${scenario.scenarioName}**.
 
-💻 **CIRCUITO SINTETIZZATO (OPENQASM 2.0):**
+💻 **CODICE OPENQASM 2.0 GENERATO:**
 \`\`\`qasm
 ${qasmCode}
 \`\`\`
 
 ${closingPhrase}`);
+          }
         }, 400);
-
+        return;
+      } else {
+        setTimeout(() => {
+          addMessage('system', `Per procedere con la generazione del circuito OpenQASM 2.0 o l'elaborazione classica, digita "**Conferma**" o clicca sul pulsante "**✅ Conferma Dati**" sotto la chat.`);
+        }, 300);
         return;
       }
     }
 
-    // Fallback if completed
-    setTimeout(() => {
-      addMessage('system', `Il circuito OpenQASM 2.0 è pronto e validato. Puoi inviarlo direttamente al processore quantistico IBM cliccando su **"Send to IBM"** in alto.`);
-    }, 300);
+    // ==========================================
+    // FASE 3: Post-Generation Interaction
+    // ==========================================
+    if (step === 3) {
+      const isHpcSelected = selectedTechnology.includes('HPC') || selectedTechnology.includes('Classica') || selectedTechnology === 'HPC';
+      setTimeout(() => {
+        if (isHpcSelected) {
+          addMessage('system', `La matrice dati è pronta per l'elaborazione classica. Clicca su "**⚡ Esegui Calcolo Classico (HPC)**" in basso per ottenere subito i risultati calcolati dal sistema.`);
+        } else {
+          addMessage('system', `Il circuito quantistico OpenQASM 2.0 è pronto. Puoi inviarlo al processore quantistico IBM cliccando su "**🚀 Invia a IBM Quantum QPU**" sotto la chat.`);
+        }
+      }, 300);
+    }
   };
 
   const prepareCsvMapping = (csvTextContent: string) => {
@@ -3410,10 +3483,11 @@ Acquisizione guidata e conversazionale dei dati aziendali per la generazione Ope
           </div>
 
           {/* Chat scrolling feed */}
-          <div className="flex-1 p-5 overflow-y-auto space-y-4 max-h-[50vh] lg:max-h-[58vh] scrollbar-hide text-xs sm:text-sm">
+          <div ref={chatFeedRef} className="flex-1 p-5 overflow-y-auto space-y-4 max-h-[50vh] lg:max-h-[58vh] scrollbar-hide text-xs sm:text-sm">
             {messages.map((msg) => (
               <div 
                 key={msg.id} 
+                id={`agent-chat-msg-${msg.id}`}
                 className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
               >
                 <div className={`flex items-center gap-1.5 text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-1`}>
@@ -3475,6 +3549,20 @@ Acquisizione guidata e conversazionale dei dati aziendali per la generazione Ope
                 <span className="text-[9px] font-mono text-gray-600 mt-1">{msg.timestamp}</span>
               </div>
             ))}
+
+            {isAiThinking && (
+              <div className="flex flex-col items-start animate-fade-in">
+                <div className="flex items-center gap-1.5 text-[10px] font-mono text-quantum-primary uppercase tracking-wider mb-1">
+                  <Sparkles className="w-3.5 h-3.5 animate-spin text-quantum-primary" /> {t('agents_quantum_compiler') || '🤖 Quantum Compiler & AI'}
+                </div>
+                <div className="p-4 rounded-2xl bg-[#0f172a]/85 border border-quantum-primary/40 text-gray-300 font-sans flex items-center gap-3 shadow-[0_0_15px_rgba(0,242,255,0.1)]">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-quantum-primary animate-ping" />
+                  <span className="text-xs text-quantum-primary font-mono font-medium">
+                    {isIt ? "Elaborazione risposta con l'AI Quantistica in corso..." : "Formulating response with Quantum AI..."}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {showEntanglementWarning ? (
               <motion.div 
@@ -3585,241 +3673,319 @@ Acquisizione guidata e conversazionale dei dati aziendali per la generazione Ope
                 )}
               </motion.div>
             )}
-            {step === 1 && (
-              <div className="flex flex-col gap-2 w-full">
-                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block mb-1">
-                  {t('agents_phase0_select') || '📊 PHASE 0: SELECT A MAIN CORPORATE MACRO-AREA:'}
+            {step === 1 && interviewSubstep === 0 && (
+              <div className="flex flex-col gap-2 w-full animate-fade-in">
+                <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider block mb-1 font-bold">
+                  {t('agents_phase0_select') || '📊 FASE 0: SELEZIONA LA CATEGORIA AZIENDALE:'}
                 </span>
                 <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-6 gap-2 w-full">
                   <button
                     onClick={() => handleSelectSector('Finanza')}
-                    className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
+                    className="px-2 py-2 bg-[#0d1527] border border-white/10 hover:border-quantum-primary rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-center"
                   >
-                    {t('agents_sec_finance') || '📊 1. Finance'}
+                    1. Finanza
                   </button>
                   <button
                     onClick={() => handleSelectSector('Logistica')}
-                    className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
+                    className="px-2 py-2 bg-[#0d1527] border border-white/10 hover:border-quantum-primary rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-center"
                   >
-                    {t('agents_sec_logistics') || '🚚 2. Logistics'}
+                    2. Logistica
                   </button>
                   <button
                     onClick={() => handleSelectSector('Chimica')}
-                    className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
+                    className="px-2 py-2 bg-[#0d1527] border border-white/10 hover:border-quantum-primary rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-center"
                   >
-                    {t('agents_sec_chemistry') || '🔬 3. Chemistry'}
+                    3. Chimica
                   </button>
                   <button
                     onClick={() => handleSelectSector('Manifatturiero')}
-                    className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
+                    className="px-2 py-2 bg-[#0d1527] border border-white/10 hover:border-quantum-primary rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-center"
                   >
-                    {t('agents_sec_factory') || '🏭 4. Factory'}
+                    4. Fabbrica
                   </button>
                   <button
                     onClick={() => handleSelectSector('Sanita')}
-                    className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
+                    className="px-2 py-2 bg-[#0d1527] border border-white/10 hover:border-quantum-primary rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-center"
                   >
-                    {t('agents_sec_healthcare') || '🧬 5. Healthcare'}
+                    5. Sanità
                   </button>
                   <button
                     onClick={() => handleSelectSector('Cybersecurity')}
-                    className="px-2 py-1.5 bg-[#0d1527] border border-white/5 hover:border-quantum-primary/30 rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center"
+                    className="px-2 py-2 bg-[#0d1527] border border-white/10 hover:border-quantum-primary rounded-lg text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-center"
                   >
-                    {t('agents_sec_cybersec') || '🛡️ 6. Cybersec'}
+                    6. Cybersec
                   </button>
                 </div>
               </div>
             )}
 
-            {step === 2 && interviewSubstep === 0 && (
-              <div className="flex flex-col gap-2 w-full animate-fade-in">
-                <span className="text-[10px] font-mono text-[#00f2ff] uppercase tracking-wider block mb-1 font-bold">
-                  {t('agents_phase1_choose') || '💡 PHASE 1: CHOOSE OPERATIONAL SCENARIO OPTION:'}
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
-                  <button
-                    onClick={() => handleChoiceOption('A')}
-                    className="px-3 py-2 bg-[#0d1527] border border-quantum-primary/20 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
-                  >
-                    {t('agents_opt_a') || '🅰️ Option A [Mixed/Entanglement]'}
-                  </button>
-                  <button
-                    onClick={() => handleChoiceOption('B')}
-                    className="px-3 py-2 bg-[#0d1527] border border-quantum-primary/20 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
-                  >
-                    {t('agents_opt_b') || '🅱️ Option B [Angle Only]'}
-                  </button>
-                  <button
-                    onClick={() => handleChoiceOption('C')}
-                    className="px-3 py-2 bg-[#0d1527] border border-quantum-primary/20 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white uppercase transition-all hover:bg-quantum-primary/5 cursor-pointer text-center rounded-lg"
-                  >
-                    {t('agents_opt_c') || '🆃 Option C [Amplitude Only]'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && interviewSubstep === 1 && (() => {
+            {step === 1 && interviewSubstep === 1 && (() => {
               const currentSector = selectedSector || 'Finanza';
-              const currentOpt = scenarioSelection || 'A';
-              const scenarioInfo = getV9ScenarioInterviewInfo(currentSector, currentOpt);
-              const sampleOpts = scenarioInfo.sampleElements.split(',').map(s => s.trim());
+              const scenario = getSectorIndustrialScenario(currentSector);
+              const sampleOpts = scenario.sampleElements.split(',').map(s => s.trim());
+              
+              // Count how many comma-separated elements the user has currently typed in inputText
+              const typedTokens = inputText
+                .replace(/[;\n]/g, ',')
+                .split(',')
+                .map(t => t.trim())
+                .filter(t => t.length > 0);
+              const count = typedTokens.length;
+
               return (
-                <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
-                  <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
-                    💡 ELEMENTI SUGGERITI PER QUESTO SCENARIO (DOMANDA 1):
-                  </span>
-                  <div className="flex flex-wrap gap-2 mt-1 w-full">
+                <div className="flex flex-col gap-2.5 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3.5 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
+                      ✏️ SCRIVI I TUOI INPUT O SELEZIONA QUELLI SUGGERITI (DA 2 A 5 VARIABILI):
+                    </span>
+                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                      count >= 2 && count <= 5
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                        : count > 5
+                        ? 'bg-red-500/20 text-red-300 border-red-500/30 animate-pulse'
+                        : 'bg-white/5 text-gray-400 border-white/10'
+                    }`}>
+                      {count}/5 Inseriti {count > 5 ? '(Limite max 5)' : count < 2 ? '(Minimo 2)' : '✓'}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 w-full">
+                    <span className="text-[9.5px] font-mono text-gray-400 uppercase tracking-wide mr-1">
+                      💡 Proposte Gemini:
+                    </span>
                     <button
-                      onClick={() => setInputText(scenarioInfo.sampleElements)}
-                      className="px-3 py-2 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-quantum-primary uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-left rounded-lg"
+                      onClick={() => setInputText(scenario.sampleElements)}
+                      className="px-2.5 py-1.5 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10px] font-mono font-bold text-quantum-primary uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-left rounded-lg"
+                      title="Inserisce tutti i suggerimenti proposti"
                     >
-                      Inserisci tutti: <span className="text-white font-normal">{scenarioInfo.sampleElements}</span>
+                      Inserisci predefiniti: <span className="text-white font-normal">{scenario.sampleElements}</span>
                     </button>
                     {sampleOpts.map((opt, oIdx) => (
                       <button
                         key={oIdx}
                         onClick={() => {
-                          setInputText(prev => prev ? `${prev}, ${opt}` : opt);
+                          setInputText(prev => {
+                            const tokens = prev.replace(/[;\n]/g, ',').split(',').map(s => s.trim()).filter(Boolean);
+                            if (tokens.includes(opt)) return prev;
+                            if (tokens.length >= 5) return prev;
+                            return prev ? `${prev}, ${opt}` : opt;
+                          });
                         }}
-                        className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-white transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
+                        className="px-2.5 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10px] font-mono text-white transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
                       >
                         + {opt}
                       </button>
                     ))}
+                    {inputText.trim() && (
+                      <button
+                        onClick={() => setInputText('')}
+                        className="px-2 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-[9.5px] font-mono rounded-lg transition-all ml-auto cursor-pointer"
+                        title="Cancella il campo per scrivere da zero"
+                      >
+                        ✕ Pulisci
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="text-[9px] font-mono text-gray-400 border-t border-white/5 pt-1.5">
+                    ℹ️ Puoi digitare direttamente i nomi delle tue variabili nella barra di testo in basso separandole con la virgola (es. <span className="text-cyan-300">FORNITORE_A, FORNITORE_B, LINEA_1</span>).
                   </div>
                 </div>
               );
             })()}
 
-            {step === 3 && interviewSubstep === 2 && (() => {
+            {step === 1 && interviewSubstep === 2 && (() => {
               const currentSector = selectedSector || 'Finanza';
-              const currentOpt = scenarioSelection || 'A';
-              const scenarioInfo = getV9ScenarioInterviewInfo(currentSector, currentOpt);
+              const scenario = getSectorIndustrialScenario(currentSector);
+              const elements = v9Elements.length >= 2 ? v9Elements : scenario.defaultElements;
+
+              // Calculate parsed percentages from current inputText
+              const numMatches = inputText.match(/(?:\d+[.,]?\d*|\.\d+)\s*%?/g) || [];
+              const parsedList: number[] = numMatches.map(m => {
+                const isPct = m.includes('%');
+                const n = parseFloat(m.replace('%', '').replace(',', '.').trim());
+                if (isNaN(n)) return 35;
+                return (isPct || n > 1.0) ? n : n * 100;
+              });
+
+              const isMulti = parsedList.length > 1;
+              const singleVal = parsedList.length === 1 ? parsedList[0] : null;
+
               return (
-                <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
-                  <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
-                    💡 VALORI SUGGERITI (DOMANDA 2):
-                  </span>
-                  <div className="flex flex-wrap gap-2 mt-1 w-full">
-                    <button
-                      onClick={() => setInputText(scenarioInfo.sampleSaturation)}
-                      className="px-3 py-2 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white transition-all hover:bg-quantum-primary/10 cursor-pointer rounded-lg"
-                    >
-                      Applica esempio: <span className="text-quantum-primary font-mono">{scenarioInfo.sampleSaturation}</span>
-                    </button>
-                    <button
-                      onClick={() => setInputText('30%, 45%, 60%')}
-                      className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-gray-300 transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
-                    >
-                      30%, 45%, 60%
-                    </button>
-                    <button
-                      onClick={() => setInputText('25%, 50%, 75%')}
-                      className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-gray-300 transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
-                    >
-                      25%, 50%, 75%
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {step === 3 && interviewSubstep === 3 && (() => {
-              const currentSector = selectedSector || 'Finanza';
-              const currentOpt = scenarioSelection || 'A';
-              const scenarioInfo = getV9ScenarioInterviewInfo(currentSector, currentOpt);
-              return (
-                <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
-                  <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
-                    💡 CONFIGURAZIONE SUGGERITA FASE 2 (DOMANDA 3):
-                  </span>
-                  <div className="flex flex-wrap gap-2 mt-1 w-full">
-                    <button
-                      onClick={() => setInputText(scenarioInfo.sampleCorrelation)}
-                      className="px-3 py-2 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-white transition-all hover:bg-quantum-primary/10 cursor-pointer rounded-lg"
-                    >
-                      Applica esempio: <span className="text-quantum-primary font-mono">{scenarioInfo.sampleCorrelation}</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {step === 3 && interviewSubstep === 4 && (
-              <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
-                    💡 SOGLIA ANCILLA SUGGERITA (DOMANDA 4):
-                  </span>
-                  
-                  {/* Tooltip Dettagliato e Chiaro sulla Soglia */}
-                  <div className="relative group/tooltip inline-flex items-center">
-                    <button
-                      type="button"
-                      aria-label="Dettagli e spiegazione completa della soglia"
-                      className="text-quantum-primary/80 hover:text-quantum-primary focus:outline-none transition-colors cursor-help p-0.5 rounded-full hover:bg-quantum-primary/10"
-                    >
-                      <HelpCircle className="w-3.5 h-3.5" />
-                    </button>
-                    <div className="absolute bottom-full left-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 w-80 sm:w-96 p-3.5 bg-[#070e1b] border border-quantum-primary/40 rounded-xl text-left shadow-2xl backdrop-blur-xl opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto transition-all duration-200 z-50">
-                      <div className="flex items-center gap-1.5 text-quantum-primary text-[11.5px] font-bold mb-2 pb-1.5 border-b border-white/10">
-                        <Sparkles className="w-4 h-4 shrink-0" />
-                        <span>Significato della Soglia e del Comparatore Quantistico</span>
-                      </div>
-                      
-                      <div className="space-y-2 text-[10.5px] leading-relaxed text-gray-300 font-sans normal-case">
-                        <div>
-                          <strong className="text-white">1. Cos'è questo numero (es. 4% o 0.04):</strong>
-                          <p className="text-gray-300 mt-0.5">
-                            È il <span className="text-quantum-primary font-semibold">limite massimo di tolleranza</span> (budget di rischio o di anomalia) assegnato al circuito quantistico. Separa la zona di sicurezza da quella critica.
-                          </p>
-                        </div>
-
-                        <div>
-                          <strong className="text-white">2. Cosa succede se si supera vs se si resta sotto:</strong>
-                          <ul className="mt-1 space-y-1 pl-1">
-                            <li className="flex items-start gap-1.5">
-                              <span className="text-red-400 font-bold shrink-0">🔴 Se il rischio supera il 4%:</span>
-                              <span>Il qubit comparatore (Ancilla) collassa su <strong>Stato |1⟩ (Allarme Attivo)</strong>, indicando che la combinazione delle variabili ha sforato il limite consentito e serve un'azione correttiva aziendale.</span>
-                            </li>
-                            <li className="flex items-start gap-1.5">
-                              <span className="text-emerald-400 font-bold shrink-0">🟢 Se il rischio resta sotto il 4%:</span>
-                              <span>L'Ancilla collassa su <strong>Stato |0⟩ (Stato Nominale)</strong>, confermando che il sistema opera in sicurezza.</span>
-                            </li>
-                          </ul>
-                        </div>
-
-                        <div className="pt-1.5 border-t border-white/10 text-[9.5px] text-cyan-200">
-                          <strong className="text-quantum-primary">A cosa servono le freccette (▲ / ▼):</strong> Permettono di regolare la percentuale a scatti di <strong>±1% (±0.01)</strong> (es. passare da 0.04 a 0.05 o a 0.03) senza dover riscrivere il numero a mano.
-                        </div>
-                      </div>
+                <div className="flex flex-col gap-2.5 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3.5 rounded-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
+                        ✏️ PERCENTUALI PER LE TUE VARIABILI:
+                      </span>
+                      <span className="text-[9.5px] font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded">
+                        {elements.join(', ')}
+                      </span>
                     </div>
-                  </div>
-                </div>
 
-                <div className="flex flex-wrap items-center gap-2 mt-1 w-full">
-                  <div className="relative group/btn4 inline-flex items-center">
-                    <button
-                      onClick={() => setInputText('4%')}
-                      className="px-3 py-1.5 bg-[#070b14] border border-quantum-primary/40 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-quantum-primary transition-all hover:bg-quantum-primary/10 cursor-pointer rounded-lg flex items-center gap-1.5 shadow-sm"
-                    >
-                      <span>4% (Standard Benchmark)</span>
-                    </button>
+                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border self-start sm:self-auto ${
+                      isMulti
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                        : singleVal !== null
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+                        : 'bg-white/5 text-gray-400 border-white/10'
+                    }`}>
+                      {isMulti
+                        ? `Assegnazione: ${elements.map((el, i) => `${el}➔${(parsedList[i] ?? parsedList[parsedList.length-1]).toFixed(0)}%`).join(' | ')}`
+                        : singleVal !== null
+                        ? `Soglia globale: ${singleVal.toFixed(0)}% (base per tutti i ${elements.length} elementi)`
+                        : '💡 Digita 1 o più percentuali separate da virgola'}
+                    </span>
                   </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 w-full">
+                    <span className="text-[9.5px] font-mono text-gray-400 uppercase tracking-wide mr-1">
+                      💡 Proposte Gemini:
+                    </span>
+                    <button
+                      onClick={() => setInputText(scenario.sampleSaturation)}
+                      className="px-2.5 py-1.5 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10px] font-mono font-bold text-quantum-primary uppercase transition-all hover:bg-quantum-primary/10 cursor-pointer text-left rounded-lg"
+                      title="Inserisce una percentuale specifica per ogni singola variabile"
+                    >
+                      Assegna a ciascuna: <span className="text-white font-normal">{scenario.sampleSaturation}</span>
+                    </button>
+                    {['15% (Prudente)', '25%', '35% (Standard)', '50%', '75% (Tollerante)'].map((pLabel, pIdx) => {
+                      const val = pLabel.split(' ')[0];
+                      return (
+                        <button
+                          key={pIdx}
+                          onClick={() => setInputText(val)}
+                          className="px-2.5 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10px] font-mono text-white transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
+                          title="Imposta questo valore come soglia base globale"
+                        >
+                          {pLabel}
+                        </button>
+                      );
+                    })}
+                    {inputText.trim() && (
+                      <button
+                        onClick={() => setInputText('')}
+                        className="px-2 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-[9.5px] font-mono rounded-lg transition-all ml-auto cursor-pointer"
+                        title="Cancella il campo per scrivere da zero"
+                      >
+                        ✕ Pulisci
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="text-[9px] font-mono text-gray-400 border-t border-white/5 pt-1.5">
+                    ℹ️ **Associazione Domanda 1 ➔ Domanda 2:** Le percentuali verranno abbinate direttamente alle variabili inserite (es. <span className="text-cyan-300">{elements[0] || 'VAR1'} ➔ 25%, {elements[1] || 'VAR2'} ➔ 45%</span>) oppure condivise come soglia comune.
+                  </div>
+                </div>
+              );
+            })()}
+
+            {step === 1 && interviewSubstep === 3 && (
+              <div className="flex flex-col gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-3 rounded-xl">
+                <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black">
+                  💡 SCEGLI IL LIVELLO DI PRUDENZA (DOMANDA 3):
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1 w-full">
                   <button
-                    onClick={() => setInputText('5%')}
-                    className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-white transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
+                    onClick={() => {
+                      setInputText('1');
+                      setTimeout(() => handleSendMessage(), 100);
+                    }}
+                    className="px-3 py-2 bg-[#070b14] border border-red-500/30 hover:border-red-400 text-[10.5px] font-mono font-bold text-red-300 transition-all hover:bg-red-500/10 cursor-pointer rounded-lg text-left"
                   >
-                    5%
+                    1. Alta Prudenza (Massima Protezione)
                   </button>
                   <button
-                    onClick={() => setInputText('10%')}
-                    className="px-3 py-1.5 bg-[#070b14] border border-white/10 hover:border-quantum-primary text-[10.5px] font-mono text-white transition-all hover:bg-quantum-primary/5 cursor-pointer rounded-lg"
+                    onClick={() => {
+                      setInputText('2');
+                      setTimeout(() => handleSendMessage(), 100);
+                    }}
+                    className="px-3 py-2 bg-[#070b14] border border-quantum-primary/30 hover:border-quantum-primary text-[10.5px] font-mono font-bold text-quantum-primary transition-all hover:bg-quantum-primary/10 cursor-pointer rounded-lg text-left"
                   >
-                    10%
+                    2. Bilanciato (Rischio Moderato)
+                  </button>
+                  <button
+                    onClick={() => {
+                      setInputText('3');
+                      setTimeout(() => handleSendMessage(), 100);
+                    }}
+                    className="px-3 py-2 bg-[#070b14] border border-amber-500/30 hover:border-amber-400 text-[10.5px] font-mono font-bold text-amber-300 transition-all hover:bg-amber-500/10 cursor-pointer rounded-lg text-left"
+                  >
+                    3. Tollerante (Alta Aggressività)
                   </button>
                 </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="flex flex-col items-center gap-2.5 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/30 p-3.5 rounded-xl shadow-lg">
+                <span className="text-[10px] font-mono text-quantum-primary uppercase tracking-wider block font-black text-center">
+                  📋 FASE 2: CONFERMA LA TABELLA DATI
+                </span>
+                <div className="flex items-center justify-center w-full mt-1">
+                  <button
+                    onClick={() => {
+                      setInputText('conferma');
+                      setTimeout(() => handleSendMessage(), 100);
+                    }}
+                    className="px-6 py-2.5 bg-quantum-primary hover:bg-quantum-primary/90 text-quantum-bg text-xs font-mono font-black rounded-lg transition-all shadow-[0_0_15px_rgba(0,242,255,0.35)] cursor-pointer flex items-center justify-center gap-2 mx-auto"
+                  >
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>CONFERMA E COMPILA CIRCUITO</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="flex flex-wrap items-center justify-between gap-2 w-full animate-fade-in bg-[#0c1527] border border-quantum-primary/20 p-2.5 rounded-xl">
+                <div className="flex items-center gap-2">
+                  {selectedTechnology.includes('HPC') || selectedTechnology.includes('Classica') || selectedTechnology === 'HPC' ? (
+                    <button
+                      disabled={isRunningHpc}
+                      onClick={() => {
+                        const realCsv = findRealUserCsv();
+                        if (realCsv) {
+                          setTempCsvContent(realCsv);
+                          setIsCsvLoaded(true);
+                          processInputCSV(realCsv, true);
+                        }
+                        executeHpcSimulation(qasmOutput);
+                      }}
+                      className="px-4 py-2 bg-quantum-primary hover:bg-quantum-primary/90 disabled:opacity-50 text-quantum-bg text-xs font-mono font-black rounded-lg transition-all shadow-md cursor-pointer flex items-center gap-2"
+                    >
+                      <Cpu className={`w-3.5 h-3.5 fill-current ${isRunningHpc ? 'animate-spin' : 'animate-pulse'}`} />
+                      <span>{isRunningHpc ? (isIt ? 'Calcolo in corso...' : 'Computing...') : '⚡ Esegui Calcolo Classico (HPC)'}</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        const realCsv = findRealUserCsv();
+                        if (realCsv) {
+                          setTempCsvContent(realCsv);
+                          setIsCsvLoaded(true);
+                          processInputCSV(realCsv, true);
+                        }
+                        onSendToIbm(qasmOutput || `OPENQASM 2.0;\ninclude "qelib1.inc";\nqreg q[4];\ncreg c[4];\nry(1.26610) q[0];\nry(1.47063) q[1];\nry(2.16450) q[2];\nmeasure q[0] -> c[0];\nmeasure q[1] -> c[1];\nmeasure q[2] -> c[2];\nmeasure q[3] -> c[3];`);
+                      }}
+                      className="px-4 py-2 bg-quantum-primary hover:bg-quantum-primary/90 text-quantum-bg text-xs font-mono font-black rounded-lg transition-all shadow-md cursor-pointer flex items-center gap-2"
+                    >
+                      <Cpu className="w-3.5 h-3.5 fill-current animate-pulse" />
+                      <span>🚀 Invia a IBM Quantum QPU</span>
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    setStep(1);
+                    setInterviewSubstep(0);
+                    setSelectedSector(null);
+                    addMessage('system', '🔄 Scenario reimpostato. Seleziona una nuova categoria per iniziare.');
+                  }}
+                  className="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 text-[10px] font-mono rounded cursor-pointer transition-all"
+                >
+                  🔄 Nuovo Scenario
+                </button>
               </div>
             )}
 
@@ -3898,9 +4064,12 @@ Acquisizione guidata e conversazionale dei dati aziendali per la generazione Ope
                 if (e.key === 'Enter') handleSendMessage();
               }}
               placeholder={
-                step === 1 ? (t('agents_placeholder_step1') || "Choose a finance or logistics sector above to unlock the interview...") :
-                step === 2 ? (t('agents_placeholder_step2') || "Answer the questions indicated by the assistant...") :
-                (t('agents_placeholder_step3') || "Paste or edit your decimal-point CSV data here...")
+                step === 1 && interviewSubstep === 0 ? (isIt ? "Digita 1-6, seleziona una categoria o fai una domanda..." : "Type 1-6, select a sector or ask a question...") :
+                step === 1 && interviewSubstep === 1 ? (isIt ? "Scrivi da 2 a 5 variabili separate da virgola (es. CLIENTE_1, FORNITORE_A) o fai una domanda..." : "Type 2 to 5 variables separated by comma or ask a question...") :
+                step === 1 && interviewSubstep === 2 ? (isIt ? "Digita la percentuale di soglia (es. 35%, 25%, 0.40) o fai una domanda..." : "Type threshold percentage (e.g. 35%, 0.35) or ask a question...") :
+                step === 1 && interviewSubstep === 3 ? (isIt ? "Digita 1, 2 o 3 per la prudenza o fai una domanda..." : "Type 1, 2 or 3 for prudence level or ask a question...") :
+                step === 2 ? (isIt ? "Digita 'conferma' o fai una domanda..." : "Type 'confirm' or ask a question...") :
+                (t('agents_placeholder_step3') || "Incolla dati CSV, esegui o fai una domanda...")
               }
               className="flex-1 bg-[#090d18] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-quantum-primary transition-colors font-mono"
             />
@@ -4003,13 +4172,26 @@ Acquisizione guidata e conversazionale dei dati aziendali per la generazione Ope
                       <span className="text-[11px] font-bold text-white group-hover:text-quantum-primary transition-colors leading-snug">
                         {scenario.name}
                       </span>
-                      <span className={`text-[8px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded shrink-0 ${
-                        scenario.technology.includes('QPU') 
-                          ? 'bg-[#00f2ff]/10 border border-[#00f2ff]/20 text-[#00f2ff]'
-                          : 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-400'
-                      }`}>
-                        {scenario.technology.includes('QPU') ? 'QPU' : 'HPC'}
-                      </span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {scenario.focus && (
+                          <span className={`text-[7.5px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded font-bold ${
+                            scenario.focus === 'Entanglement'
+                              ? 'bg-purple-500/15 border border-purple-500/30 text-purple-300'
+                              : scenario.focus === 'Ampiezza'
+                              ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-300'
+                              : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
+                          }`}>
+                            {scenario.focus}
+                          </span>
+                        )}
+                        <span className={`text-[8px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded font-bold ${
+                          scenario.technology.includes('QPU') 
+                            ? 'bg-[#00f2ff]/10 border border-[#00f2ff]/30 text-[#00f2ff]'
+                            : 'bg-indigo-500/10 border border-indigo-500/30 text-indigo-300'
+                        }`}>
+                          {scenario.technology.includes('QPU') ? 'QPU' : 'HPC'}
+                        </span>
+                      </div>
                     </div>
 
                     <p className="text-[10px] text-gray-400 mt-1 font-mono">
@@ -4124,26 +4306,34 @@ Acquisizione guidata e conversazionale dei dati aziendali per la generazione Ope
                     >
                       <Layers className="w-3.5 h-3.5" /> 🎼 IBM Composer
                     </button>
-                    <button
-                      onClick={() => setRightPanelTab('qasm')}
-                      className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
-                        rightPanelTab === 'qasm'
-                          ? 'bg-quantum-primary/20 border border-quantum-primary/40 text-quantum-primary shadow-sm'
-                          : 'text-gray-400 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      <Code className="w-3.5 h-3.5" /> 📜 OpenQASM 2.0
-                    </button>
-                    <button
-                      onClick={() => setRightPanelTab('qiskit')}
-                      className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
-                        rightPanelTab === 'qiskit'
-                          ? 'bg-quantum-primary/20 border border-quantum-primary/40 text-quantum-primary shadow-sm'
-                          : 'text-gray-400 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      <FileCode className="w-3.5 h-3.5 text-indigo-400" /> 🐍 Qiskit (Python)
-                    </button>
+
+                    {/* QPU Scenarios: show OpenQASM 2.0 */}
+                    {(!selectedTechnology.includes('HPC') && !selectedTechnology.includes('Classica')) && (
+                      <button
+                        onClick={() => setRightPanelTab('qasm')}
+                        className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+                          rightPanelTab === 'qasm'
+                            ? 'bg-quantum-primary/20 border border-quantum-primary/40 text-quantum-primary shadow-sm'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <Code className="w-3.5 h-3.5" /> 📜 OpenQASM 2.0
+                      </button>
+                    )}
+
+                    {/* HPC Scenarios: show Qiskit (Python) */}
+                    {(selectedTechnology.includes('HPC') || selectedTechnology.includes('Classica')) && (
+                      <button
+                        onClick={() => setRightPanelTab('qiskit')}
+                        className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+                          rightPanelTab === 'qiskit'
+                            ? 'bg-quantum-primary/20 border border-quantum-primary/40 text-quantum-primary shadow-sm'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <FileCode className="w-3.5 h-3.5 text-indigo-400" /> 🐍 Qiskit (Python)
+                      </button>
+                    )}
                   </div>
 
                   {/* Actions Header Toolbar */}

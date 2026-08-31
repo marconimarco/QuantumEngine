@@ -3,7 +3,7 @@ import { LanguageCode } from '../types';
 export const translations: Record<LanguageCode, Record<string, string>> = {
   "it": {
     "title": "Quantum Engine",
-    "subtitle": "Esplora lo stato dell'arte dell'informatica quantistica applicata ai settori critici dell'economia globale.",
+    "subtitle": "Esplora lo stato dell'arte dell'informatica quantistica\napplicata ai settori critici dell'economia globale.",
     "chooseSector": "Scegli un Settore Verticale",
     "activeCore": "Quantum Core",
     "lang_it": "Italiano",
@@ -551,7 +551,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   },
   "en": {
     "title": "Quantum Engine",
-    "subtitle": "Explore the state-of-the-art quantum computing applied to critical sectors of the global economy.",
+    "subtitle": "Explore the state-of-the-art quantum computing\napplied to critical sectors of the global economy.",
     "chooseSector": "Choose a Vertical Sector",
     "activeCore": "Quantum Core",
     "lang_it": "Italiano",
@@ -1098,7 +1098,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   },
   "zh": {
     "title": "Quantum Engine",
-    "subtitle": "探索应用于全球经济关键领域的尖端量子计算。",
+    "subtitle": "探索应用于全球经济\n关键领域的尖端量子计算。",
     "chooseSector": "选择垂直领域",
     "activeCore": "量子核心",
     "lang_it": "Italiano",
@@ -1646,7 +1646,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   },
   "ja": {
     "title": "Quantum Engine",
-    "subtitle": "世界経済の重要なセクターに適用される最先端の量子コンピューティングを探究します。",
+    "subtitle": "世界経済の重要なセクターに適用される\n最先端の量子コンピューティングを探究します。",
     "chooseSector": "バーティカルセクターを選択",
     "activeCore": "量子コア",
     "lang_it": "Italiano",
@@ -2194,7 +2194,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   },
   "ko": {
     "title": "Quantum Engine",
-    "subtitle": "세계 경제의 핵심 부문에 적용된 최첨단 양자 컴퓨팅을 탐구하십시오.",
+    "subtitle": "세계 경제의 핵심 부문에 적용된\n최첨단 양자 컴퓨팅을 탐구하십시오.",
     "chooseSector": "수직 섹터 선택",
     "activeCore": "양자 코어",
     "lang_it": "Italiano",
@@ -2742,7 +2742,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   },
   "de": {
     "title": "Quantum Engine",
-    "subtitle": "Erkunden Sie modernste Quantenberechnungen für kritische Sektoren der globalen Wirtschaft.",
+    "subtitle": "Erkunden Sie modernste Quantenberechnungen\nfür kritische Sektoren der globalen Wirtschaft.",
     "chooseSector": "Wählen Sie einen vertikalen Sektor",
     "activeCore": "Quantenkern",
     "lang_de": "Deutsch",
@@ -3289,7 +3289,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   },
   "fr": {
     "title": "Quantum Engine",
-    "subtitle": "Explorez l'informatique quantique de pointe appliquée aux secteurs critiques de l'économie mondiale.",
+    "subtitle": "Explorez l'informatique quantique de pointe\nappliquée aux secteurs critiques de l'économie mondiale.",
     "chooseSector": "Choisissez un secteur vertical",
     "activeCore": "Quantum Core",
     "lang_fr": "Français",
@@ -3836,7 +3836,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   },
   "es": {
     "title": "Quantum Engine",
-    "subtitle": "Explore la computación cuántica de vanguardia aplicada a sectores críticos de la economía global.",
+    "subtitle": "Explore la computación cuántica de vanguardia\naplicada a sectores críticos de la economía global.",
     "chooseSector": "Elija un Sector Vertical",
     "activeCore": "Quantum Core",
     "lang_es": "Español",
@@ -4383,7 +4383,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   },
   "ru": {
     "title": "Quantum Engine",
-    "subtitle": "Изучите современные квантовые вычисления, применимые в критически важных секторах мировой экономики.",
+    "subtitle": "Изучите современные квантовые вычисления,\nприменимые в критически важных секторах мировой экономики.",
     "chooseSector": "Выберите вертикальный сектор",
     "activeCore": "Квантовое ядро",
     "lang_it": "Italiano",
@@ -4930,7 +4930,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   },
   "uk": {
     "title": "Quantum Engine",
-    "subtitle": "Досліджуйте сучасні квантові обчислення, що застосовуються у критичних секторах світової економіки.",
+    "subtitle": "Досліджуйте сучасні квантові обчислення,\nщо застосовуються у критичних секторах світової економіки.",
     "chooseSector": "Оберіть вертикальний сектор",
     "activeCore": "Квантове ядро",
     "lang_it": "Italiano",

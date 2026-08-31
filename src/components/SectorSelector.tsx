@@ -195,9 +195,16 @@ export default function SectorSelector({ onSelect, initialSubMenu = null, onSubM
               <h1 className="text-2xl sm:text-4xl md:text-6xl font-display font-bold quantum-gradient-text mb-2 md:mb-4 uppercase tracking-tighter">
                 {t('title')}
               </h1>
-              <p className="text-[9px] sm:text-xs md:text-base text-gray-500 font-mono uppercase tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] max-w-2xl mx-auto px-4">
-                {t('subtitle')}
-              </p>
+              <div className="flex flex-col items-center justify-center text-center max-w-4xl mx-auto px-4">
+                {t('subtitle').split('\n').map((line, idx) => (
+                  <span
+                    key={idx}
+                    className="block text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-400 font-mono uppercase tracking-[0.08em] sm:tracking-[0.15em] md:tracking-[0.2em] leading-relaxed text-center"
+                  >
+                    {line}
+                  </span>
+                ))}
+              </div>
               <p className="text-[7px] sm:text-[10px] text-quantum-primary font-mono uppercase tracking-[0.2em] sm:tracking-[0.3em] md:tracking-[0.4em] mt-3 sm:mt-4 md:mt-6 animate-pulse">
                 {t('chooseSector')}
               </p>
