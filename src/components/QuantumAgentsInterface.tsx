@@ -36,6 +36,7 @@ import {
   Edit3
 } from 'lucide-react';
 import { QUANTUM_SCENARIOS, QuantumScenario } from '../data/scenarios';
+import { QUANTUM_RAG_DATABASE, QuantumRagScenario, findQuantumRagScenario } from '../data/quantumRagDatabase';
 import axios from 'axios';
 import { useTranslation } from '../lib/TranslationContext';
 
@@ -1525,12 +1526,18 @@ DESKTOP_CLIENT,0.01,0.20,0.02,0.10,INDEPENDENT`
       {
         id: 'welcome',
         sender: 'system',
-        text: `👋 **Benvenuto nel Quantum Engine BI Orchestrator (V9 Core)**
+        text: `👋 **Quantum Business Orchestrator (V10 Pure Core)**
 
-Sono la tua interfaccia conversazionale per la compilazione e traduzione quantistica verso IBM Quantum. 
-L'acquisizione dei dati aziendali avverrà in modo guidato direttamente qui in chat, ponendo **una sola domanda alla volta** per calibrare il circuito OpenQASM 2.0.
+Il mio unico scopo è mappare problemi aziendali in circuiti quantistici OpenQASM 2.0 deterministici, precisi e privi di errori.
 
-👉 **FASE 0 - Seleziona la tua Macro-Area aziendale di riferimento (digita il numero da 1 a 6 o clicca sotto):**
+📐 **REGOLE DI COERENZA SORGENTE (INVIOLABILI):**
+1. **MAPPATURA RIGIDA 1:1:** Il numero di qubit (\`qreg q[N]\`) e bit classici (\`creg c[N]\`) è ESATTAMENTE uguale al numero N di elementi dichiarati nella Domanda 1. Nessun qubit ancilla o termostato fantasma (se gli asset sono 4, i qubit sono da q[0] a q[3]).
+2. **FORMULA ANALITICA REALE:** Gli angoli θ delle porte RY sono calcolati nello spazio di Hilbert: $\\theta = 2 \\arcsin(\\sqrt{P})$ (es. 12% -> P=0.12 -> θ = 0.70465 rad).
+3. **LOGICA DI ENTANGLEMENT:** Porte \`cry\` applicate esclusivamente tra qubit dello stesso gruppo. Gli elementi \`INDEPENDENT\` rimangono isolati.
+4. **SINTASSI OPENQASM 2.0:** Definizione macro standard della porta \`cry(theta)\` per compatibilità nativa con \`qelib1.inc\`.
+5. **AUTO-RESET DI SESSIONE:** Reset automatico al termine per garantire massima purezza per ogni nuovo scenario.
+
+👉 **FASE 1 (CONFIGURAZIONE) - Seleziona la Macro-Area aziendale di riferimento (digita il numero da 1 a 6 o clicca sotto):**
 
 1. 📊 **Finanza e Mercati**
 2. 🚚 **Logistica e Smart Cities**
@@ -1873,6 +1880,12 @@ Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inseri
     const isQPU = scenario.technology.includes('QPU');
     setRightPanelTab(isQPU ? 'composer' : 'composer');
 
+    // Retrieve Golden Scenario from RAG database by ID, Sector, or Name if present
+    const ragScenario = findQuantumRagScenario(scenario.id ? `fin-q-${scenario.id}` : undefined, sectorName, scenario.name);
+    const suggestedElements = ragScenario && ragScenario.inputs && ragScenario.inputs.length > 0
+      ? ragScenario.inputs.map(i => i.name).join(', ')
+      : industrialScenario.sampleElements;
+
     addMessage('user', `🎯 Selezionato scenario: **${scenario.name}** [${scenario.technology}]`);
     setTimeout(() => {
       if (isQPU) {
@@ -1896,7 +1909,7 @@ ${scenario.focus === 'Ampiezza'
 Iniziamo l'acquisizione guidata dei parametri:
 
 👉 **DOMANDA 1 (Elementi):**
-Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inserisci da **2 a 5 nomi reali** legati a questo scenario (es. \`${industrialScenario.sampleElements}\`).`);
+Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inserisci da **2 a 5 nomi reali** legati a questo scenario (es. \`${suggestedElements}\`).`);
       } else {
         addMessage('system', `💻 **SCENARIO CLASSICO / HPC ATTIVATO: ${scenario.name}**
 *Macro-Area:* **${scenario.macroarea}** | *Tecnologia:* **${scenario.technology}**
@@ -1910,7 +1923,7 @@ Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inseri
 Iniziamo l'acquisizione dei dati per l'elaborazione:
 
 👉 **DOMANDA 1 (Elementi / Feature):**
-Quali e quanti elementi o sorgenti dati dobbiamo analizzare? Inserisci da **2 a 5 identificatori** (es. \`${industrialScenario.sampleElements}\`).`);
+Quali e quanti elementi o sorgenti dati dobbiamo analizzare? Inserisci da **2 a 5 identificatori** (es. \`${suggestedElements}\`).`);
       }
     }, 350);
   };
@@ -2172,7 +2185,7 @@ Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inseri
     }
   };
 
-  // Dedicated OpenQASM 2.0 CAM Circuit Code Generator
+  // Dedicated OpenQASM 2.0 CAM Circuit Code Generator (V10 Pure Core: Rigorous 1:1 Mapping, Cry Macro & Group Entanglement)
   const generateV9OpenQasmCode = (
     elements: string[],
     saturations: number[],
@@ -2180,90 +2193,52 @@ Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inseri
     angles2: number[],
     option: 'A' | 'B' | 'C',
     critThreshold: number,
-    prudenceLevel: string = v9Prudence || 'Bilanciato'
+    prudenceLevel: string = v9Prudence || 'Bilanciato',
+    scenarioId?: string
   ): string => {
-    const N = elements.length;
-    const ancillaIdx = N;
-    const totalQubits = N + 1;
-    const tClipped = Math.max(0.01, Math.min(critThreshold, 1.0));
-    
-    // Prudence Multiplier for Ancilla Sensitivity
-    const prudenceMultiplier = prudenceLevel === 'Alta Prudenza' ? 1.35 : (prudenceLevel === 'Tollerante' ? 0.75 : 1.0);
-    const scaledThreshold = Math.max(0.01, Math.min(0.99, tClipped * prudenceMultiplier));
-    const totalTh = 2 * Math.asin(Math.sqrt(scaledThreshold));
-    const distTh = (totalTh / Math.max(1, N)).toFixed(5);
-    const scenario = getSectorIndustrialScenario(selectedSector || 'Finanza');
+    const N = Math.max(1, elements.length);
 
-    let code = `OPENQASM 2.0;\ninclude "qelib1.inc";\n\n`;
-    code += `// =========================================================================\n`;
-    code += `// CIRCUITO QUANTISTICO OPENQASM 2.0 - ${scenario.scenarioName.toUpperCase()}\n`;
-    code += `// Macro-Area: ${scenario.macroarea} | Prudenza: ${prudenceLevel}\n`;
-    code += `// =========================================================================\n\n`;
-    code += `// --- INIZIALIZZAZIONE REGISTRI QUANTISTICI E CLASSICI ---\n`;
-    code += `qreg q[${totalQubits}];    // Registri dati aziendali (q[0]..q[${N-1}]) + Ancilla comparatore allarme (q[${ancillaIdx}])\n`;
-    code += `creg c[${totalQubits}];    // Bit classici per la lettura dei risultati di misura\n\n`;
+    // REGOLE DI COERENZA SORGENTE (V10 PURE CORE):
+    // 1. Mappatura rigida 1:1: qreg q[N] e creg c[N] (esattamente N qubit e N bit classici, nessuna ancilla)
+    // 2. Macro gate cry(theta) definita all'inizio perché qelib1.inc non la include nativamente in OpenQASM 2.0
+    let code = `OPENQASM 2.0;\ninclude "qelib1.inc";\n\ngate cry(theta) ctrl, tgt {\n  ry(theta/2) tgt;\n  cx ctrl, tgt;\n  ry(-theta/2) tgt;\n  cx ctrl, tgt;\n}\n\nqreg q[${N}];\ncreg c[${N}];\n\n`;
 
-    // STEP 1: ENCODING RIGIDO DELLE PERCENTUALI (NO PORTA HADAMARD DI DEFAULT)
-    code += `// --- STEP 1: ENCODING RIGIDO DELLE PERCENTUALI (STATO FONDAMENTALE |0>) ---\n`;
-    code += `// Formula: theta = 2 * arcsin(sqrt(p)) applicata direttamente per preservare la linearita' d'ampiezza\n`;
+    // STEP 1: ENCODING REALE DEI DATI (Formula analitica theta = 2 * arcsin(sqrt(P)))
     elements.forEach((el, i) => {
-      const p = Math.max(0.001, Math.min(saturations[i] ?? 0.35, 0.999));
+      const p = Math.max(0.0001, Math.min(saturations[i] ?? 0.35, 0.9999));
       const th = (2 * Math.asin(Math.sqrt(p))).toFixed(5);
-      code += `ry(${th}) q[${i}]; // Encoding ${el}: Saturazione/Rischio = ${(p * 100).toFixed(1)}% (theta = ${th} rad)\n`;
+      code += `ry(${th}) q[${i}];\n`;
     });
-    code += `\n`;
 
-    // STEP 2: GESTIONE RIGIDA DELLE RELAZIONI ED ENTANGLEMENT
-    code += `// --- STEP 2: CONFIGURAZIONE RELAZIONI ED ENTANGLEMENT (${scenario.focus}) ---\n`;
-    const independentIndices: number[] = [];
-    const groupedPairs: Array<{ from: number; to: number; label: string; angle: number }> = [];
-
-    for (let i = 0; i < N; i++) {
-      const corr = correlations[i] ? correlations[i].toUpperCase().trim() : 'INDEPENDENT';
-      if (corr === 'INDEPENDENT' || corr === 'NO' || corr === 'NONE') {
-        independentIndices.push(i);
-      } else {
-        // Find partner with same group/match or next element
-        const nextIdx = (i + 1) % N;
-        const ang = angles2[i] ?? 0.70748;
-        groupedPairs.push({ from: i, to: nextIdx, label: correlations[i], angle: ang });
+    // STEP 2: LOGICA DI ENTANGLEMENT (Solo tra qubit dello stesso gruppo, isolamento INDEPENDENT)
+    const clusterMap: Record<string, number[]> = {};
+    elements.forEach((_, idx) => {
+      const corr = correlations[idx] ? correlations[idx].toUpperCase().trim() : 'INDEPENDENT';
+      if (corr !== 'INDEPENDENT' && corr !== 'NO' && corr !== 'NONE' && corr !== 'DIRECT_AMPLITUDE' && !corr.startsWith('AXIS_')) {
+        if (!clusterMap[corr]) clusterMap[corr] = [];
+        clusterMap[corr].push(idx);
       }
-    }
+    });
 
-    if (independentIndices.length === N) {
-      code += `// Tutti gli elementi sono INDEPENDENT: Nessuna porta di entanglement CX/CRY applicata tra di loro\n`;
-    } else {
-      code += `// Entanglement applicato selettivamente SOLO tra elementi correlati o appartenenti allo stesso cluster:\n`;
-      groupedPairs.forEach(pair => {
-        if (option === 'C') {
-          const ampGain = (0.5 * Math.PI * (saturations[pair.from] ?? 0.35)).toFixed(5);
-          code += `ry(${ampGain}) q[${pair.from}]; // Bilanciamento ampiezza cluster per ${elements[pair.from]}\n`;
-        } else if (option === 'B') {
-          const angStr = pair.angle.toFixed(5);
-          code += `rz(${angStr}) q[${pair.from}]; // Rotazione di fase conformazionale per ${elements[pair.from]}\n`;
-          code += `cry(${angStr}) q[${pair.from}], q[${pair.to}]; // Correlazione di fase [${elements[pair.from]} <-> ${elements[pair.to]}]\n`;
-        } else {
-          const angStr = pair.angle.toFixed(5);
-          code += `cry(${angStr}) q[${pair.from}], q[${pair.to}]; // Entanglement controllato [${elements[pair.from]} -> ${elements[pair.to]}] (Gruppo: ${pair.label})\n`;
+    // Applica porte controllate cry esclusivamente tra qubit appartenenti allo stesso gruppo
+    Object.keys(clusterMap).forEach(groupName => {
+      const members = clusterMap[groupName];
+      if (members.length >= 2) {
+        for (let m = 0; m < members.length - 1; m++) {
+          const fromQubit = members[m];
+          const toQubit = members[m + 1];
+          const fromP = Math.max(0.0001, Math.min(saturations[fromQubit] ?? 0.35, 0.9999));
+          const ang = (2 * Math.asin(Math.sqrt(fromP))).toFixed(5);
+          code += `cry(${ang}) q[${fromQubit}], q[${toQubit}];\n`;
         }
-      });
-    }
-    code += `\n`;
+      }
+    });
 
-    // STEP 3: LOGICA DI PRUDENZA, SOGLIA E REALE CALIBRAZIONE DELL'ANCILLA
-    code += `// --- STEP 3: COMPARATORE ANCILLA ALLARME (Soglia: ${(tClipped * 100).toFixed(1)}% | Profilo: ${prudenceLevel}) ---\n`;
-    code += `// L'ancilla q[${ancillaIdx}] riceve rotazioni controllate calibrate dinamicamente per segnalare criticita'\n`;
-    for (let i = 0; i < N; i++) {
-      code += `cry(${distTh}) q[${i}], q[${ancillaIdx}]; // Rilevamento proporzionale soglia da ${elements[i]} (peso = ${distTh} rad)\n`;
-    }
+    // STEP 3: MISURAZIONI RIGIDE 1:1 SU TUTTI I REGISTRI
     code += `\n`;
-
-    // STEP 4: COLLASSO E MISURAZIONE FINALE SUI CANALI
-    code += `// --- STEP 4: COLLASSO E MISURAZIONE FINALE SUI CANALI ---\n`;
     for (let i = 0; i < N; i++) {
-      code += `measure q[${i}] -> c[${i}]; // Misura stato ${elements[i]}\n`;
+      code += `measure q[${i}] -> c[${i}];\n`;
     }
-    code += `measure q[${ancillaIdx}] -> c[${ancillaIdx}]; // Misura canale di allarme/ancilla\n`;
 
     return code;
   };
@@ -2357,9 +2332,9 @@ Quali e quanti elementi della tua azienda dobbiamo inserire nell'analisi? Inseri
       // 1. Try calling the backend /api/quantum-bi/chat for dynamic Gemini answers
       const res = await axios.post('/api/quantum-bi/chat', {
         messages: [{ role: 'user', text: userQuestion }],
-        systemPrompt: `Sei l'Assistente Quantistico Esperto (Quantum Compiler & Business Orchestrator). 
-L'utente sta svolgendo la calibrazione guidata per il settore "${currentSector}" (Scenario: ${scenario.scenarioName}).
-Rispondi in modo esaustivo, scientificamente rigoroso e chiaro in italiano alla sua domanda, usando spiegazioni comprensibili e l'analogia dell'auto da corsa o dei qubit.
+        systemPrompt: `Sei il "Quantum Business Orchestrator", un sistema esperto di calcolo quantistico specializzato nella traduzione di problemi aziendali in circuiti quantistici.
+L'utente sta svolgendo la calibrazione per il settore "${currentSector}" (Scenario: ${scenario.scenarioName}).
+Rispondi in modo rigoroso, esaustivo e chiaro in italiano seguendo i principi della mappatura semantico-quantistica (rotazioni ry(theta) con theta = 2*arcsin(sqrt(P)), correlazioni selettive vs INDEPENDENT, ed ancilla come termostato di allarme).
 Non includere frasi di scuse o divagazioni generiche.`
       }, { timeout: 4000 });
 
@@ -2613,11 +2588,11 @@ Qual è il valore di percentuale o soglia d'allarme che vuoi impostare?`);
       // DOMANDA 3: Livello Prudenza & Generazione Tabella CSV (FASE 2)
       // -------------------------------------------------------------
       if (interviewSubstep === 3) {
-        const lower = userText.toLowerCase();
+        const lower = userText.toLowerCase().trim();
         let prudence = 'Bilanciato';
-        if (lower.includes('alta') || lower.includes('prud') || lower.includes('sicur') || lower.includes('sever')) {
+        if (lower === '1' || lower.startsWith('1') || lower.includes('opzione 1') || lower.includes('alta') || lower.includes('prud') || lower.includes('sicur') || lower.includes('sever')) {
           prudence = 'Alta Prudenza';
-        } else if (lower.includes('toll') || lower.includes('bassa') || lower.includes('permiss') || lower.includes('aggress')) {
+        } else if (lower === '3' || lower.startsWith('3') || lower.includes('opzione 3') || lower.includes('toll') || lower.includes('bassa') || lower.includes('permiss') || lower.includes('aggress')) {
           prudence = 'Tollerante';
         } else {
           prudence = 'Bilanciato';
@@ -2631,10 +2606,16 @@ Qual è il valore di percentuale o soglia d'allarme che vuoi impostare?`);
         const correlations: string[] = [];
         const angles2: number[] = [];
 
+        // Check if matching RAG scenario exists to inherit exact realistic structure
+        const sectorName = selectedSector || 'Finanza';
+        const ragRef = findQuantumRagScenario(selectedScenario?.id, sectorName, selectedScenario?.name, elements);
+
         const csvRows = elements.map((el, idx) => {
           let sat = 0.35;
           if (v9CustomSaturations && v9CustomSaturations[idx] !== undefined) {
             sat = v9CustomSaturations[idx];
+          } else if (ragRef && ragRef.inputs[idx] && (el.toLowerCase() === ragRef.inputs[idx].name.toLowerCase() || elements.length === ragRef.inputs.length)) {
+            sat = ragRef.inputs[idx].percentage;
           } else {
             // Calculate realistic distributed saturation around threshold
             const offset = (idx - (elements.length - 1) / 2) * (prudence === 'Alta Prudenza' ? 0.08 : 0.05);
@@ -2648,10 +2629,30 @@ Qual è il valore di percentuale o soglia d'allarme che vuoi impostare?`);
           if (scenario.id === 5) metricVal = (-8.4 - idx * 0.7).toFixed(2); // Kcal binding
           if (scenario.id === 2) metricVal = (2.5 + idx * 1.2).toFixed(1); // Hours
 
-          // Entanglement / Group Link
-          const groupLink = scenario.focusKey === 'A' 
-            ? (idx < 2 ? 'GROUP_ALPHA' : 'INDEPENDENT')
-            : (scenario.focusKey === 'B' ? `AXIS_${idx + 1}` : 'DIRECT_AMPLITUDE');
+          // Entanglement / Group Link: Respect true independence and clusters from RAG database
+          let groupLink = 'INDEPENDENT';
+          if (ragRef && ragRef.constraints) {
+            const cUpper = ragRef.constraints.toUpperCase();
+            if (cUpper.includes('TUTTI INDEPENDENT') || cUpper.includes('ALL INDEPENDENT')) {
+              groupLink = 'INDEPENDENT';
+            } else if (cUpper.includes('A-B LEGATI, C-D INDEPENDENT') || cUpper.includes('ENEL-INTESA LEGATI')) {
+              groupLink = idx < 2 ? 'GROUP_ALPHA' : 'INDEPENDENT';
+            } else if (cUpper.includes('A-B LEGATI, C-D LEGATI')) {
+              groupLink = idx < 2 ? 'GROUP_ALPHA' : 'GROUP_BETA';
+            } else if (cUpper.includes('A-C LEGATI, B-D INDEPENDENT')) {
+              groupLink = (idx === 0 || idx === 2) ? 'GROUP_ALPHA' : 'INDEPENDENT';
+            } else if (cUpper.includes('A-B-C LEGATI')) {
+              groupLink = idx < 3 ? 'GROUP_ALPHA' : 'INDEPENDENT';
+            } else {
+              groupLink = idx < 2 ? 'GROUP_ALPHA' : 'INDEPENDENT';
+            }
+          } else if (scenario.focusKey === 'A') {
+            groupLink = idx < 2 ? 'GROUP_ALPHA' : 'INDEPENDENT';
+          } else if (scenario.focusKey === 'B') {
+            groupLink = `AXIS_${idx + 1}`;
+          } else {
+            groupLink = 'DIRECT_AMPLITUDE';
+          }
           correlations.push(groupLink);
           angles2.push(0.70748 + idx * 0.15);
 
@@ -2704,8 +2705,8 @@ ${csvRows.join('\n')}
         const angles2 = v9AnglesPhase2.length === elements.length ? v9AnglesPhase2 : elements.map(() => 0.78539);
         const threshVal = threshold || 0.35;
 
-        // Generate clean OpenQASM 2.0 code
-        const qasmCode = generateV9OpenQasmCode(elements, saturations, correlations, angles2, scenario.focusKey, threshVal, v9Prudence);
+        // Generate clean OpenQASM 2.0 code from RAG / Dynamic rules
+        const qasmCode = generateV9OpenQasmCode(elements, saturations, correlations, angles2, scenario.focusKey, threshVal, v9Prudence, selectedScenario?.id);
         setQasmOutput(qasmCode);
 
         // Update clean records for IBM visual composer board
